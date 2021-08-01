@@ -5,7 +5,7 @@ import { Provider } from 'react-redux'
 import { FirebaseApp } from '../concerns/FirebaseApp'
 import React from 'react'
 import Head from 'next/head'
-import { store } from '@/store/create-store'
+import { store } from '@/store/createStore'
 
 const configuration = {
     apiKey: 'AIzaSyATnPYkvNTs33CHelSgtE1iUUhMVrTn8YM',
