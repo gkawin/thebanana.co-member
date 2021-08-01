@@ -5,17 +5,6 @@ import 'firebase/firestore'
 import 'firebase/storage'
 import firebase from 'firebase/app'
 
-const configuration = {
-    apiKey: 'AIzaSyATnPYkvNTs33CHelSgtE1iUUhMVrTn8YM',
-    authDomain: 'thebanana-d9286.firebaseapp.com',
-    databaseURL: 'https://thebanana-d9286.firebaseio.com',
-    projectId: 'thebanana-d9286',
-    storageBucket: 'thebanana-d9286.appspot.com',
-    messagingSenderId: '652607083295',
-    appId: '1:652607083295:web:33c191031fff9434a9d62a',
-    measurementId: 'G-FFJ2NRF8KK',
-}
-
 interface FirebaseAppProps {
     configuration: Record<string, any>
 }
@@ -32,7 +21,12 @@ export const FirebaseApp: React.FC<FirebaseAppProps> = ({ children, configuratio
             if (process.env.NODE_ENV !== 'development') {
                 firebase.analytics().logEvent('notification_received')
             }
+
+            unsubscribe = firebase.auth().onIdTokenChanged((user) => {
+                console.log(user)
+            })
         }
+        return () => unsubscribe()
     }, [configuration])
 
     return <FirebaseContext.Provider value={firebase}>{children}</FirebaseContext.Provider>
