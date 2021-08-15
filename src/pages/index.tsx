@@ -1,8 +1,8 @@
-import { Container } from '@material-ui/core'
+import { Container } from 'semantic-ui-react'
 
 export default function Home() {
     return (
-        <Container maxWidth="lg">
+        <Container>
             <div>test</div>
         </Container>
     )

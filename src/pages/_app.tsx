@@ -1,11 +1,11 @@
 import '../styles/globals.css'
+import 'semantic-ui-css/semantic.min.css'
 import type { AppProps } from 'next/app'
-import { Provider } from 'react-redux'
 
-import { FirebaseApp } from '../concerns/FirebaseApp'
+import { FirebaseProvider } from '../concerns/FirebaseApp'
 import React from 'react'
 import Head from 'next/head'
-import { store } from '@/store/createStore'
+import { LineLiffProvider } from '@/concerns/LineLiffApp'
 
 const configuration = {
     apiKey: 'AIzaSyATnPYkvNTs33CHelSgtE1iUUhMVrTn8YM',
@@ -27,11 +27,11 @@ function MyApp({ Component, pageProps }: AppProps) {
                 <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
                 <title>หน้าสมาชิก</title>
             </Head>
-            <Provider store={store}>
-                <FirebaseApp configuration={configuration}>
+            <LineLiffProvider liffId="1653826193-QbmamAo0">
+                <FirebaseProvider configuration={configuration}>
                     <Component {...pageProps} />
-                </FirebaseApp>
-            </Provider>
+                </FirebaseProvider>
+            </LineLiffProvider>
         </React.Fragment>
     )
 }

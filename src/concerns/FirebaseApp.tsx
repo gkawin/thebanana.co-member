@@ -4,17 +4,28 @@ import 'firebase/auth'
 import 'firebase/firestore'
 import 'firebase/storage'
 import firebase from 'firebase/app'
+import { useLineProfile } from './LineLiffApp'
+import { useState } from 'react'
 
-interface FirebaseAppProps {
+interface FirebaseProviderProps {
     configuration: Record<string, any>
 }
 
 const FirebaseContext = React.createContext<typeof firebase>(null as unknown as typeof firebase)
 
-export const FirebaseApp: React.FC<FirebaseAppProps> = ({ children, configuration }) => {
+export type UserProfile = { userId: string | null; email: string | null; photoURL: string | null }
+
+export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children, configuration }) => {
+    const lineProfile = useLineProfile()
+    const [userProfile, setUserProfile] = useState<UserProfile>({
+        userId: null,
+        email: null,
+        photoURL: null,
+    })
+
     useEffect(() => {
         let unsubscribe = () => {}
-        if (firebase.apps.length === 0) {
+        if (firebase.apps.length === 0 && lineProfile) {
             console.log('initailzed')
             firebase.initializeApp(configuration)
             firebase.auth().languageCode = 'th'
@@ -23,7 +34,9 @@ export const FirebaseApp: React.FC<FirebaseAppProps> = ({ children, configuratio
             }
 
             unsubscribe = firebase.auth().onIdTokenChanged((user) => {
-                console.log(user)
+                if (user) {
+                    setUserProfile({ userId: user.uid, email: user.email, photoURL: user.photoURL })
+                }
             })
         }
         return () => unsubscribe()

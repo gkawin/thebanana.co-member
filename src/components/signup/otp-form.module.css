@@ -1,0 +1,8 @@
+.grid {
+    display: grid;
+}
+
+.sq {
+    width: 6rem;
+    height: 6rem;
+}
