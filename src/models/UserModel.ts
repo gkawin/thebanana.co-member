@@ -12,7 +12,7 @@ export class UserModel extends Model {
     @JsonProperty() email: string
 
     @JsonProperty({ beforeDeserialize: withServerTimestampToISO })
-    createdOn: string | FirebaseFirestore.Timestamp
+    createdOn: string | FirebaseFirestore.FieldValue
 
     @JsonProperty() id: string
 
@@ -24,15 +24,15 @@ export class UserModel extends Model {
 
     @JsonProperty() fullname: string
 
-    @JsonProperty() address: string
+    @JsonProperty() address?: string
 
     @JsonProperty() sms?: string
 
-    @JsonProperty() socials: UserSocialModel[]
+    @JsonProperty() socials?: UserSocialModel[]
 
-    @JsonProperty() parents: UserParentModel[]
+    @JsonProperty() parents?: UserParentModel[]
 
-    @JsonProperty() school: UserSchoolModel
+    @JsonProperty() school?: UserSchoolModel
 
     @JsonProperty() pictureURL: string
 }

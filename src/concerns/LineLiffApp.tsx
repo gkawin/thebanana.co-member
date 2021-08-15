@@ -1,6 +1,7 @@
-import { lineService, userService } from '@/services'
+import { userService } from '@/services'
 import type { LiffCore } from '@line/liff/dist/lib/liff'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { Dimmer, Loader } from 'semantic-ui-react'
 
 export type LineUserProfile = Unpromise<ReturnType<LiffCore['getProfile']>>
 
@@ -8,7 +9,7 @@ export const LineLiffContext = createContext<LineUserProfile | null>(null)
 
 export const LineLiffProvider: React.FC<{ liffId: string }> = ({ liffId, children }) => {
     const [lineProfile, setLineProfile] = useState<LineUserProfile | null>(null)
-    const [isLoggedIn, setIsLoggedIn] = useState(false)
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         if (!lineProfile) {
@@ -21,22 +22,26 @@ export const LineLiffProvider: React.FC<{ liffId: string }> = ({ liffId, childre
                 })
                 .then(window.liff.getProfile)
                 .then(async ({ userId, ...props }) => {
-                    const isRegistered = await userService.isRegistered(userId)
+                    const isRegistered = await userService.getLoginToken(userId)
                     if (isRegistered) return { userId, ...props }
                     return null
                 })
                 .then((profile) => {
-                    setIsLoggedIn(window.liff.isLoggedIn())
                     setLineProfile(profile)
                 })
                 .catch(console.error)
+                .finally(() => {
+                    setLoading(false)
+                })
         }
     }, [liffId])
 
     return (
         <LineLiffContext.Provider value={lineProfile}>
-            {!isLoggedIn && <div>กรุณาเข้าสู่ระบบ Line ก่อนการใช้งาน</div>}
-            {lineProfile && children}
+            <Dimmer active={loading} inverted>
+                <Loader size="huge">Loading</Loader>
+            </Dimmer>
+            {children}
         </LineLiffContext.Provider>
     )
 }

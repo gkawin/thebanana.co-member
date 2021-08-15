@@ -4,7 +4,7 @@ import { ok } from 'assert'
 
 import runsWith, { extractAccessToken, RunsMiddleware } from './runsWith'
 
-export type IAuthorizationOptions = { role: 'admin' }
+export type IAuthorizationOptions = { role: 'admin' | 'all' }
 
 const authorization: RunsMiddleware<any, IAuthorizationOptions> = async (req, res, next, options) => {
     try {

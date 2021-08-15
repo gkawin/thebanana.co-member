@@ -15,5 +15,5 @@ export class UserParentModel extends Model {
     @JsonProperty() phoneNumber: string
 
     @JsonProperty({ beforeDeserialize: withServerTimestampToISO })
-    createdOn: string | FirebaseFirestore.Timestamp
+    createdOn: string | FirebaseFirestore.FieldValue
 }

@@ -1,18 +1,34 @@
 import runsWithMethods from '@/middleware/runsWithMethods'
 import { NextApiHandler } from 'next'
 import runsWithAcceptedParams from '@/middleware/runsWithAcceptedParams'
-import adminSDK from '@/libs/adminSDK'
-import Model from '@/models/Model'
-import UserModel from '@/models/UserModel'
+import { container } from 'tsyringe'
+import { Boom, notFound } from '@hapi/boom'
+import { LoginService } from '@/services/handlers/Login.service'
+import { ok } from 'assert'
+import runsWithAuthorization from '@/middleware/runsWithAuthorization'
 
-const admin = adminSDK()
-const db = admin.firestore().collection('users').withConverter(Model.transform(UserModel))
+const loginSrv = container.resolve(LoginService)
 
-const loginHandler: NextApiHandler<{ status: string }> = async (req, res) => {
+const loginHandler: NextApiHandler = async (req, res) => {
+    await runsWithAuthorization(req, res, { role: 'all' })
     await runsWithMethods(req, res, { methods: ['GET'] })
-    await runsWithAcceptedParams(req, res, [{ name: 'socialId', required: false }])
+    await runsWithAcceptedParams(req, res, [{ name: 'socialId', required: true }])
 
-    res.status(200).json({ status: 'ok' })
+    try {
+        const { socialId } = req.query
+        const socialInfo = await loginSrv.getSocialInfo(socialId.toString())
+
+        ok(socialInfo, notFound('User not found'))
+
+        const token = await loginSrv.generateLoginToken(socialId.toString())
+        res.status(200).json({ token })
+    } catch (error) {
+        if (error instanceof Boom) {
+            res.status(error.output.statusCode).json(error.output.payload)
+        } else {
+            res.status(500).json({ message: error.message })
+        }
+    }
 }
 
 export default loginHandler

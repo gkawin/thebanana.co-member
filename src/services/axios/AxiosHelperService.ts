@@ -58,6 +58,12 @@ export class AxiosHelperService {
     }
 
     get backend() {
+        if (typeof window !== 'undefined') {
+            this.#backend.defaults.headers = {
+                ...this.#backend.defaults.headers,
+                Authorization: `Bearer ${window.liff.getAccessToken()}`,
+            }
+        }
         return this.#backend
     }
 }

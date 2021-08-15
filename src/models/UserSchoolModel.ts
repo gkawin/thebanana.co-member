@@ -13,5 +13,5 @@ export class UserSchoolModel extends Model {
     @JsonProperty() school: string
 
     @JsonProperty({ beforeDeserialize: withServerTimestampToISO })
-    createdOn: string | FirebaseFirestore.Timestamp
+    createdOn: string | FirebaseFirestore.FieldValue
 }
