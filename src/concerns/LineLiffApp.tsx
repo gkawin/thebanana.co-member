@@ -8,6 +8,7 @@ export const LineLiffContext = createContext<LineUserProfile | null>(null)
 
 export const LineLiffProvider: React.FC<{ liffId: string }> = ({ liffId, children }) => {
     const [lineProfile, setLineProfile] = useState<LineUserProfile | null>(null)
+    const [isLoggedIn, setIsLoggedIn] = useState(false)
 
     useEffect(() => {
         if (!lineProfile) {
@@ -24,14 +25,17 @@ export const LineLiffProvider: React.FC<{ liffId: string }> = ({ liffId, childre
                     if (isRegistered) return { userId, ...props }
                     return null
                 })
-                .then((profile) => setLineProfile(profile))
+                .then((profile) => {
+                    setIsLoggedIn(window.liff.isLoggedIn())
+                    setLineProfile(profile)
+                })
                 .catch(console.error)
         }
     }, [liffId])
 
     return (
         <LineLiffContext.Provider value={lineProfile}>
-            {!lineProfile && <div>กรุณาเข้าสู่ระบบ Line ก่อนการใช้งาน</div>}
+            {!isLoggedIn && <div>กรุณาเข้าสู่ระบบ Line ก่อนการใช้งาน</div>}
             {lineProfile && children}
         </LineLiffContext.Provider>
     )

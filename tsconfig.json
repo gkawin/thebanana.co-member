@@ -5,7 +5,9 @@
         "allowJs": true,
         "skipLibCheck": true,
         "noUnusedLocals": true,
-        "strict": true,
+        "strict": false,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
         "forceConsistentCasingInFileNames": true,
         "noEmit": true,
         "esModuleInterop": true,
@@ -16,9 +18,10 @@
         "jsx": "preserve",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-        "baseUrl": "./src",
+        "baseUrl": ".",
         "paths": {
-            "@/*": ["*"]
+            "@/*": ["./src/*"],
+            "@/libs/*": ["./libs/*"]
         }
     },
     "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
