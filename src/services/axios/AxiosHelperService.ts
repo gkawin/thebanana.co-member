@@ -39,14 +39,12 @@ export class AxiosHelperService {
                     'Content-Type': 'application/json',
                 },
             })
-            this.#line.interceptors.response.use(
+            this.#backend.interceptors.response.use(
                 (r) => r,
                 (e) => {
                     if (e.response.data) {
-                        const statusCode = e.response.status || 400
-                        const data = e.response?.data || { error: null, error_description: null }
-
-                        throw boomify(new Error(), { statusCode, message: data?.error_description })
+                        const { data } = e.response
+                        throw boomify(new Error(), data)
                     }
                 }
             )
@@ -63,6 +61,7 @@ export class AxiosHelperService {
                 ...this.#backend.defaults.headers,
                 Authorization: `Bearer ${window.liff.getAccessToken()}`,
             }
+            this.#backend.interceptors
         }
         return this.#backend
     }

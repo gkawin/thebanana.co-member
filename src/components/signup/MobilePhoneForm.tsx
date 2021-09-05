@@ -1,15 +1,15 @@
 import { useWizardAction } from '@/pages/signup'
-import { Button, Form } from 'semantic-ui-react'
+import { Button, Form } from 'react-bootstrap'
 
 export const MobilePhoneForm = () => {
     const { updateAction } = useWizardAction()
     return (
         <Form>
-            <Form.Field>
-                <label>เบอร์โทรศัพท์</label>
+            <Form.Group>
+                <Form.Label>เบอร์โทรศัพท์</Form.Label>
                 <input type="text" pattern="d+" />
-            </Form.Field>
-            <Button type="submit" primary fluid onClick={() => updateAction({ mobilePhone: 'test' })}>
+            </Form.Group>
+            <Button type="submit" variant="primary" onClick={() => updateAction({ mobilePhone: 'test' })}>
                 รอรับ SMS
             </Button>
         </Form>

@@ -6,6 +6,9 @@ import 'firebase/storage'
 import firebase from 'firebase/app'
 import { useLineProfile } from './LineLiffApp'
 import { useState } from 'react'
+import { userService } from '@/services'
+import { ok } from 'assert'
+import { Boom, notFound } from '@hapi/boom'
 
 interface FirebaseProviderProps {
     configuration: Record<string, any>
@@ -25,22 +28,35 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children, co
 
     useEffect(() => {
         let unsubscribe = () => {}
-        if (firebase.apps.length === 0 && lineProfile) {
+        if (firebase.apps.length === 0) {
             console.log('initailzed')
             firebase.initializeApp(configuration)
             firebase.auth().languageCode = 'th'
             if (process.env.NODE_ENV !== 'development') {
                 firebase.analytics().logEvent('notification_received')
             }
-
-            unsubscribe = firebase.auth().onIdTokenChanged((user) => {
-                if (user) {
-                    setUserProfile({ userId: user.uid, email: user.email, photoURL: user.photoURL })
-                }
-            })
         }
         return () => unsubscribe()
     }, [configuration])
+
+    useEffect(() => {
+        if (!lineProfile) return () => {}
+
+        userService
+            .getLoginToken(lineProfile.userId)
+            .then(({ token }) => {
+                return firebase.auth().signInWithCustomToken(token)
+            })
+            .catch((error: Boom) => {
+                console.log(error)
+            })
+
+        return firebase.auth().onIdTokenChanged((user) => {
+            if (user) {
+                setUserProfile({ userId: user.uid, email: user.email, photoURL: user.photoURL })
+            }
+        })()
+    }, [lineProfile])
 
     return <FirebaseContext.Provider value={firebase}>{children}</FirebaseContext.Provider>
 }

@@ -1,5 +1,4 @@
 import '../styles/globals.css'
-import 'semantic-ui-css/semantic.min.css'
 import type { AppProps } from 'next/app'
 
 import { FirebaseProvider } from '../concerns/FirebaseApp'
@@ -25,6 +24,11 @@ function MyApp({ Component, pageProps }: AppProps) {
                 <meta charSet="utf-8" />
                 <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
                 <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
+                <link
+                    rel="stylesheet"
+                    href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+                />
+                <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
                 <title>หน้าสมาชิก</title>
             </Head>
             <LineLiffProvider liffId="1653826193-QbmamAo0">

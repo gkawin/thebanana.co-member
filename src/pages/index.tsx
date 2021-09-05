@@ -1,9 +1,7 @@
-import { Container } from 'semantic-ui-react'
-
 export default function Home() {
     return (
-        <Container>
+        <div>
             <div>test</div>
-        </Container>
+        </div>
     )
 }

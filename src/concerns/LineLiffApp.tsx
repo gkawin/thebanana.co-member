@@ -1,7 +1,8 @@
 import { userService } from '@/services'
 import type { LiffCore } from '@line/liff/dist/lib/liff'
+import { Backdrop, CircularProgress } from '@material-ui/core'
+import { useRef } from 'react'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { Dimmer, Loader } from 'semantic-ui-react'
 
 export type LineUserProfile = Unpromise<ReturnType<LiffCore['getProfile']>>
 
@@ -20,27 +21,20 @@ export const LineLiffProvider: React.FC<{ liffId: string }> = ({ liffId, childre
                         window.liff.login()
                     }
                 })
-                .then(window.liff.getProfile)
-                .then(async ({ userId, ...props }) => {
-                    const isRegistered = await userService.getLoginToken(userId)
-                    if (isRegistered) return { userId, ...props }
-                    return null
-                })
-                .then((profile) => {
-                    setLineProfile(profile)
+                .then(async () => {
+                    const lineProfile = await window.liff.getProfile()
+                    setLineProfile(lineProfile)
                 })
                 .catch(console.error)
-                .finally(() => {
-                    setLoading(false)
-                })
+                .finally(() => setLoading(false))
         }
     }, [liffId])
 
     return (
         <LineLiffContext.Provider value={lineProfile}>
-            <Dimmer active={loading} inverted>
-                <Loader size="huge">Loading</Loader>
-            </Dimmer>
+            <Backdrop open={loading}>
+                <CircularProgress color="inherit" />
+            </Backdrop>
             {children}
         </LineLiffContext.Provider>
     )
