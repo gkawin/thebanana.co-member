@@ -46,6 +46,7 @@ export const MobilePhoneForm: React.VFC<IMobilePhoneFromProps> = ({ onConfirmedC
                 inputProps={{ pattern: /\d/, inputMode: 'numeric' }}
                 name="mobileNumber"
                 id="mobile-phone"
+                readOnly={Boolean(recaptcha.confirmationResult)}
             ></Input>
             <div id="recaptcha-container"></div>
             <Button
