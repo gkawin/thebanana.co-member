@@ -1,28 +1,22 @@
 import { mobileToThaiNumber } from '@/utils/phone-number'
+import firebase from 'firebase/compat/app'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useFirebase } from './FirebaseApp'
 
-export const useFirebaseFormHandlers = <T extends { phoneNumber: string; [k: string]: any }>(el: {
-    containerId: string
-}) => {
-    const firebase = useFirebase()
+export const useRecaptchaForm = <T extends { mobileNumber: string; [k: string]: any }>(el: { containerId: string }) => {
     const [loading, setLoading] = useState(false)
-    const [confirmationResult, setConfirmationResult] = useState<firebase.default.auth.ConfirmationResult>()
-    const [phoneNumber, setPhoneNumber] = useState(null)
+    const [confirmationResult, setConfirmationResult] = useState<firebase.auth.ConfirmationResult>()
+    const [mobileNumber, setMobileNumber] = useState(null)
 
-    const initRecaptcha = useCallback(
-        async (containerId: string) => {
-            if (!window.recaptchaVerifier) {
-                window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(containerId, {
-                    size: 'invisible',
-                    'expired-callback': () => {
-                        window.grecaptcha.reset(window.recaptchaWidgetId)
-                    },
-                })
-            }
-        },
-        [firebase.auth.RecaptchaVerifier]
-    )
+    const initRecaptcha = useCallback(async (containerId: string) => {
+        if (!window.recaptchaVerifier) {
+            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(containerId, {
+                size: 'invisible',
+                'expired-callback': () => {
+                    window.grecaptcha.reset(window.recaptchaWidgetId)
+                },
+            })
+        }
+    }, [])
 
     const renderRecaptcha = useCallback(async () => {
         if (window.recaptchaVerifier && !window.recaptchaWidgetId) {
@@ -34,14 +28,14 @@ export const useFirebaseFormHandlers = <T extends { phoneNumber: string; [k: str
     const methods = useMemo(
         () => ({
             confirmationResult,
-            phoneNumber,
+            mobileNumber,
             loading,
             onSignInWithPhoneNumber: async (data: T) => {
-                setPhoneNumber(data.phoneNumber as any)
+                setMobileNumber(data.mobileNumber as any)
                 const appVerifier = window.recaptchaVerifier
                 firebase
                     .auth()
-                    .signInWithPhoneNumber(mobileToThaiNumber(data.phoneNumber), appVerifier)
+                    .signInWithPhoneNumber(mobileToThaiNumber(data.mobileNumber), appVerifier)
                     .then((result) => {
                         setConfirmationResult(result)
                     })
@@ -64,7 +58,7 @@ export const useFirebaseFormHandlers = <T extends { phoneNumber: string; [k: str
                 }
             },
         }),
-        [confirmationResult, firebase, phoneNumber, loading]
+        [confirmationResult, loading, mobileNumber]
     )
 
     const _initializeRecaptcha = useCallback(async () => {
@@ -74,12 +68,11 @@ export const useFirebaseFormHandlers = <T extends { phoneNumber: string; [k: str
     }, [el.containerId, initRecaptcha, renderRecaptcha])
 
     useEffect(() => {
-        if (firebase.apps.length === 1 && !window.recaptchaWidgetId) {
+        if (firebase.apps.length > 0 && !window.recaptchaWidgetId) {
             _initializeRecaptcha()
         }
         setLoading(true)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [_initializeRecaptcha, firebase.apps.length])
+    }, [_initializeRecaptcha])
 
     return methods
 }

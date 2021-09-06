@@ -1,50 +1,21 @@
 import { MobilePhoneForm } from '@/components/signup/MobilePhoneForm'
 import { OTPForm } from '@/components/signup/OTPForm'
+import { Grid } from '@material-ui/core'
 import { NextPage } from 'next'
-import { useRouter } from 'next/dist/client/router'
+
 import React, { useState } from 'react'
-import { useCallback } from 'react'
-import { useContext } from 'react'
-import { Container } from 'semantic-ui-react'
 
 export type SignInPageForm = {
     phoneNumber: string
     acceptedTC: boolean
 }
 
-const WizardFormContext = React.createContext(null)
-
-export const useWizardAction = () => {
-    const [steps, setStepAction] = useState([])
-    const wizardForm = useContext(WizardFormContext)
-    const router = useRouter()
-
-    const methods = {
-        updateAction(data: any) {
-            setStepAction((state) => state.concat(data))
-            const step = methods.getStep()?.split('step').pop()
-            router.push('/signup', `#step${Number(step) + 1}`)
-        },
-        previousAction() {},
-        getStep() {
-            if (typeof window === undefined) return ''
-            return window.location.hash.split('#').pop()
-        },
-        steps,
-    }
-
-    return methods
-}
-
 const SignInPage: NextPage = () => {
-    const { getStep } = useWizardAction()
+    const handleConfirmChange = (val: firebase.default.auth.ConfirmationResult) => {}
     return (
-        <WizardFormContext.Provider value={null}>
-            <Container className="text-center">
-                {getStep() === 'step1' && <MobilePhoneForm />}
-                {getStep() === 'step2' && <OTPForm />}
-            </Container>
-        </WizardFormContext.Provider>
+        <Grid style={{ minHeight: '100vh' }} container direction="row" justifyContent="center" alignItems="center">
+            <MobilePhoneForm onConfirmedChange={handleConfirmChange} />
+        </Grid>
     )
     // const { triggerSubmitHandler, confirmationResult, phoneNumber, loading } = useFirebaseFormHandlers({
     //     containerId: 'captcha-landing',
