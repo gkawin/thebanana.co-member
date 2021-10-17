@@ -1,4 +1,4 @@
-import { TextField, Button } from '@material-ui/core'
+import { TextField, Button } from '@mui/material'
 
 export type IOtpFormProps = {
     confirmationResult: firebase.default.auth.ConfirmationResult

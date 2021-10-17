@@ -1,20 +1,12 @@
-import { useProfile } from '@/concerns/UserProvider'
-import { Container, Typography } from '@material-ui/core'
-import { useRouter } from 'next/dist/client/router'
-import { useEffect } from 'react'
+import { useAuth } from '@/core/RootContext'
+import { Container, Typography } from '@mui/material'
 
 export default function Home() {
-    const user = useProfile()
-    const router = useRouter()
-    useEffect(() => {
-        if (!user.isLoggedIn) {
-            router.push('/signup')
-        }
-    }, [router, user.isLoggedIn])
+    const auth = useAuth()
 
     return (
         <Container maxWidth="lg">
-            <Typography variant="h2">{user.displayName}</Typography>
+            <Typography variant="h2">{auth.phoneNumber}</Typography>
         </Container>
     )
 }

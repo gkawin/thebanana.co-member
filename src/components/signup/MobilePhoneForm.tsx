@@ -1,6 +1,6 @@
 import { useRecaptchaForm } from '@/concerns/use-recaptcha-form'
 import { mobileToThaiNumber } from '@/utils/phone-number'
-import { Button, FormControl, Input, InputLabel } from '@material-ui/core'
+import { Button, FormControl, Input, InputLabel } from '@mui/material'
 import { useState } from 'react'
 import IMask from 'imask'
 import { useEffect } from 'react'

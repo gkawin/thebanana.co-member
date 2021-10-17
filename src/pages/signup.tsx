@@ -1,6 +1,6 @@
 import { MobilePhoneForm } from '@/components/signup/MobilePhoneForm'
 import { OTPForm } from '@/components/signup/OTPForm'
-import { Grid } from '@material-ui/core'
+import { Grid } from '@mui/material'
 import { NextPage } from 'next'
 
 import React, { useState, useEffect } from 'react'

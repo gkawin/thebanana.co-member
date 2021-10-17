@@ -1,9 +1,6 @@
 import { injectable } from 'tsyringe'
 import type admin from 'firebase-admin'
 import adminSDK from '@/libs/adminSDK'
-import Model from '@/models/Model'
-import { UserModel } from '@/models/UserModel'
-import { UserConnectModel } from '@/models/UserConnectModel'
 
 @injectable()
 export class AdminSDKService {
@@ -20,12 +17,12 @@ export class AdminSDKService {
         return AdminSDKService.sdk
     }
 
-    get userModel() {
-        return this.sdk.firestore().collection('users').withConverter(Model.transform(UserModel))
+    get db() {
+        return this.sdk.firestore()
     }
 
-    get socialModel() {
-        return this.sdk.firestore().collection('users_connect').withConverter(Model.transform(UserConnectModel))
+    get auth() {
+        return this.sdk.auth()
     }
 
     getUserByPhoneNumber(phoneNumber: string) {

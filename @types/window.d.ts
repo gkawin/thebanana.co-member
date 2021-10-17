@@ -6,6 +6,5 @@ declare global {
         recaptchaVerifier: any
         recaptchaWidgetId?: any
         grecaptcha?: any
-        liff: LiffCore
     }
 }

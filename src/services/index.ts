@@ -1,8 +1,6 @@
 import 'reflect-metadata'
 
 import { container } from 'tsyringe'
-import { LineService } from './Line.service'
-import { UserService } from './User.service'
+import { AdminSDKService } from './AdminSDK.service'
 
-export const lineService = container.resolve(LineService)
-export const userService = container.resolve(UserService)
+export const admin = container.resolve(AdminSDKService)

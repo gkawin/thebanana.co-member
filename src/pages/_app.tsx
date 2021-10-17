@@ -1,25 +1,29 @@
-import '../styles/globals.css'
+import RootContext from '@/core/RootContext'
 import type { AppProps } from 'next/app'
 
-import React from 'react'
 import Head from 'next/head'
-
-import UserProvider from '@/concerns/UserProvider'
 
 function MyApp({ Component, pageProps }: AppProps) {
     return (
-        <React.Fragment>
+        <>
             <Head>
                 <meta charSet="utf-8" />
                 <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
                 <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
-                <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+                <link
+                    rel="stylesheet"
+                    href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
+                    integrity="sha512-NhSC1YmyruXifcj/KFRWoC561YpHpc5Jtzgvbuzx5VozKpWvQ+4nXhPdFgmx8xqexRcpAglTj9sIBWINXa8x5w=="
+                    crossOrigin="anonymous"
+                    referrerPolicy="no-referrer"
+                />
                 <title>หน้าสมาชิก</title>
             </Head>
-            <UserProvider>
+            <RootContext>
                 <Component {...pageProps} />
-            </UserProvider>
-        </React.Fragment>
+            </RootContext>
+        </>
     )
 }
+
 export default MyApp
