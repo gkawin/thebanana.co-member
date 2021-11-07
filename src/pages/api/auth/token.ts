@@ -1,28 +1,24 @@
 import runsWithMethods from '@/middleware/runsWithMethods'
-import { admin } from '@/services'
 import { badRequest, Boom, forbidden } from '@hapi/boom'
 import { NextApiHandler } from 'next'
 import { ok } from 'assert'
-import Model from '@/models/Model'
-import { UserConnectEntity } from '@/models/user-connect.entity'
+import adminSDK from '@/libs/adminSDK'
 
 const handleToken: NextApiHandler = async (req, res) => {
     await runsWithMethods(req, res, { methods: ['POST'] })
+    const sdk = adminSDK()
+    const db = sdk.firestore()
+    const auth = sdk.auth()
 
     try {
         const { connectId } = req.body
         ok(connectId !== null, badRequest())
 
-        const connectInfo = await admin.db
-            .collection('user_connect')
-            .withConverter(Model.transform(UserConnectEntity))
-            .doc(connectId)
-            .get()
-
+        const connectInfo = await db.collection('user_connect').doc(connectId).get()
         ok(connectInfo.exists, forbidden())
 
-        const { user: uid } = connectInfo.data()
-        const authenticationCode = await admin.auth.createCustomToken(uid)
+        const uid = connectInfo.data().user.id
+        const authenticationCode = await auth.createCustomToken(uid)
 
         res.status(200).json({ authenticationCode })
     } catch (error) {

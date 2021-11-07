@@ -1,15 +1,11 @@
-import 'firebase/compat/auth'
-import 'firebase/compat/firestore'
-import 'firebase/compat/storage'
-import 'firebase/compat/analytics'
-
 import { useContext, useEffect, useMemo, useState, createContext } from 'react'
-import firebase from 'firebase/compat/app'
+import { initializeApp, getApp, getApps } from 'firebase/app'
 
 import Axios, { AxiosInstance } from 'axios'
 import type { Liff } from '@liff/liff-types'
 import { getFirestore } from 'firebase/firestore'
-import { getAuth } from 'firebase/auth'
+import { getAuth, signInWithCustomToken } from 'firebase/auth'
+import { logEvent, getAnalytics } from 'firebase/analytics'
 
 const liffId = '1653826193-QbmamAo0'
 const firebaseConfig = {
@@ -38,9 +34,9 @@ export const useAxios = () => {
 
 export const useFirebase = () =>
     useMemo(() => {
-        if (firebase.apps.length === 0) return null
+        const app = getApp()
+        if (!app) return null
 
-        const app = firebase.app()
         return {
             db: getFirestore(app),
             auth: getAuth(app),
@@ -54,10 +50,11 @@ const RootContext: React.FC = ({ children }) => {
     })
 
     useEffect(() => {
-        if (firebase.apps.length === 0) {
-            firebase.initializeApp(firebaseConfig)
-            firebase.auth().languageCode = 'th'
-            firebase.analytics().logEvent('notification_received')
+        if (getApps().length === 0) {
+            initializeApp(firebaseConfig)
+
+            const analytic = getAnalytics()
+            logEvent(analytic, 'notification_received')
             console.log('firebase initilized')
 
             import('@line/liff')
@@ -87,14 +84,14 @@ const RootContext: React.FC = ({ children }) => {
                         const authenResult = await $axios.post<{ authenticationCode: string }>('/api/auth/token', {
                             connectId,
                         })
-                        await firebase.auth().signInWithCustomToken(authenResult.data.authenticationCode)
+                        await signInWithCustomToken(getAuth(), authenResult.data.authenticationCode)
                     }
 
                     return { $liff, $axios }
                 })
                 .then(({ $liff, $axios }) => setContext((state) => ({ ...state, $liff, $axios })))
         }
-        return getAuth(firebase.app()).onIdTokenChanged((user) => {
+        return getAuth().onIdTokenChanged((user) => {
             console.log(user)
         })()
     }, [])
