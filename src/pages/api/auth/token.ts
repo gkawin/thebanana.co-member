@@ -3,8 +3,8 @@ import { admin } from '@/services'
 import { badRequest, Boom, forbidden } from '@hapi/boom'
 import { NextApiHandler } from 'next'
 import { ok } from 'assert'
-import Model from '@/entities/Model'
-import { UserConnectEntity } from '@/entities/user-connect.entity'
+import Model from '@/models/Model'
+import { UserConnectEntity } from '@/models/user-connect.entity'
 
 const handleToken: NextApiHandler = async (req, res) => {
     await runsWithMethods(req, res, { methods: ['POST'] })
@@ -22,7 +22,7 @@ const handleToken: NextApiHandler = async (req, res) => {
         ok(connectInfo.exists, forbidden())
 
         const { user: uid } = connectInfo.data()
-        const authenticationCode = await admin.auth.createCustomToken(uid, { scope: ['manage', 'read', 'write'] })
+        const authenticationCode = await admin.auth.createCustomToken(uid)
 
         res.status(200).json({ authenticationCode })
     } catch (error) {

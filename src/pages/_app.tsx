@@ -1,3 +1,4 @@
+import '@/styles/globals.css'
 import RootContext from '@/core/RootContext'
 import type { AppProps } from 'next/app'
 

@@ -1,4 +1,4 @@
-import { classToClass, classToPlain, deserialize, plainToClass } from 'class-transformer'
+import { classToPlain, plainToClass } from 'class-transformer'
 import { firestore } from 'firebase-admin'
 
 interface ClassType<T> {

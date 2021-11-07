@@ -3,13 +3,13 @@ import 'firebase/compat/firestore'
 import 'firebase/compat/storage'
 import 'firebase/compat/analytics'
 
-import { Backdrop, CircularProgress } from '@mui/material'
 import { useContext, useEffect, useMemo, useState, createContext } from 'react'
 import firebase from 'firebase/compat/app'
 
 import Axios, { AxiosInstance } from 'axios'
 import type { Liff } from '@liff/liff-types'
-import { useRouter } from 'next/dist/client/router'
+import { getFirestore } from 'firebase/firestore'
+import { getAuth } from 'firebase/auth'
 
 const liffId = '1653826193-QbmamAo0'
 const firebaseConfig = {
@@ -23,34 +23,34 @@ const firebaseConfig = {
     measurementId: 'G-FFJ2NRF8KK',
 }
 
-const liffContext = createContext<Liff>(null)
-const axiosContext = createContext<AxiosInstance>(null)
-const authContext = createContext<firebase.User>(null)
+export type AppContext = { $liff?: Liff; $axios?: AxiosInstance }
+const appContext = createContext<AppContext>(null)
 
 export const useLiff = () => {
-    const liff = useContext(liffContext)
-    if (!liff) throw new Error('liff')
-    return useMemo(() => liff, [liff])
+    const { $liff } = useContext(appContext)
+    return useMemo(() => $liff, [$liff])
 }
 
 export const useAxios = () => {
-    const axios = useContext(liffContext)
-    if (!axios) throw new Error('axios')
-    return useMemo(() => axios, [axios])
+    const { $axios } = useContext(appContext)
+    return useMemo(() => $axios, [$axios])
 }
 
-export const useAuth = () => {
-    const auth = useContext(authContext)
+export const useFirebase = () =>
+    useMemo(() => {
+        if (firebase.apps.length === 0) return null
 
-    return useMemo(() => auth, [auth])
-}
+        const app = firebase.app()
+        return {
+            db: getFirestore(app),
+            auth: getAuth(app),
+        }
+    }, [])
 
 const RootContext: React.FC = ({ children }) => {
-    const router = useRouter()
-    const [context, setContext] = useState<{ $liff?: Liff; $axios?: AxiosInstance; $auth?: firebase.User }>({
+    const [context, setContext] = useState<AppContext>({
         $axios: null,
         $liff: null,
-        $auth: null,
     })
 
     useEffect(() => {
@@ -60,62 +60,52 @@ const RootContext: React.FC = ({ children }) => {
             firebase.analytics().logEvent('notification_received')
             console.log('firebase initilized')
 
-            import('@line/liff').then(async ({ default: $liff }) => {
-                await $liff.init({ liffId })
-                await $liff.ready
-                if (!$liff.isLoggedIn()) {
-                    $liff.login()
-                }
+            import('@line/liff')
+                .then(async ({ default: $liff }) => {
+                    await $liff.init({ liffId })
+                    await $liff.ready
+                    if (!$liff.isLoggedIn()) {
+                        $liff.login()
+                    }
 
-                const $axios = Axios.create({
-                    headers: {
-                        Authorization: `Bearer ${$liff.getAccessToken()}`,
-                        'Content-Type': 'application/json',
-                    },
-                    timeout: 10000,
+                    const $axios = Axios.create({
+                        headers: {
+                            Authorization: `Bearer ${$liff.getAccessToken()}`,
+                            'Content-Type': 'application/json',
+                        },
+                        timeout: 10000,
+                    })
+                    return { $liff, $axios }
                 })
-                setContext((state) => ({ ...state, $liff, $axios }))
-            })
+                .then(async ({ $liff, $axios }) => {
+                    const { sub: connectId } = $liff.getDecodedIDToken()
+                    const memberResult = await $axios.post<{ isMember: boolean }>('/api/auth/member', {
+                        connectId,
+                    })
+
+                    if (memberResult) {
+                        const authenResult = await $axios.post<{ authenticationCode: string }>('/api/auth/token', {
+                            connectId,
+                        })
+                        await firebase.auth().signInWithCustomToken(authenResult.data.authenticationCode)
+                    }
+
+                    return { $liff, $axios }
+                })
+                .then(({ $liff, $axios }) => setContext((state) => ({ ...state, $liff, $axios })))
         }
+        return getAuth(firebase.app()).onIdTokenChanged((user) => {
+            console.log(user)
+        })()
     }, [])
 
-    useEffect(() => {
-        if (!context.$axios || !context.$liff) return () => {}
-
-        async function checkMember() {
-            const { sub: connectId } = context.$liff.getDecodedIDToken()
-
-            const memberResult = await context.$axios.post<{ isMember: boolean }>('/api/auth/member', { connectId })
-
-            if (!memberResult.data.isMember && router.pathname !== '/signup') {
-                router.push('/signup', undefined, { shallow: true })
-            }
-
-            const authenResult = await context.$axios.post<{ authenticationCode: string }>('/api/auth/token', {
-                connectId,
-            })
-
-            await firebase.auth().signInWithCustomToken(authenResult.data.authenticationCode)
-        }
-
-        return firebase.auth().onIdTokenChanged(async (user) => {
-            if (!user) await checkMember()
-            setContext((state) => ({ ...state, $auth: user }))
-        })
-    }, [context.$axios, context.$liff, router])
+    const shouldReleased = !!context.$liff && !!context.$axios
 
     return (
-        <liffContext.Provider value={context.$liff}>
-            <axiosContext.Provider value={context.$axios}>
-                <authContext.Provider value={context.$auth}>
-                    <Backdrop open={!context.$auth && !context.$liff && !context.$axios}>
-                        <CircularProgress color="inherit" />
-                    </Backdrop>
-
-                    {!!context.$auth && !!context.$liff && !!context.$axios && children}
-                </authContext.Provider>
-            </axiosContext.Provider>
-        </liffContext.Provider>
+        <appContext.Provider value={context}>
+            {!shouldReleased && <div>Loading</div>}
+            {shouldReleased && children}
+        </appContext.Provider>
     )
 }
 
