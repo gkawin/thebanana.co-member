@@ -7,6 +7,8 @@ export class CourseModel {
 }
 
 export class ProductModel {
+    id: string
+
     code: string
 
     name: string

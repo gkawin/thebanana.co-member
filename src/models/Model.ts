@@ -13,7 +13,7 @@ export default class Model {
             },
             fromFirestore: (ss) => {
                 const { courses: _, ...props } = ss.data()
-                return plainToClass(target, props)
+                return plainToClass(target, { id: ss.id, ...props })
             },
         }
     }

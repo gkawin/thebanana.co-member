@@ -5,7 +5,9 @@ import dayjs from 'dayjs'
 import { ProductModel } from '@/models/ProductModel'
 import Model from '@/models/Model'
 
-export const SelectSubjectForm: React.VFC = ({}) => {
+export type AvaliableProductsProps = { onChange: (value: ProductModel) => void }
+
+export const AvaliableProducts: React.VFC<AvaliableProductsProps> = ({ onChange }) => {
     const [productInfo, setProductInfo] = useState<ProductModel>(null)
     const [products, setProducts] = useState<ProductModel[]>([])
     const { db } = useFirebase()
@@ -38,7 +40,12 @@ export const SelectSubjectForm: React.VFC = ({}) => {
                     {products.map((product) => (
                         <div
                             key={product.code}
-                            onClick={() => setProductInfo(product)}
+                            onClick={() =>
+                                setProductInfo(() => {
+                                    onChange(product)
+                                    return product
+                                })
+                            }
                             className={`border-2 border-indigo-500 cursor-pointer rounded p-2 text-center w-full transition-all duration-400 ease-in-out ${
                                 product.code === productInfo?.code ? 'bg-indigo-500 text-white' : 'bg-white'
                             }`}
@@ -48,17 +55,6 @@ export const SelectSubjectForm: React.VFC = ({}) => {
                     ))}
                 </div>
             </section>
-            {productInfo && (
-                <section className="py-4">
-                    <h2 className="text-xl font-semibold">สรุปรายการลงทะเบียน</h2>
-                    <div className="grid grid-flow-row">
-                        <div>คอร์สเรียน</div>
-                        <div>{productInfo.name}</div>
-                        <div>ราคา</div>
-                        <div>{productInfo.pricing}</div>
-                    </div>
-                </section>
-            )}
         </>
     )
 }
