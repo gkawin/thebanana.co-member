@@ -1,6 +1,6 @@
 import { MobilePhoneForm } from '@/components/signup/MobilePhoneForm'
 import { OTPForm } from '@/components/signup/OTPForm'
-import { Grid } from '@mui/material'
+
 import { NextPage } from 'next'
 
 import React, { useState, useEffect } from 'react'
@@ -20,10 +20,10 @@ const SignInPage: NextPage = () => {
     }, [confirmationResult])
 
     return (
-        <Grid style={{ minHeight: '100vh' }} container direction="row" justifyContent="center" alignItems="center">
+        <div style={{ minHeight: '100vh' }}>
             <MobilePhoneForm onConfirmedChange={setConfirmationResult} />
             {confirmationResult && <OTPForm confirmationResult={confirmationResult} />}
-        </Grid>
+        </div>
     )
 }
 

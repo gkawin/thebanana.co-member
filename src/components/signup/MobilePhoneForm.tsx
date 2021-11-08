@@ -1,6 +1,5 @@
 import { useRecaptchaForm } from '@/concerns/use-recaptcha-form'
 import { mobileToThaiNumber } from '@/utils/phone-number'
-import { Button, FormControl, Input, InputLabel } from '@mui/material'
 import { useState } from 'react'
 import IMask from 'imask'
 import { useEffect } from 'react'
@@ -38,26 +37,18 @@ export const MobilePhoneForm: React.VFC<IMobilePhoneFromProps> = ({ onConfirmedC
     }
 
     return (
-        <FormControl>
-            <InputLabel htmlFor="mobile-phone">เบอร์โทรศัพท์</InputLabel>
-            <Input
-                inputRef={inputRef}
+        <form>
+            <label htmlFor="mobile-phone">เบอร์โทรศัพท์</label>
+            <input
                 type="text"
-                inputProps={{ pattern: /\d/, inputMode: 'numeric' }}
                 name="mobileNumber"
                 id="mobile-phone"
                 readOnly={Boolean(recaptcha.confirmationResult)}
-            ></Input>
+            ></input>
             <div id="recaptcha-container"></div>
-            <Button
-                style={{ marginTop: '1em' }}
-                variant="contained"
-                color="primary"
-                type="submit"
-                onClick={handleClick}
-            >
+            <button style={{ marginTop: '1em' }} color="primary" type="submit" onClick={handleClick}>
                 รอรับ SMS
-            </Button>
-        </FormControl>
+            </button>
+        </form>
     )
 }

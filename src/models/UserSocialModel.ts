@@ -1,17 +1,17 @@
-import { JsonProperty, Serializable } from 'typescript-json-serializer'
+// import { JsonProperty, Serializable } from 'typescript-json-serializer'
 
-import { withServerTimestampToISO } from '@/utils/firestore'
+// import { withServerTimestampToISO } from '@/utils/firestore'
 
-import Model from './Model'
+// import Model from './Model'
 
-@Serializable()
-export class UserSocialModel extends Model {
-    @JsonProperty() facebook?: string
+// @Serializable()
+// export class UserSocialModel extends Model {
+//     @JsonProperty() facebook?: string
 
-    @JsonProperty() twitter?: string
+//     @JsonProperty() twitter?: string
 
-    @JsonProperty({ beforeDeserialize: withServerTimestampToISO })
-    createdOn?: string | FirebaseFirestore.FieldValue
+//     @JsonProperty({ beforeDeserialize: withServerTimestampToISO })
+//     createdOn?: string | FirebaseFirestore.FieldValue
 
-    @JsonProperty() line?: any
-}
+//     @JsonProperty() line?: any
+// }
