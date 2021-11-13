@@ -4,6 +4,10 @@ import type { AppProps } from 'next/app'
 
 import Head from 'next/head'
 
+import ReactModal from 'react-modal'
+
+ReactModal.setAppElement('#__next')
+
 function MyApp({ Component, pageProps }: AppProps) {
     return (
         <>

@@ -1,4 +1,3 @@
-import { ProductModel } from '@/models/ProductModel'
 import { NextPage } from 'next'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
