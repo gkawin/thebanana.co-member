@@ -30,34 +30,35 @@ const CheckoutPage: NextPage = () => {
         getDocs(q).then((docs) => {
             setBookingList(docs.docs.map((v) => v.data()))
         })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const renderForm = () => (
         <form onSubmit={handleSubmit(onCheckout)}>
             <div className="py-4">
                 {bookingList.map((booking) => (
-                    <div key={booking.productId} className="grid grid-flow-row">
+                    <div key={Math.random().toString()} className="grid grid-flow-row">
                         <div>คอร์สเรียน</div>
-                        <div>{booking.productId}</div>
+                        <div className="text-gray-500 font-light">{booking.productRef}</div>
                         <div>ราคา</div>
                         <div>{booking.status}</div>
                     </div>
                 ))}
             </div>
             <AddressForm />
-            <button type="submit" className="bg-indigo-500 rounded p-2 my-2 block w-full">
+            <button type="submit" className="bg-indigo-500 rounded p-2 my-2 block w-full text-white">
                 ชำระเงิน
             </button>
         </form>
     )
 
     return (
-        <div className="max-w-xl container mx-auto p-4" style={{ minWidth: '20rem' }}>
-            <h2 className="text-xl font-semibold">สรุปรายการลงทะเบียน</h2>
+        <div className="p-4">
+            <h2 className="text-sub-title font-semibold">สรุปรายการลงทะเบียน</h2>
             {bookingList.length > 0 && renderForm()}
             {bookingList.length === 0 && (
                 <div className="block">
-                    ไม่มีวิชาที่คุณเลือกลงทะบียต่อนนี้
+                    ไม่มีวิชาที่คุณเลือกลงทะเบียนอยู่
                     <Link href="/">
                         <a className="text-indigo-500 text-center">กลับหน้าหลัก</a>
                     </Link>

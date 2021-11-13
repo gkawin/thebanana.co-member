@@ -19,10 +19,10 @@ export const ConfirmedProductForm: React.VFC<ConfirmedProductFormProps> = ({ pro
         e.preventDefault()
         await setDoc(doc(collection(db, 'booking')).withConverter(Model.convert(BookingModel)), {
             createdOn: new Date(),
-            productId: doc(db, 'products', productInfo.id).path,
+            productRef: doc(db, 'products', productInfo.id).path,
             status: BookingStatus.WAITING_FOR_PAYMENT,
             expiredOn: dayjs().add(10, 'day').toDate(),
-            userId: doc(db, 'users', auth.currentUser.uid).path,
+            userRef: doc(db, 'users', auth.currentUser.uid).path,
         })
         router.push('/checkout')
     }
