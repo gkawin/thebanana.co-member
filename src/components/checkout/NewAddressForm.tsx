@@ -1,4 +1,5 @@
-import { useAxios } from '@/core/RootContext'
+import { useAxios, useFirebase } from '@/core/RootContext'
+import { doc, addDoc, collectionGroup, collection } from '@firebase/firestore'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import Modal from 'react-modal'
@@ -32,19 +33,35 @@ export const NewAddressForm: React.VFC = () => {
         watch,
         setValue,
         resetField,
+        reset,
     } = useForm<NewAddressFormFields>()
     const $axios = useAxios()
-    const handleSubmitNewAddress = async (data: NewAddressFormFields) => {
-        console.log(data)
-    }
-
+    const { db, auth } = useFirebase()
+    const [isOpen, setIsOpen] = useState(false)
     const [addrOptions, setAddrOptions] = useState<NewAddressFormFields[]>([])
+    const [isLoading, setIsLoading] = useState(false)
+
+    const handleSubmitNewAddress = async (data: NewAddressFormFields) => {
+        const uid = auth.currentUser.uid
+        try {
+            setIsLoading(true)
+            await addDoc(collection(db, 'users', uid, 'address'), {
+                address: `${data.commonAddr}, ต.${data.subdistrict} อ.${data.district} จ.${data.province}, ${data.postcode} โทร: ${data.phoneNumber}`,
+                ...data,
+                createdOn: new Date(),
+            })
+            setIsOpen(false)
+        } catch (error) {
+            alert('เพิ่มข้อมูลไม่สำเร็จ')
+        } finally {
+            setIsLoading(false)
+        }
+    }
 
     const handleDebounce = useCallback(
         debounce(async (fun: Function) => await fun(), 500),
         []
     )
-
     const handleSelectedOption = (idx: number) => {
         const addrInfo = addrOptions[idx]
         if (!addrInfo) return
@@ -75,9 +92,16 @@ export const NewAddressForm: React.VFC = () => {
         return () => subscrible.unsubscribe()
     }, [$axios, handleDebounce, resetField, watch])
 
+    useEffect(() => {
+        if (!isOpen) {
+            reset({ commonAddr: '', district: '', phoneNumber: '', postcode: '', province: '', subdistrict: '' })
+            setAddrOptions([])
+        }
+    }, [isOpen, reset])
+
     return (
         <>
-            <Modal isOpen>
+            <Modal isOpen={isOpen}>
                 <form className={`${styles['new-address-form']}`} onSubmit={handleSubmit(handleSubmitNewAddress)}>
                     <h2 className="text-sub-title font-semibold">เพิ่มที่อยู่ใหม่</h2>
 
@@ -166,13 +190,30 @@ export const NewAddressForm: React.VFC = () => {
                         <small className="text-red-500">{errors.province?.message}</small>
                     </div>
 
-                    <button type="submit" className="bg-indigo-500 text-white rounded p-2 my-2 block w-full">
-                        <span>+</span>
-                        <span>เพิ่มที่อยู่ใหม่</span>
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className={`${
+                            isLoading ? 'bg-indigo-300' : 'bg-indigo-500'
+                        }  text-white rounded p-2 my-2 block w-full`}
+                    >
+                        {isLoading && <span>กำลังส่งข้อมูล</span>}
+                        {!isLoading && <span>+ เพิ่มที่อยู่</span>}
+                    </button>
+                    <button
+                        type="button"
+                        className="border border-indigo-500  rounded p-2 my-2 block w-full"
+                        onClick={() => setIsOpen(false)}
+                    >
+                        <span>ยกเลิก</span>
                     </button>
                 </form>
             </Modal>
-            <button type="button" className="border border-indigo-500 rounded p-2 my-2 block w-full">
+            <button
+                type="button"
+                className="border border-indigo-500 rounded p-2 my-2 block w-full"
+                onClick={() => setIsOpen(true)}
+            >
                 <span>+</span>
                 <span>เพิ่มที่อยู่ใหม่</span>
             </button>

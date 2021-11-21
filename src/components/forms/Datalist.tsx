@@ -34,6 +34,9 @@ export const Datalist: React.VFC<DatalistProps> = ({ options = [], handleSelecte
             setCurrentOptions(options)
             setShouldDisplay(true)
         }
+        if (options.length === 0) {
+            setShouldDisplay(false)
+        }
     }, [currentOptions, options, shouldDisplay])
 
     if (!shouldDisplay) return null
