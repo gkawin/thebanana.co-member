@@ -17,8 +17,7 @@ export const AddressForm: React.VFC = () => {
             setAddresses(docs.docs.map((item) => ({ id: item.id, address: item.data().address })))
         })
         return () => unsubscribe()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [auth.currentUser.uid, db])
 
     return (
         <>

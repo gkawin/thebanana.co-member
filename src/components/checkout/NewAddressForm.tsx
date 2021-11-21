@@ -1,14 +1,27 @@
-import React from 'react'
+import { useAxios } from '@/core/RootContext'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import Modal from 'react-modal'
+import Datalist from '../forms/Datalist'
 import styles from './new-address-form.module.css'
 
 export type NewAddressFormFields = {
     commonAddr: string
-    subDistrict: string
-    city: string
+    subdistrict: string
+    district: string
     province: string
     postcode: string
+    phoneNumber: string
+}
+
+const debounce = (callback: Function, wait = 500) => {
+    let timeoutId: any = null
+    return (...args: any[]) => {
+        clearTimeout(timeoutId)
+        timeoutId = setTimeout(() => {
+            callback.apply(null, args)
+        }, wait)
+    }
 }
 
 export const NewAddressForm: React.VFC = () => {
@@ -16,10 +29,51 @@ export const NewAddressForm: React.VFC = () => {
         register,
         handleSubmit,
         formState: { errors },
+        watch,
+        setValue,
+        resetField,
     } = useForm<NewAddressFormFields>()
+    const $axios = useAxios()
     const handleSubmitNewAddress = async (data: NewAddressFormFields) => {
         console.log(data)
     }
+
+    const [addrOptions, setAddrOptions] = useState<NewAddressFormFields[]>([])
+
+    const handleDebounce = useCallback(
+        debounce(async (fun: Function) => await fun(), 500),
+        []
+    )
+
+    const handleSelectedOption = (idx: number) => {
+        const addrInfo = addrOptions[idx]
+        if (!addrInfo) return
+        for (const addr in addrInfo) {
+            const value = addrInfo[addr as keyof NewAddressFormFields]
+            setValue(addr as keyof NewAddressFormFields, value, { shouldValidate: true })
+        }
+    }
+
+    useEffect(() => {
+        const subscrible = watch((value, { name, type }) => {
+            handleDebounce(async () => {
+                if (name === 'postcode' && value[name].length === 5) {
+                    const { data } = await $axios.get('/api/geo/search/postcode', {
+                        params: { keyword: encodeURIComponent(value.postcode) },
+                    })
+                    if (data.length === 0) {
+                        resetField('district')
+                        resetField('province')
+                        resetField('subdistrict')
+                        setAddrOptions([])
+                    } else {
+                        setAddrOptions(data)
+                    }
+                }
+            })
+        })
+        return () => subscrible.unsubscribe()
+    }, [$axios, handleDebounce, resetField, watch])
 
     return (
         <>
@@ -38,15 +92,44 @@ export const NewAddressForm: React.VFC = () => {
                     </div>
 
                     <div className="flex flex-col mb-4">
-                        <label htmlFor="postcode">รหัสไปรณีย์</label>
+                        <label htmlFor="commonAddr">เบอร์โทรศัพท์ที่ติดต่อได้</label>
                         <input
-                            id="postcode"
+                            id="phoneNumber"
+                            name="phoneNumber"
                             type="text"
                             inputMode="numeric"
                             pattern="[0-9]*"
-                            className="form-input rounded text-sm"
-                            {...register('postcode', { required: 'กรุณาระบุ' })}
+                            maxLength={10}
+                            minLength={8}
+                            className="form-input rounded text-sm relative  w-full"
+                            {...register('phoneNumber', { required: true })}
                         />
+                    </div>
+
+                    <div className="flex flex-col mb-4 ">
+                        <label htmlFor="postcode">รหัสไปรณีย์</label>
+                        <div className="relative">
+                            <input
+                                id="postcode"
+                                name="postcode"
+                                list="postcodelist"
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                maxLength={5}
+                                minLength={5}
+                                className="form-input rounded text-sm relative  w-full"
+                                {...register('postcode', { required: true })}
+                            />
+                            <Datalist
+                                options={addrOptions.map(({ district, postcode, province, subdistrict }, idx) => ({
+                                    text: `${postcode}, ${subdistrict}, ${district}, ${province}`,
+                                    value: idx,
+                                }))}
+                                handleSelectedOption={handleSelectedOption}
+                            />
+                        </div>
+
                         <small className="text-red-500">{errors.postcode?.message}</small>
                     </div>
 
@@ -56,9 +139,9 @@ export const NewAddressForm: React.VFC = () => {
                             id="subDistrict"
                             className="form-input rounded text-sm"
                             type="text"
-                            {...register('subDistrict', { required: 'กรุณาระบุ' })}
+                            {...register('subdistrict', { required: 'กรุณาระบุ' })}
                         />
-                        <small className="text-red-500">{errors.subDistrict?.message}</small>
+                        <small className="text-red-500">{errors.subdistrict?.message}</small>
                     </div>
 
                     <div className="flex flex-col mb-4">
@@ -67,9 +150,9 @@ export const NewAddressForm: React.VFC = () => {
                             id="city"
                             className="form-input rounded text-sm"
                             type="text"
-                            {...register('city', { required: 'กรุณาระบุ' })}
+                            {...register('district', { required: 'กรุณาระบุ' })}
                         />
-                        <small className="text-red-500">{errors.city?.message}</small>
+                        <small className="text-red-500">{errors.district?.message}</small>
                     </div>
 
                     <div className="flex flex-col mb-4">

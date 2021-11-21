@@ -18,10 +18,11 @@ const apiKey = process.env.LONGDO_API_KEY || ''
 
 export default async function HandleGeoSerachPostCode(req: NextApiRequest, res: NextApiResponse) {
     await runsWithMethods(req, res, { methods: ['GET'] })
+    const { keyword } = req.query
+
     try {
-        const { keyword } = req.query
         const { data } = await axios.get<LongdoMapSearchAddress>('https://api.longdo.com/POIService/json/address', {
-            params: { postcode: keyword, key: apiKey, locale: 'th' },
+            params: { postcode: decodeURIComponent(keyword.toString()), key: apiKey, locale: 'th' },
         })
 
         ok(data, notFound('data not found'))
@@ -37,7 +38,7 @@ export default async function HandleGeoSerachPostCode(req: NextApiRequest, res: 
         })
         res.status(200).json(addresses)
     } catch (error) {
-        console.error(error)
+        console.error({ keyword, error: error.output })
         res.status(200).json([])
     }
 }

@@ -2,32 +2,40 @@ import runsWithMethods from '@/middleware/runsWithMethods'
 import { NextApiHandler } from 'next'
 import { badRequest, Boom } from '@hapi/boom'
 
-import { ok } from 'assert'
 import adminSDK from '@/libs/adminSDK'
-import { IsString, validate } from 'class-validator'
-import { plainToClass } from 'class-transformer'
+import { DocumentReference } from '@firebase/firestore'
+import dayjs from 'dayjs'
 
-class EnrollmentRequestDto {
-    @IsString()
-    productId: string
-
-    @IsString()
-    userId: string
-}
+const sdk = adminSDK()
+const db = sdk.firestore()
 
 const enrollHandler: NextApiHandler = async (req, res) => {
-    await runsWithMethods(req, res, { methods: ['POST'] })
-    const sdk = adminSDK()
-    const db = sdk.firestore()
+    await runsWithMethods(req, res, { methods: ['GET'] })
 
     try {
-        const { body } = req
-        const invalid = await validate(plainToClass(EnrollmentRequestDto, body))
+        const ref = await db.collection('transactions').where('createdOn', '>=', new Date('2021-09-01')).get()
+        let total = 0
+        const createdResults = ref.docs.map(async (doc) => {
+            const { user: userPathRef, inputAddress: address, parentName, totalAmount, createdOn } = doc.data()
+            const userRef = db.doc(userPathRef.path)
+            const userInfo = (await userRef.get()).data()
+            const usrSchoolInfo = (await userRef.collection('school').get()).docs[0].data()
 
-        ok(invalid.length === 0, badRequest())
+            total += Number(totalAmount)
 
-        const enrollments = await db.collection('enrollments').add(body)
-        return res.status(200).json(enrollments.id)
+            return {
+                studentName: userInfo.fullname,
+                studentNickname: userInfo.nickname,
+                grade: usrSchoolInfo.grade,
+                school: usrSchoolInfo.school,
+                address,
+                parentName,
+                totalAmount: Number(totalAmount),
+                generatedInvoiceOn: dayjs(createdOn.toDate()).format('YYYY-MM-DD HH:mm:ss'),
+            }
+        })
+        const results = await Promise.all(createdResults)
+        res.status(200).json({ results, total })
     } catch (error) {
         if (error instanceof Boom) {
             res.status(error.output.statusCode).json(error.output.payload)
