@@ -11,10 +11,12 @@ export class BookingModel {
 
     productRef: string
 
-    @Transform(({ value }) => (value instanceof Timestamp ? value.toDate() : value))
+    @Transform(({ value }) => {
+        return value instanceof Timestamp ? value.toDate().toISOString() : value
+    })
     createdOn: Date
 
-    @Transform(({ value }) => (value instanceof Timestamp ? value.toDate() : value))
+    @Transform(({ value }) => (value instanceof Timestamp ? value.toDate().toISOString() : value))
     expiredOn: Date
 
     status: BookingStatus

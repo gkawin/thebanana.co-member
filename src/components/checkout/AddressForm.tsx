@@ -1,5 +1,5 @@
 import { useFirebase } from '@/core/RootContext'
-import { collection, onSnapshot } from 'firebase/firestore'
+import { collection, limit, onSnapshot, orderBy, query } from '@firebase/firestore'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { NewAddressForm } from './NewAddressForm'
@@ -13,7 +13,9 @@ export const AddressForm: React.VFC = () => {
     const { auth, db } = useFirebase()
 
     useEffect(() => {
-        const unsubscribe = onSnapshot(collection(db, 'users', auth.currentUser.uid, 'address'), (docs) => {
+        const addrCol = collection(db, 'users', auth.currentUser.uid, 'address')
+        const q = query(addrCol, orderBy('createdOn', 'desc'), limit(2))
+        const unsubscribe = onSnapshot(q, (docs) => {
             setAddresses(docs.docs.map((item) => ({ id: item.id, address: item.data().address })))
         })
         return () => unsubscribe()
@@ -39,7 +41,7 @@ export const AddressForm: React.VFC = () => {
                 </div>
             ))}
             <small className="text-red-500">{errors.address?.message}</small>
-            <NewAddressForm />
+            <NewAddressForm enabled />
         </>
     )
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { useFirebase } from '@/core/RootContext'
 import dayjs from 'dayjs'
@@ -11,6 +11,12 @@ export const AvaliableProducts: React.VFC<AvaliableProductsProps> = ({ onChange 
     const [productInfo, setProductInfo] = useState<ProductModel>(null)
     const [products, setProducts] = useState<ProductModel[]>([])
     const { db } = useFirebase()
+
+    const handleClickProduct = (product: ProductModel) => (e: React.SyntheticEvent) => {
+        e.preventDefault()
+        setProductInfo(product)
+        onChange(product)
+    }
 
     useEffect(() => {
         const productsRef = query(collection(db, 'products'), where('effectiveDate', '<=', new Date())).withConverter(
@@ -40,12 +46,7 @@ export const AvaliableProducts: React.VFC<AvaliableProductsProps> = ({ onChange 
                     {products.map((product) => (
                         <div
                             key={product.code}
-                            onClick={() =>
-                                setProductInfo(() => {
-                                    onChange(product)
-                                    return product
-                                })
-                            }
+                            onClick={handleClickProduct(product)}
                             className={`border-2 border-indigo-500 cursor-pointer rounded p-2 text-center w-full transition-all duration-400 ease-in-out ${
                                 product.code === productInfo?.code ? 'bg-indigo-500 text-white' : 'bg-white'
                             }`}

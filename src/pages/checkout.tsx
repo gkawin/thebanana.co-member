@@ -3,10 +3,13 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import Link from 'next/link'
 import { AddressForm } from '@/components/checkout/AddressForm'
-import { collection, getDocs, query, where } from '@firebase/firestore'
+import { collection, doc, getDoc, getDocs, orderBy, query, where } from '@firebase/firestore'
 import { useFirebase } from '@/core/RootContext'
 import Model from '@/models/Model'
 import { BookingModel, BookingStatus } from '@/models/BookingModel'
+import { CheckoutModel } from '@/models/CheckoutModel'
+import { ProductModel } from '@/models/ProductModel'
+import { plainToClass } from 'class-transformer'
 
 export type CheckoutFormProps = {
     productId: string
@@ -16,31 +19,53 @@ export type CheckoutFormProps = {
 
 const CheckoutPage: NextPage = () => {
     const { handleSubmit } = useForm<CheckoutFormProps>()
+    const [bookingList, setBookingList] = useState<CheckoutModel[]>([])
+    const { db, auth } = useFirebase()
 
-    const [bookingList, setBookingList] = useState<BookingModel[]>([])
-    const onCheckout = async (data) => {}
-    const { db } = useFirebase()
+    const onCheckout = async () => {
+        console.log()
+    }
 
     useEffect(() => {
-        const q = query(
-            collection(db, 'booking'),
-            where('status', '==', BookingStatus.WAITING_FOR_PAYMENT)
+        const bookingCol = collection(db, 'booking')
+        const waitingForPaymentQuery = query(
+            bookingCol,
+            where('status', '==', BookingStatus.WAITING_FOR_PAYMENT),
+            where('userRef', '==', `users/${auth.currentUser.uid}`),
+            where('expiredOn', '>=', new Date()),
+            orderBy('expiredOn', 'desc')
         ).withConverter(Model.convert(BookingModel))
-        getDocs(q).then((docs) => {
-            setBookingList(docs.docs.map((v) => v.data()))
-        })
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+
+        getDocs(waitingForPaymentQuery)
+            .then((result) => result.docs.map((v) => v.data()))
+            .then(async (bookinglist) => {
+                const createdBookinglist = bookinglist.map(async ({ productRef, ...props }) => {
+                    const product = (
+                        await getDoc(doc(db, productRef).withConverter(Model.convert(ProductModel)))
+                    ).data()
+                    return { ...props, product }
+                })
+                const results = await Promise.all(createdBookinglist)
+                return plainToClass(CheckoutModel, results)
+            })
+            .then((result) => {
+                setBookingList(result)
+            })
+    }, [auth.currentUser.uid, db])
 
     const renderForm = () => (
         <form onSubmit={handleSubmit(onCheckout)}>
-            <div className="py-4">
+            <div className="py-4 divide-y gap-y-4 grid">
                 {bookingList.map((booking) => (
                     <div key={Math.random().toString()} className="grid grid-flow-row">
                         <div>คอร์สเรียน</div>
-                        <div className="text-gray-500 font-light">{booking.productRef}</div>
+                        <div className="text-gray-500 font-light">{booking.product.name}</div>
                         <div>ราคา</div>
-                        <div>{booking.status}</div>
+                        <div>{booking.product.pricing}</div>
+                        <div className="flex flex-co`1">
+                            <label htmlFor="enrollName">ชื่อนักเรียน</label>
+                            <input id="enrollName" className="form-input rounded" type="text"></input>
+                        </div>
                     </div>
                 ))}
             </div>

@@ -1,5 +1,5 @@
 import { useAxios, useFirebase } from '@/core/RootContext'
-import { doc, addDoc, collectionGroup, collection } from '@firebase/firestore'
+import { addDoc, collection } from '@firebase/firestore'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import Modal from 'react-modal'
@@ -25,7 +25,9 @@ const debounce = (callback: Function, wait = 500) => {
     }
 }
 
-export const NewAddressForm: React.VFC = () => {
+export type NewAddressFormProps = { enabled: boolean }
+
+export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ enabled = true }) => {
     const {
         register,
         handleSubmit,
@@ -42,6 +44,8 @@ export const NewAddressForm: React.VFC = () => {
     const [isLoading, setIsLoading] = useState(false)
 
     const handleSubmitNewAddress = async (data: NewAddressFormFields) => {
+        if (!enabled) return
+
         const uid = auth.currentUser.uid
         try {
             setIsLoading(true)
@@ -101,7 +105,7 @@ export const NewAddressForm: React.VFC = () => {
 
     return (
         <>
-            <Modal isOpen={isOpen}>
+            <Modal isOpen={isOpen && enabled}>
                 <form className={`${styles['new-address-form']}`} onSubmit={handleSubmit(handleSubmitNewAddress)}>
                     <h2 className="text-sub-title font-semibold">เพิ่มที่อยู่ใหม่</h2>
 
@@ -211,8 +215,11 @@ export const NewAddressForm: React.VFC = () => {
             </Modal>
             <button
                 type="button"
-                className="border border-indigo-500 rounded p-2 my-2 block w-full"
+                className={`border  ${
+                    enabled ? 'border-indigo-500' : 'border-gray-300 text-gray-300'
+                } rounded p-2 my-2 block w-full`}
                 onClick={() => setIsOpen(true)}
+                disabled={!enabled}
             >
                 <span>+</span>
                 <span>เพิ่มที่อยู่ใหม่</span>
