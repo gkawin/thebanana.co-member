@@ -2,28 +2,19 @@ import { ProductModel } from '@/models/ProductModel'
 import { useAxios, useFirebase } from '@/core/RootContext'
 import React from 'react'
 import { useRouter } from 'next/dist/client/router'
-import { collection, doc, setDoc } from '@firebase/firestore'
-import Model from '@/models/Model'
-import { BookingModel, BookingStatus } from '@/models/BookingModel'
-import dayjs from 'dayjs'
 
 export type ConfirmedProductFormProps = {
     productInfo: ProductModel
 }
 
 export const ConfirmedProductForm: React.VFC<ConfirmedProductFormProps> = ({ productInfo }) => {
-    const { db, auth } = useFirebase()
+    const { auth } = useFirebase()
+    const axios = useAxios()
     const router = useRouter()
 
     const handleOnSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault()
-        await setDoc(doc(collection(db, 'booking')).withConverter(Model.convert(BookingModel)), {
-            createdOn: new Date(),
-            productRef: doc(db, 'products', productInfo.id).path,
-            status: BookingStatus.WAITING_FOR_PAYMENT,
-            expiredOn: dayjs().add(10, 'day').toDate(),
-            userRef: doc(db, 'users', auth.currentUser.uid).path,
-        })
+        await axios.post('/api/enrollment', { productId: productInfo.id, userId: auth.currentUser.uid })
         router.push('/checkout')
     }
 

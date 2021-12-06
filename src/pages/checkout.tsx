@@ -31,7 +31,7 @@ const CheckoutPage: NextPage = () => {
         const waitingForPaymentQuery = query(
             bookingCol,
             where('status', '==', BookingStatus.WAITING_FOR_PAYMENT),
-            where('userRef', '==', `users/${auth.currentUser.uid}`),
+            where('userPath', '==', `users/${auth.currentUser.uid}`),
             where('expiredOn', '>=', new Date()),
             orderBy('expiredOn', 'desc')
         ).withConverter(Model.convert(BookingModel))
@@ -39,9 +39,9 @@ const CheckoutPage: NextPage = () => {
         getDocs(waitingForPaymentQuery)
             .then((result) => result.docs.map((v) => v.data()))
             .then(async (bookinglist) => {
-                const createdBookinglist = bookinglist.map(async ({ productRef, ...props }) => {
+                const createdBookinglist = bookinglist.map(async ({ productPath, ...props }) => {
                     const product = (
-                        await getDoc(doc(db, productRef).withConverter(Model.convert(ProductModel)))
+                        await getDoc(doc(db, productPath).withConverter(Model.convert(ProductModel)))
                     ).data()
                     return { ...props, product }
                 })

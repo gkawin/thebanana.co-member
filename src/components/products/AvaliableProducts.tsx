@@ -30,7 +30,7 @@ export const AvaliableProducts: React.VFC<AvaliableProductsProps> = ({ onChange 
                     {products.map((product) => {
                         const isAlreadyAtCart =
                             userCart.categories[BookingStatus.WAITING_FOR_PAYMENT].findIndex(
-                                (cate) => cate.productRef === `products/${product.id}`
+                                (cate) => cate.productPath === `products/${product.id}`
                             ) !== -1
 
                         return (

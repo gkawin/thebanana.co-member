@@ -10,7 +10,7 @@ export default function useUserCart() {
     useEffect(() => {
         const q = query(
             collection(db, 'booking'),
-            where('userRef', '==', `users/${auth.currentUser.uid}`)
+            where('userPath', '==', `users/${auth.currentUser.uid}`)
         ).withConverter(Model.convert(BookingModel))
         const unsubscribe = onSnapshot(q, (ss) => {
             const results = ss.docs.map((doc) => {
