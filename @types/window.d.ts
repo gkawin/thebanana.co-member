@@ -1,3 +1,4 @@
+import { Liff } from '@liff/liff-types'
 import type { LiffCore } from '@line/liff/dist/lib/liff'
 
 export {}
@@ -6,5 +7,6 @@ declare global {
         recaptchaVerifier: any
         recaptchaWidgetId?: any
         grecaptcha?: any
+        liff?: Liff
     }
 }

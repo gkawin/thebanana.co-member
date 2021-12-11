@@ -1,16 +1,22 @@
-import { AvaliableProducts } from '@/components/products/AvaliableProducts'
-import { ConfirmedProductForm } from '@/components/products/ConfirmedProductForm'
-import { UserCard } from '@/components/user/UserCard'
-import { ProductModel } from '@/models/ProductModel'
-import { useState } from 'react'
+import { BrowseProductsNav } from '@/components/products/BrowseProductsNav'
+import useUserCart from '@/concerns/use-user-cart'
+import useProductsList from '@/concerns/use-products-list'
+import { ProductCard } from '@/components/products/ProductCard'
 
 export default function Home() {
-    const [productInfo, setProductInfo] = useState<ProductModel>(null)
+    const userCart = useUserCart()
+    // const products = useProductsList(userCart.items)
+
+    console.log(userCart)
+
     return (
-        <div className="max-w-xl container mx-auto p-4" style={{ minWidth: '20rem' }}>
-            <UserCard />
-            <AvaliableProducts onChange={setProductInfo} />
-            <ConfirmedProductForm productInfo={productInfo} />
-        </div>
+        <section className="container mx-auto">
+            <BrowseProductsNav className="overflow-x-scroll whitespace-pre text-right" />
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-4">
+                {products.map((product) => {
+                    return <ProductCard disabled={false} onClick={() => {}} product={product} key={product.code} />
+                })}
+            </div> */}
+        </section>
     )
 }

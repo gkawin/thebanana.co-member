@@ -6,5 +6,11 @@
     "search.exclude": {
         "**/.yarn": true,
         "**/.pnp.*": true
+    },
+    "emmet.includeLanguages": {
+        "postcss": "css"
+    },
+    "emmet.syntaxProfiles": {
+        "postcss": "css"
     }
 }

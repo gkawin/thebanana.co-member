@@ -5,6 +5,7 @@ import type { AppProps } from 'next/app'
 import Head from 'next/head'
 
 import ReactModal from 'react-modal'
+import { UserCard } from '@/components/user/UserCard'
 
 ReactModal.setAppElement('#__next')
 
@@ -18,9 +19,8 @@ function MyApp({ Component, pageProps }: AppProps) {
                 <title>หน้าสมาชิก</title>
             </Head>
             <RootContext>
-                <main className="max-w-6xl container mx-auto" style={{ minWidth: '20rem' }}>
-                    <Component {...pageProps} />
-                </main>
+                <UserCard />
+                <Component {...pageProps} />
             </RootContext>
         </>
     )

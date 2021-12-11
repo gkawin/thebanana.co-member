@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from 'react'
 export default function useUserCart() {
     const [items, setItems] = useState<BookingModel[]>([])
     const { db, auth } = useFirebase()
+
     useEffect(() => {
         const q = query(
             collection(db, 'booking'),
@@ -21,7 +22,8 @@ export default function useUserCart() {
         return () => {
             unsubscribe()
         }
-    }, [auth.currentUser.uid, db])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     const waitingForPaymentList = useMemo(
         () => items.filter((item) => item.status === BookingStatus.WAITING_FOR_PAYMENT),

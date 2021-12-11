@@ -1,43 +1,66 @@
-import { classToPlain, plainToClass } from 'class-transformer'
-import { FirestoreDataConverter, CollectionReference, DocumentReference, Timestamp } from 'firebase/firestore'
+import {
+    CollectionReference,
+    DocumentData,
+    DocumentReference,
+    FieldValue,
+    FirestoreDataConverter,
+    PartialWithFieldValue,
+    QueryDocumentSnapshot,
+    Timestamp,
+    WithFieldValue,
+} from '@firebase/firestore'
+import { instanceToPlain, plainToClass } from 'class-transformer'
 
 interface ClassType<T> {
     new (...args: any[]): T
 }
 
 export default class Model {
+    static _converter(data: DocumentData) {
+        return Object.entries(data).reduce((acc, [key, value]) => {
+            if (value instanceof Timestamp || Object.keys(value).includes('_seconds')) {
+                acc = { ...acc, [key]: value.toDate() }
+            } else if (value instanceof DocumentReference) {
+                acc = { ...acc, [key]: value.id }
+            } else if (value instanceof CollectionReference) {
+                acc = { ...acc, [key]: value.id }
+            } else if (Array.isArray(value)) {
+                const mapped = value.map((v) => {
+                    if (v instanceof DocumentReference || v instanceof CollectionReference) {
+                        return v.id
+                    }
+                    return v
+                })
+                acc = { ...acc, [key]: mapped }
+            } else {
+                acc = { ...acc, [key]: value }
+            }
+            return acc
+        }, {})
+    }
+
     static convert<T>(target: ClassType<T>): FirestoreDataConverter<T> {
         return {
-            toFirestore: (modelObject) => {
-                return classToPlain(modelObject, { exposeUnsetFields: false })
+            toFirestore: (modelObject: WithFieldValue<T> | PartialWithFieldValue<T>) => {
+                return instanceToPlain(modelObject, { exposeUnsetFields: false })
             },
             fromFirestore: (ss) => {
-                const { courses: _, ...props } = ss.data()
-                return plainToClass(target, { id: ss.id, ...props })
+                const data = ss.data()
+                const id = ss.id
+                const o = Model._converter(data)
+                return plainToClass(target, { id, ...o })
             },
         }
     }
     static transform = <T>(target: ClassType<T>): FirebaseFirestore.FirestoreDataConverter<T> => ({
         toFirestore: (modelObject) => {
-            return classToPlain(modelObject)
+            return instanceToPlain(modelObject)
         },
-        fromFirestore: (snapshot: FirebaseFirestore.QueryDocumentSnapshot<T>) => {
-            const data = snapshot.data()
-
-            const o = Object.entries(data).reduce((acc, [key, value]) => {
-                if (value instanceof Timestamp) {
-                    acc = { ...acc, [key]: value.toDate() }
-                } else if (value instanceof DocumentReference) {
-                    acc = { ...acc, [key]: value.id }
-                } else if (value instanceof CollectionReference) {
-                    acc = { ...acc, [key]: value.id }
-                } else {
-                    acc = { ...acc, [key]: value }
-                }
-                return acc
-            }, {})
-
-            return plainToClass(target, o)
+        fromFirestore: (ss) => {
+            const data = ss.data()
+            const o = Model._converter(data)
+            const id = ss.id
+            return plainToClass(target, { id, ...o })
         },
     })
 }

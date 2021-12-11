@@ -1,13 +1,15 @@
 import { useFirebase } from '@/core/RootContext'
+import { BookingModel } from '@/models/BookingModel'
 import Model from '@/models/Model'
 import { ProductModel } from '@/models/ProductModel'
 import { collection, getDocs, query, where } from '@firebase/firestore'
 import dayjs from 'dayjs'
 import { useEffect, useMemo, useState } from 'react'
 
-export default function useProductsList() {
+export default function useProductsList(filteredBy: BookingModel[]) {
     const [productsList, setProductsList] = useState<ProductModel[]>([])
     const { db } = useFirebase()
+
     useEffect(() => {
         const productsRef = query(collection(db, 'products'), where('effectiveDate', '<=', new Date())).withConverter(
             Model.convert(ProductModel)
@@ -25,7 +27,11 @@ export default function useProductsList() {
             }, [])
             setProductsList(results)
         })
-    }, [db])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
-    return useMemo(() => productsList, [productsList])
+    return useMemo(() => {
+        console.log(filteredBy)
+        return productsList
+    }, [productsList, filteredBy])
 }

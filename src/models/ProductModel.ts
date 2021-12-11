@@ -15,6 +15,15 @@ export class ProductModel {
 
     courses: string[]
 
+    description: string
+
+    @Transform(({ value }) => (!value ? null : value))
+    rating: number
+
+    coverImage: string
+
+    slug: string
+
     @Transform(({ value }) => (value instanceof Timestamp ? value.toDate() : value))
     effectiveDate: Date
     @Transform(({ value }) => (value instanceof Timestamp ? value.toDate() : value))

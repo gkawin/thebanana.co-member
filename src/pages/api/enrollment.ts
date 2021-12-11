@@ -8,7 +8,7 @@ import dayjs from 'dayjs'
 import Model from '@/models/Model'
 import { BookingModel, BookingStatus } from '@/models/BookingModel'
 import { validate } from 'class-validator'
-import { EnrollDto } from 'dtos/enroll.dto'
+import { EnrollDto } from '@/dtos/enroll.dto'
 import { plainToClass } from 'class-transformer'
 
 const sdk = adminSDK()

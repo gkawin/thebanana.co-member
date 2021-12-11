@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState, createContext } from 'react'
+import { useContext, useEffect, useMemo, useState, createContext, useCallback } from 'react'
 import { initializeApp, getApp, getApps } from 'firebase/app'
 
 import Axios, { AxiosInstance } from 'axios'
@@ -19,13 +19,8 @@ const firebaseConfig = {
     measurementId: 'G-FFJ2NRF8KK',
 }
 
-export type AppContext = { $liff?: Liff; $axios?: AxiosInstance }
+export type AppContext = { $axios?: AxiosInstance }
 const appContext = createContext<AppContext>(null)
-
-export const useLiff = () => {
-    const { $liff } = useContext(appContext)
-    return useMemo(() => $liff, [$liff])
-}
 
 export const useAxios = () => {
     const { $axios } = useContext(appContext)
@@ -46,10 +41,44 @@ export const useFirebase = () =>
 const RootContext: React.FC = ({ children }) => {
     const [context, setContext] = useState<AppContext>({
         $axios: null,
-        $liff: null,
     })
 
+    const createLiff = useCallback(async () => {
+        const { default: liff } = await import('@line/liff')
+        await liff.init({ liffId })
+        await liff.ready
+        if (!liff.isLoggedIn()) {
+            liff.login()
+        }
+    }, [])
+
+    const createAxios = useCallback(async () => {
+        const token = window.liff.getAccessToken()
+        return Axios.create({
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            timeout: 10000,
+        })
+    }, [])
+
+    const createAuthorization = useCallback(async () => {
+        const axios = await createAxios()
+        const { sub: connectId } = window.liff.getDecodedIDToken()
+        const memberResult = await axios.post<{ isMember: boolean }>('/api/auth/member', {
+            connectId,
+        })
+        if (memberResult) {
+            const authenResult = await axios.post<{ authenticationCode: string }>('/api/auth/token', {
+                connectId,
+            })
+            await signInWithCustomToken(getAuth(), authenResult.data.authenticationCode)
+        }
+    }, [createAxios])
+
     useEffect(() => {
+        let unsubscribe = () => {}
         if (getApps().length === 0) {
             initializeApp(firebaseConfig)
 
@@ -57,46 +86,25 @@ const RootContext: React.FC = ({ children }) => {
             logEvent(analytic, 'notification_received')
             console.log('firebase initilized')
 
-            import('@line/liff')
-                .then(async ({ default: $liff }) => {
-                    await $liff.init({ liffId })
-                    await $liff.ready
-                    if (!$liff.isLoggedIn()) {
-                        $liff.login()
-                    }
+            createLiff().then(createAxios)
 
-                    const $axios = Axios.create({
-                        headers: {
-                            Authorization: `Bearer ${$liff.getAccessToken()}`,
-                            'Content-Type': 'application/json',
-                        },
-                        timeout: 10000,
-                    })
-                    return { $liff, $axios }
-                })
-                .then(async ({ $liff, $axios }) => {
-                    const { sub: connectId } = $liff.getDecodedIDToken()
-                    const memberResult = await $axios.post<{ isMember: boolean }>('/api/auth/member', {
-                        connectId,
-                    })
-
-                    if (memberResult) {
-                        const authenResult = await $axios.post<{ authenticationCode: string }>('/api/auth/token', {
-                            connectId,
-                        })
-                        await signInWithCustomToken(getAuth(), authenResult.data.authenticationCode)
-                    }
-
-                    return { $liff, $axios }
-                })
-                .then(({ $liff, $axios }) => setContext((state) => ({ ...state, $liff, $axios })))
+            unsubscribe = getAuth().onAuthStateChanged(async (user) => {
+                if (!user) {
+                    await createAuthorization()
+                } else {
+                    console.log(user)
+                    const $axios = await createAxios()
+                    setContext({ $axios })
+                }
+            })
         }
-        return getAuth().onIdTokenChanged((user) => {
-            console.log(user)
-        })()
+        return () => {
+            unsubscribe()
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    const shouldReleased = !!context.$liff && !!context.$axios
+    const shouldReleased = !!context.$axios
 
     return (
         <appContext.Provider value={context}>
