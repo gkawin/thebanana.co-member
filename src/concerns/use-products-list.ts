@@ -1,12 +1,11 @@
 import { useFirebase } from '@/core/RootContext'
-import { BookingModel } from '@/models/BookingModel'
 import Model from '@/models/Model'
 import { ProductModel } from '@/models/ProductModel'
 import { collection, getDocs, query, where } from '@firebase/firestore'
 import dayjs from 'dayjs'
 import { useEffect, useMemo, useState } from 'react'
 
-export default function useProductsList(filteredBy: BookingModel[]) {
+export default function useProductsList() {
     const [productsList, setProductsList] = useState<ProductModel[]>([])
     const { db } = useFirebase()
 
@@ -30,8 +29,5 @@ export default function useProductsList(filteredBy: BookingModel[]) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    return useMemo(() => {
-        console.log(filteredBy)
-        return productsList
-    }, [productsList, filteredBy])
+    return useMemo(() => productsList, [productsList])
 }

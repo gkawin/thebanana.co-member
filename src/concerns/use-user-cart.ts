@@ -9,16 +9,19 @@ export default function useUserCart() {
     const { db, auth } = useFirebase()
 
     useEffect(() => {
-        const q = query(
-            collection(db, 'booking'),
-            where('userPath', '==', `users/${auth.currentUser.uid}`)
-        ).withConverter(Model.convert(BookingModel))
+        if (!auth.currentUser.uid) return () => {}
+
+        const q = query(collection(db, 'booking'), where('userId', '==', auth.currentUser.uid)).withConverter(
+            Model.convert(BookingModel)
+        )
+
         const unsubscribe = onSnapshot(q, (ss) => {
             const results = ss.docs.map((doc) => {
                 return doc.data()
             })
             setItems(results)
         })
+
         return () => {
             unsubscribe()
         }

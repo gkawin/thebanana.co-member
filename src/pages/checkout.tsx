@@ -9,7 +9,7 @@ import Model from '@/models/Model'
 import { BookingModel, BookingStatus } from '@/models/BookingModel'
 import { CheckoutModel } from '@/models/CheckoutModel'
 import { ProductModel } from '@/models/ProductModel'
-import { plainToClass } from 'class-transformer'
+import { plainToInstance } from 'class-transformer'
 
 export type CheckoutFormProps = {
     productId: string
@@ -31,7 +31,7 @@ const CheckoutPage: NextPage = () => {
         const waitingForPaymentQuery = query(
             bookingCol,
             where('status', '==', BookingStatus.WAITING_FOR_PAYMENT),
-            where('userPath', '==', `users/${auth.currentUser.uid}`),
+            where('userId', '==', auth.currentUser.uid),
             where('expiredOn', '>=', new Date()),
             orderBy('expiredOn', 'desc')
         ).withConverter(Model.convert(BookingModel))
@@ -39,14 +39,12 @@ const CheckoutPage: NextPage = () => {
         getDocs(waitingForPaymentQuery)
             .then((result) => result.docs.map((v) => v.data()))
             .then(async (bookinglist) => {
-                const createdBookinglist = bookinglist.map(async ({ productPath, ...props }) => {
-                    const product = (
-                        await getDoc(doc(db, productPath).withConverter(Model.convert(ProductModel)))
-                    ).data()
+                const createdBookinglist = bookinglist.map(async ({ productId, ...props }) => {
+                    const product = (await getDoc(doc(db, productId).withConverter(Model.convert(ProductModel)))).data()
                     return { ...props, product }
                 })
                 const results = await Promise.all(createdBookinglist)
-                return plainToClass(CheckoutModel, results)
+                return plainToInstance(CheckoutModel, results)
             })
             .then((result) => {
                 setBookingList(result)

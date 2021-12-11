@@ -1,20 +1,51 @@
-import { ProductContent, ProductDescription } from '@/components/products/ProductDescription'
+import { ProductDescription } from '@/components/products/ProductDescription'
 import { ProductCoverImage } from '@/components/products/ProductCoverImage'
 import adminSDK from '@/libs/adminSDK'
 import Model from '@/models/Model'
 import { ProductModel } from '@/models/ProductModel'
 import { GetServerSideProps, NextPage } from 'next'
-import Image from 'next/image'
+import useUserCart from '@/concerns/use-user-cart'
+import React, { useCallback } from 'react'
+import { useRouter } from 'next/router'
+import { useAxios, useFirebase } from '@/core/RootContext'
 
 export type CourseInfoProps = { slug: string; product: ProductModel }
 
 const CourseInfo: NextPage<CourseInfoProps> = ({ slug, product }) => {
+    const userCart = useUserCart()
+    const router = useRouter()
+    const axios = useAxios()
+    const { auth } = useFirebase()
+
+    const isEnrolled = useCallback(() => {
+        return !!userCart.items.find((item) => item.productId === product.id)
+    }, [product.id, userCart.items])
+
+    const createBooking = useCallback(async () => {
+        await axios.post('/api/enrollment', { productId: product.id, userId: auth.currentUser.uid })
+        router.push('/checkout')
+    }, [auth.currentUser.uid, axios, product.id, router])
+
+    const handleOnClick = () => {
+        if (isEnrolled()) {
+            router.push('/checkout')
+        } else {
+            createBooking()
+        }
+    }
+
     if (!product) return <div>Loading</div>
 
     return (
         <main>
             <ProductCoverImage src={product.coverImage} alt={product.name} layout="responsive" />
-            <ProductDescription className="py-4" description={product.description} name={product.name} />
+            <div className="container grid gap-y-4">
+                <ProductDescription className="py-4" description={product.description} name={product.name} />
+                <div className="text-xl font-semibold">{product.pricing}</div>
+                <button type="button" className="bg-yellow-500 text-white rounded p-2" onClick={handleOnClick}>
+                    ชำระเงิน
+                </button>
+            </div>
         </main>
     )
 }
