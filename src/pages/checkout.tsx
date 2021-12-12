@@ -1,15 +1,12 @@
 import { NextPage } from 'next'
-import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import Link from 'next/link'
 import { AddressForm } from '@/components/checkout/AddressForm'
-import { collection, doc, getDoc, getDocs, orderBy, query, where } from '@firebase/firestore'
-import { useFirebase } from '@/core/RootContext'
-import Model from '@/models/Model'
-import { BookingModel, BookingStatus } from '@/models/BookingModel'
-import { CheckoutModel } from '@/models/CheckoutModel'
+import { BookingStatus } from '@/models/BookingModel'
+import useUserHistories from '@/concerns/use-user-histories'
+import useProductsList from '@/concerns/use-products-list'
+import { useCallback } from 'react'
 import { ProductModel } from '@/models/ProductModel'
-import { plainToInstance } from 'class-transformer'
 
 export type CheckoutFormProps = {
     productId: string
@@ -18,56 +15,72 @@ export type CheckoutFormProps = {
 }
 
 const CheckoutPage: NextPage = () => {
+    const histories = useUserHistories()
+    const products = useProductsList()
     const { handleSubmit } = useForm<CheckoutFormProps>()
-    const [bookingList, setBookingList] = useState<CheckoutModel[]>([])
-    const { db, auth } = useFirebase()
 
     const onCheckout = async () => {
         console.log()
     }
 
-    useEffect(() => {
-        const bookingCol = collection(db, 'booking')
-        const waitingForPaymentQuery = query(
-            bookingCol,
-            where('status', '==', BookingStatus.WAITING_FOR_PAYMENT),
-            where('userId', '==', auth.currentUser.uid),
-            where('expiredOn', '>=', new Date()),
-            orderBy('expiredOn', 'desc')
-        ).withConverter(Model.convert(BookingModel))
+    const getProductInfo = useCallback(
+        (productId: string) => {
+            return products.find((product) => product.id === productId) || ({} as ProductModel)
+        },
+        [products]
+    )
 
-        getDocs(waitingForPaymentQuery)
-            .then((result) => result.docs.map((v) => v.data()))
-            .then(async (bookinglist) => {
-                const createdBookinglist = bookinglist.map(async ({ productId, ...props }) => {
-                    const product = (await getDoc(doc(db, productId).withConverter(Model.convert(ProductModel)))).data()
-                    return { ...props, product }
-                })
-                const results = await Promise.all(createdBookinglist)
-                return plainToInstance(CheckoutModel, results)
-            })
-            .then((result) => {
-                setBookingList(result)
-            })
-    }, [auth.currentUser.uid, db])
+    let totalPrice = 0
+    const calcVAT = (price: number, ratio = 0.07) => Number(price * ratio)
 
     const renderForm = () => (
-        <form onSubmit={handleSubmit(onCheckout)}>
-            <div className="py-4 divide-y gap-y-4 grid">
-                {bookingList.map((booking) => (
-                    <div key={Math.random().toString()} className="grid grid-flow-row">
-                        <div>คอร์สเรียน</div>
-                        <div className="text-gray-500 font-light">{booking.product.name}</div>
-                        <div>ราคา</div>
-                        <div>{booking.product.pricing}</div>
-                        <div className="flex flex-co`1">
-                            <label htmlFor="enrollName">ชื่อนักเรียน</label>
-                            <input id="enrollName" className="form-input rounded" type="text"></input>
-                        </div>
-                    </div>
-                ))}
+        <form onSubmit={handleSubmit(onCheckout)} className="grid gap-y-4">
+            <div className="p-4 border shadow-md rounded">
+                <div className="mb-2">
+                    {histories.categories[BookingStatus.WAITING_FOR_PAYMENT].map((booking) => {
+                        const product = getProductInfo(booking.product)
+                        totalPrice += product.price
+                        return (
+                            <div key={Math.random().toString()} className="grid grid-rows-2 grid-cols-2 gap-4 ">
+                                <div className=" text-lg col-span-2">{product.name}</div>
+                                <div className="self-end">ราคา/คน</div>
+                                <div className="self-end justify-self-end font-semibold text-black">
+                                    {product.pricing}
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+                <div className="border w-full"></div>
+                <div className="flex flex-row justify-between pt-2 text-sm text-gray-500">
+                    <span>ราคาไม่รวมภาษีมูลค่าเพิ่ม 7%</span>
+                    <span>
+                        {`${Number(totalPrice - calcVAT(totalPrice)).toLocaleString('th', {
+                            minimumFractionDigits: 2,
+                            minimumIntegerDigits: 2,
+                        })} ยาท`}
+                    </span>
+                </div>
+                <div className="flex flex-row justify-between pt-2 text-sm text-gray-500">
+                    <span>ภาษีมูลค่าเพิ่ม 7%</span>
+                    <span>
+                        {`${calcVAT(totalPrice).toLocaleString('th', {
+                            minimumFractionDigits: 2,
+                            minimumIntegerDigits: 2,
+                        })} บาท`}
+                    </span>
+                </div>
+                <div className="p-2 mt-4 bg-yellow-400 rounded text-2xl font-semibold flex flex-row justify-between">
+                    <span>ยอดชำระ</span>
+                    <span>{`${totalPrice.toLocaleString('th', {
+                        minimumFractionDigits: 2,
+                        minimumIntegerDigits: 2,
+                    })} บาท`}</span>
+                </div>
             </div>
-            <AddressForm />
+            <div>
+                <AddressForm />
+            </div>
             <button type="submit" className="bg-indigo-500 rounded p-2 my-2 block w-full text-white">
                 ชำระเงิน
             </button>
@@ -77,8 +90,8 @@ const CheckoutPage: NextPage = () => {
     return (
         <div className="p-4">
             <h2 className="text-sub-title font-semibold">สรุปรายการลงทะเบียน</h2>
-            {bookingList.length > 0 && renderForm()}
-            {bookingList.length === 0 && (
+            {histories.categories[BookingStatus.WAITING_FOR_PAYMENT].length > 0 && renderForm()}
+            {histories.categories[BookingStatus.WAITING_FOR_PAYMENT].length === 0 && (
                 <div className="block">
                     ไม่มีวิชาที่คุณเลือกลงทะเบียนอยู่
                     <Link href="/">
