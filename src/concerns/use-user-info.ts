@@ -2,7 +2,7 @@ import { useFirebase } from '@/core/RootContext'
 import Model from '@/models/Model'
 import { UserModel } from '@/models/UserModel'
 import { UserSchoolModel } from '@/models/UserSchoolModel'
-import { collection, doc, getDoc, getDocs, onSnapshot, orderBy, query } from '@firebase/firestore'
+import { collection, doc, getDoc, getDocs, orderBy, query } from '@firebase/firestore'
 import { useCallback } from 'react'
 
 export default function useUserInfo() {

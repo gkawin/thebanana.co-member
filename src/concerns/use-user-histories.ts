@@ -4,6 +4,11 @@ import Model from '@/models/Model'
 import { collection, doc, onSnapshot, query, where } from '@firebase/firestore'
 import { useEffect, useMemo, useState } from 'react'
 
+export type UseUserHistories = {
+    items: BookingModel[]
+    category: Record<keyof typeof BookingStatus, BookingModel[]>
+}
+
 export default function useUserHistories() {
     const [items, setItems] = useState<BookingModel[]>([])
     const { db, auth } = useFirebase()
@@ -29,10 +34,10 @@ export default function useUserHistories() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    const itemList = useMemo(() => {
+    const itemList = useMemo<UseUserHistories>(() => {
         return {
             items,
-            categories: {
+            category: {
                 [BookingStatus.WAITING_FOR_PAYMENT]: items.filter(
                     (item) => item.status === BookingStatus.WAITING_FOR_PAYMENT
                 ),
