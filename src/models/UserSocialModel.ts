@@ -1,17 +1,15 @@
-// import { JsonProperty, Serializable } from 'typescript-json-serializer'
+import { Timestamp } from '@firebase/firestore'
+import { Transform } from 'class-transformer'
 
-// import { withServerTimestampToISO } from '@/utils/firestore'
+export class UserSocialModel {
+    facebook?: string
 
-// import Model from './Model'
+    twitter?: string
 
-// @Serializable()
-// export class UserSocialModel extends Model {
-//     @JsonProperty() facebook?: string
+    @Transform(({ value }) => {
+        return value instanceof Timestamp ? value.toDate().toISOString() : value
+    })
+    createdOn?: string
 
-//     @JsonProperty() twitter?: string
-
-//     @JsonProperty({ beforeDeserialize: withServerTimestampToISO })
-//     createdOn?: string | FirebaseFirestore.FieldValue
-
-//     @JsonProperty() line?: any
-// }
+    line?: string
+}

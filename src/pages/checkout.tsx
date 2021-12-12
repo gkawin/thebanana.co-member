@@ -5,22 +5,30 @@ import { AddressForm } from '@/components/checkout/AddressForm'
 import { BookingStatus } from '@/models/BookingModel'
 import useUserHistories from '@/concerns/use-user-histories'
 import useProductsList from '@/concerns/use-products-list'
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { ProductModel } from '@/models/ProductModel'
+import { useFirebase } from '@/core/RootContext'
+import useUserInfo from '@/concerns/use-user-info'
 
 export type CheckoutFormProps = {
-    productId: string
-    address: string
-    userId: string
+    studentName: string
+    school: string
+    nickname: string
 }
 
 const CheckoutPage: NextPage = () => {
+    const { auth } = useFirebase()
+    const { getSchoolList } = useUserInfo()
     const histories = useUserHistories()
     const products = useProductsList()
-    const { handleSubmit } = useForm<CheckoutFormProps>()
+    const {
+        handleSubmit,
+        register,
+        formState: { errors },
+    } = useForm<CheckoutFormProps>()
 
-    const onCheckout = async () => {
-        console.log()
+    const onCheckout = async (data) => {
+        console.log(data)
     }
 
     const getProductInfo = useCallback(
@@ -32,7 +40,6 @@ const CheckoutPage: NextPage = () => {
 
     let totalPrice = 0
     const calcVAT = (price: number, ratio = 0.07) => Number(price * ratio)
-
     const renderForm = () => (
         <form onSubmit={handleSubmit(onCheckout)} className="grid gap-y-4">
             <div className="p-4 border shadow-md rounded">
@@ -58,7 +65,7 @@ const CheckoutPage: NextPage = () => {
                         {`${Number(totalPrice - calcVAT(totalPrice)).toLocaleString('th', {
                             minimumFractionDigits: 2,
                             minimumIntegerDigits: 2,
-                        })} ยาท`}
+                        })} บาท`}
                     </span>
                 </div>
                 <div className="flex flex-row justify-between pt-2 text-sm text-gray-500">
@@ -76,6 +83,38 @@ const CheckoutPage: NextPage = () => {
                         minimumFractionDigits: 2,
                         minimumIntegerDigits: 2,
                     })} บาท`}</span>
+                </div>
+            </div>
+
+            <div>
+                <h2 className="text-2xl font-semibold">รายละเอียดผู้เรียน</h2>
+                <div className="p-4 rounded shadow-md border flex flex-col">
+                    <label htmlFor="studentName">ชื่อผู้เรียน</label>
+                    <input
+                        type="text"
+                        className="form-input rounded"
+                        id="studentName"
+                        {...register('studentName', { required: 'กรุณาระบุ' })}
+                    />
+                    <small className="text-red-500 mb-2">{errors.studentName?.message}</small>
+
+                    <label htmlFor="nickname">ชื่อเล่น</label>
+                    <input
+                        type="text"
+                        className="form-input rounded"
+                        id="nickname"
+                        {...register('nickname', { required: 'กรุณาระบุ' })}
+                    />
+                    <small className="text-red-500 mb-2">{errors.nickname?.message}</small>
+
+                    <label htmlFor="school">โรงเรียน</label>
+                    <input
+                        type="text"
+                        className="form-input rounded"
+                        id="school"
+                        {...register('school', { required: 'กรุณาระบุ' })}
+                    />
+                    <small className="text-red-500 mb-2">{errors.school?.message}</small>
                 </div>
             </div>
             <div>

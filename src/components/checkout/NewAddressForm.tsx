@@ -14,6 +14,9 @@ export type NewAddressFormFields = {
     postcode: string
     phoneNumber: string
 }
+export type SavedNewAddressField = NewAddressFormFields & {
+    id: string
+}
 
 const debounce = (callback: Function, wait = 500) => {
     let timeoutId: any = null
@@ -25,9 +28,12 @@ const debounce = (callback: Function, wait = 500) => {
     }
 }
 
-export type NewAddressFormProps = { enabled: boolean }
+export type NewAddressFormProps = {
+    enabled: boolean
+    setNewAddr: (addr: SavedNewAddressField) => void
+}
 
-export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ enabled = true }) => {
+export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ setNewAddr, enabled = true }) => {
     const {
         register,
         handleSubmit,
@@ -49,11 +55,14 @@ export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ enabled = true 
         const uid = auth.currentUser.uid
         try {
             setIsLoading(true)
-            await addDoc(collection(db, 'users', uid, 'address'), {
+            const newAddr = {
                 address: `${data.commonAddr}, ต.${data.subdistrict} อ.${data.district} จ.${data.province}, ${data.postcode} โทร: ${data.phoneNumber}`,
                 ...data,
                 createdOn: new Date(),
-            })
+            }
+            const result = await addDoc(collection(db, 'users', uid, 'address'), newAddr)
+
+            setNewAddr({ ...newAddr, id: result.id })
             setIsOpen(false)
         } catch (error) {
             alert('เพิ่มข้อมูลไม่สำเร็จ')

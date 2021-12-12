@@ -1,8 +1,7 @@
-import { useFirebase } from '@/core/RootContext'
-import { collection, limit, onSnapshot, orderBy, query } from '@firebase/firestore'
+import useUserInfo from '@/concerns/use-user-info'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { NewAddressForm } from './NewAddressForm'
+import { NewAddressForm, SavedNewAddressField } from './NewAddressForm'
 
 export const AddressForm: React.VFC = () => {
     const {
@@ -10,20 +9,22 @@ export const AddressForm: React.VFC = () => {
         formState: { errors },
     } = useForm()
     const [addresses, setAddresses] = useState<{ id: string; address: string }[]>([])
-    const { auth, db } = useFirebase()
+    const { getAddrList } = useUserInfo()
+
+    const handleSetNewAddr = (addr: SavedNewAddressField) => {
+        setAddresses((state) => [].concat(addr).concat(state))
+    }
 
     useEffect(() => {
-        const addrCol = collection(db, 'users', auth.currentUser.uid, 'address')
-        const q = query(addrCol, orderBy('createdOn', 'desc'), limit(2))
-        const unsubscribe = onSnapshot(q, (docs) => {
-            setAddresses(docs.docs.map((item) => ({ id: item.id, address: item.data().address })))
+        getAddrList().then((doc) => {
+            setAddresses(doc.docs.map((item) => ({ id: item.id, address: item.data().address })))
         })
-        return () => unsubscribe()
-    }, [auth.currentUser.uid, db])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     return (
         <>
-            <div className="text-sub-title font-semibold">ที่อยู่ในการจัดส่งเอกสาร</div>
+            <h2 className="text-sub-title font-semibold">ที่อยู่ในการจัดส่งเอกสาร</h2>
             {addresses.map(({ id, address }) => (
                 <div
                     className={`rounded ${errors.address ? 'bg-red-100' : 'bg-indigo-50 '} p-4 flex flex-row`}
@@ -41,7 +42,7 @@ export const AddressForm: React.VFC = () => {
                 </div>
             ))}
             <small className="text-red-500">{errors.address?.message}</small>
-            <NewAddressForm enabled />
+            <NewAddressForm enabled setNewAddr={handleSetNewAddr} />
         </>
     )
 }

@@ -1,38 +1,35 @@
-// import { JsonProperty, Serializable } from 'typescript-json-serializer'
+import { Type } from 'class-transformer'
+import { UserParentModel } from './UserParentModel'
+import { UserSchoolModel } from './UserSchoolModel'
+import { UserSocialModel } from './UserSocialModel'
 
-// import { withServerTimestampToISO } from '@/utils/firestore'
+export class UserModel {
+    email: string
 
-// import Model from './Model'
-// import type { UserParentModel } from './UserParentModel'
-// import type { UserSchoolModel } from './UserSchoolModel'
-// import type { UserSocialModel } from './UserSocialModel'
+    createdOn: Date
 
-// @Serializable()
-// export class UserModel extends Model {
-//     @JsonProperty() email: string
+    id: string
 
-//     @JsonProperty({ beforeDeserialize: withServerTimestampToISO })
-//     createdOn: string | FirebaseFirestore.FieldValue
+    nickname: string
 
-//     @JsonProperty() id: string
+    verified: boolean
 
-//     @JsonProperty() nickname: string
+    phoneNumber: string
 
-//     @JsonProperty() verified: boolean
+    fullname: string
 
-//     @JsonProperty() phoneNumber: string
+    address?: string
 
-//     @JsonProperty() fullname: string
+    sms?: string
 
-//     @JsonProperty() address?: string
+    @Type(() => UserParentModel)
+    socials?: UserSocialModel[]
 
-//     @JsonProperty() sms?: string
+    @Type(() => UserParentModel)
+    parents?: UserParentModel[]
 
-//     @JsonProperty() socials?: UserSocialModel[]
+    @Type(() => UserSchoolModel)
+    school?: UserSchoolModel
 
-//     @JsonProperty() parents?: UserParentModel[]
-
-//     @JsonProperty() school?: UserSchoolModel
-
-//     @JsonProperty() pictureURL: string
-// }
+    pictureURL: string
+}
