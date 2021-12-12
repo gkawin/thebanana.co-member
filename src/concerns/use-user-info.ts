@@ -1,5 +1,6 @@
 import { useFirebase } from '@/core/RootContext'
 import Model from '@/models/Model'
+import { UserAddressModel } from '@/models/UserAddressModel'
 import { UserModel } from '@/models/UserModel'
 import { UserSchoolModel } from '@/models/UserSchoolModel'
 import { collection, doc, getDoc, getDocs, orderBy, query } from '@firebase/firestore'
@@ -10,7 +11,9 @@ export default function useUserInfo() {
     const schoolCol = collection(db, 'users', auth.currentUser.uid, 'school').withConverter(
         Model.convert(UserSchoolModel)
     )
-    const addrCol = collection(db, 'users', auth.currentUser.uid, 'address')
+    const addrCol = collection(db, 'users', auth.currentUser.uid, 'address').withConverter(
+        Model.convert(UserAddressModel)
+    )
     const userDoc = doc(db, 'users', auth.currentUser.uid).withConverter(Model.convert(UserModel))
 
     return {
