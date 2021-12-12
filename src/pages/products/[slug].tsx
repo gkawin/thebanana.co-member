@@ -4,7 +4,7 @@ import adminSDK from '@/libs/adminSDK'
 import Model from '@/models/Model'
 import { ProductModel } from '@/models/ProductModel'
 import { GetServerSideProps, NextPage } from 'next'
-import useUserCart from '@/concerns/use-user-cart'
+import useUserCart from '@/concerns/use-user-histories'
 import React, { useCallback } from 'react'
 import { useRouter } from 'next/router'
 import { useAxios, useFirebase } from '@/core/RootContext'
@@ -18,11 +18,11 @@ const CourseInfo: NextPage<CourseInfoProps> = ({ slug, product }) => {
     const { auth } = useFirebase()
 
     const isEnrolled = useCallback(() => {
-        return !!userCart.items.find((item) => item.productId === product.id)
+        return !!userCart.items.find((item) => item.product === product.id)
     }, [product.id, userCart.items])
 
     const createBooking = useCallback(async () => {
-        await axios.post('/api/enrollment', { productId: product.id, userId: auth.currentUser.uid })
+        await axios.post('/api/enrollment', { product: product.id, user: auth.currentUser.uid })
         router.push('/checkout')
     }, [auth.currentUser.uid, axios, product.id, router])
 
@@ -38,7 +38,16 @@ const CourseInfo: NextPage<CourseInfoProps> = ({ slug, product }) => {
 
     return (
         <main>
-            <ProductCoverImage src={product.coverImage} alt={product.name} layout="responsive" />
+            <figure className="md:w-full md:pb-4 bg-yellow-100">
+                <div className="max-w-xl mx-auto">
+                    <ProductCoverImage
+                        className="rounded-b-xl"
+                        src={product.coverImage}
+                        alt={product.name}
+                        layout="responsive"
+                    />
+                </div>
+            </figure>
             <div className="container grid gap-y-4">
                 <ProductDescription className="py-4" description={product.description} name={product.name} />
                 <div className="text-xl font-semibold">{product.pricing}</div>

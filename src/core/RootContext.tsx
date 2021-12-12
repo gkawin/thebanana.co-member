@@ -2,7 +2,6 @@ import { useContext, useEffect, useMemo, useState, createContext, useCallback } 
 import { initializeApp, getApp, getApps } from 'firebase/app'
 
 import Axios, { AxiosInstance } from 'axios'
-import type { Liff } from '@liff/liff-types'
 import { getFirestore } from 'firebase/firestore'
 import { getAuth, signInWithCustomToken } from 'firebase/auth'
 import { logEvent, getAnalytics } from 'firebase/analytics'
@@ -104,14 +103,9 @@ const RootContext: React.FC = ({ children }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    const shouldReleased = !!context.$axios
+    if (!context.$axios) return <div>Loading</div>
 
-    return (
-        <appContext.Provider value={context}>
-            {!shouldReleased && <div>Loading</div>}
-            {shouldReleased && children}
-        </appContext.Provider>
-    )
+    return <appContext.Provider value={context}>{children}</appContext.Provider>
 }
 
 export default RootContext

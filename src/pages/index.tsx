@@ -1,10 +1,10 @@
 import { BrowseProductsNav } from '@/components/products/BrowseProductsNav'
-// import useUserCart from '@/concerns/use-user-cart'
+import useUserHistories from '@/concerns/use-user-histories'
 import useProductsList from '@/concerns/use-products-list'
 import { ProductCard } from '@/components/products/ProductCard'
 
 export default function Home() {
-    // const userCart = useUserCart()
+    const userCart = useUserHistories()
     const products = useProductsList()
 
     return (

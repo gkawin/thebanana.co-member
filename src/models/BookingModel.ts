@@ -7,9 +7,9 @@ export enum BookingStatus {
 }
 
 export class BookingModel {
-    userId: string
+    user: string
 
-    productId: string
+    product: string
 
     @Transform(({ value }) => {
         return value instanceof Timestamp ? value.toDate().toISOString() : value
