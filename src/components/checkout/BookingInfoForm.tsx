@@ -15,7 +15,7 @@ export type BookingInfoFormProps = {
 }
 
 export const BookingInfoForm: React.VFC<BookingInfoFormProps> = ({ onSubmit }) => {
-    const { getSchoolList, getAddrList } = useUserInfo()
+    const { getAddrList } = useUserInfo()
     const [addresses, setAddresses] = useState<{ id: string; address: string }[]>([])
 
     const {
@@ -68,9 +68,9 @@ export const BookingInfoForm: React.VFC<BookingInfoFormProps> = ({ onSubmit }) =
             </div>
 
             <h2 className="text-sub-title font-semibold">ที่อยู่ในการจัดส่งเอกสาร</h2>
-            <div className="p-4 rounded shadow-md border">
+            <ul className="p-4 rounded shadow-md border">
                 {addresses.map(({ id, address }) => (
-                    <div key={id} className="py-2">
+                    <li key={id} className="py-2">
                         <input
                             className="self-center"
                             id={id}
@@ -81,12 +81,12 @@ export const BookingInfoForm: React.VFC<BookingInfoFormProps> = ({ onSubmit }) =
                         <label htmlFor={id} className="ml-4">
                             {address}
                         </label>
-                    </div>
+                    </li>
                 ))}
 
                 <small className="text-red-500">{errors.shippingAddress?.message}</small>
                 <NewAddressForm enabled setNewAddr={handleSetNewAddr} />
-            </div>
+            </ul>
             <button type="submit" className="bg-indigo-500 rounded p-2 my-2 block w-full text-white">
                 ไปยังหน้าชำระเงิน
             </button>

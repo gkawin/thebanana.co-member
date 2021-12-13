@@ -3,10 +3,10 @@ import { ok } from 'assert'
 
 import runsWith, { RunsMiddleware } from './runsWith'
 
-const checkParams = (requestedParams: string[], acceptedParams: string[]) => {
-    const authorizedParams = requestedParams.some((k) => acceptedParams.includes(k))
-    ok(authorizedParams, badRequest('some parameters are not acceptable.'))
-}
+// const checkParams = (requestedParams: string[], acceptedParams: string[]) => {
+//     const authorizedParams = requestedParams.some((k) => acceptedParams.includes(k))
+//     ok(authorizedParams, badRequest('some parameters are not acceptable.'))
+// }
 
 export type IAcceptedParamsOptions = { name: string; required?: boolean }[]
 

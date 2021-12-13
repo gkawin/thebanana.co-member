@@ -2,8 +2,8 @@ import { IsString } from 'class-validator'
 
 export class EnrollDto {
     @IsString()
-    productId: string
+    product: string
 
     @IsString()
-    userId: string
+    user: string
 }

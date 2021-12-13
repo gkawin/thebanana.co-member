@@ -7,5 +7,5 @@ export type ProductCoverImageProps = {
 } & ImageProps
 
 export const ProductCoverImage: React.VFC<ProductCoverImageProps> = ({ alt, layout, src, ...allProps }) => {
-    return <Image layout={layout} src={src} alt={alt} {...allProps} width="320" height="120" />
+    return <Image priority layout={layout} src={src} alt={alt} {...allProps} width="320" height="120" />
 }
