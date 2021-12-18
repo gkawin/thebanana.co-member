@@ -14,7 +14,7 @@ import { plainToClass } from 'class-transformer'
 const sdk = adminSDK()
 const db = sdk.firestore()
 
-const enrollmentHandler: NextApiHandler = async (req, res) => {
+const productCheckoutHandler: NextApiHandler = async (req, res) => {
     await runsWithMethods(req, res, { methods: ['POST'] })
 
     try {
@@ -26,8 +26,8 @@ const enrollmentHandler: NextApiHandler = async (req, res) => {
         const bookingCol = db.collection('booking').withConverter(Model.transform(BookingModel))
 
         const createdResult = await bookingCol
-            .where('userPath', '==', body.userId)
-            .where('productPath', '==', body.productId)
+            .where('user', '==', body.user)
+            .where('product', '==', body.product)
             .where('status', '==', BookingStatus.WAITING_FOR_PAYMENT)
             .get()
             .then(({ empty }) => {
@@ -36,10 +36,15 @@ const enrollmentHandler: NextApiHandler = async (req, res) => {
             .then(() =>
                 bookingCol.add({
                     createdOn: new Date(),
-                    productPath: `products/${body.productId}`,
+                    product: body.product,
                     status: BookingStatus.WAITING_FOR_PAYMENT,
                     expiredOn: dayjs().add(10, 'day').toDate(),
-                    userPath: `users/${body.userId}`,
+                    user: body.user,
+                    metadata: {
+                        nickname: '',
+                        schoolName: '',
+                        studentName: '',
+                    },
                 })
             )
 
@@ -53,4 +58,4 @@ const enrollmentHandler: NextApiHandler = async (req, res) => {
     }
 }
 
-export default enrollmentHandler
+export default productCheckoutHandler

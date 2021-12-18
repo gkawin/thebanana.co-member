@@ -1,7 +1,7 @@
 import { useFirebase } from '@/core/RootContext'
 import { BookingModel, BookingStatus } from '@/models/BookingModel'
 import Model from '@/models/Model'
-import { collection, doc, onSnapshot, query, where } from '@firebase/firestore'
+import { collection, onSnapshot, query, where } from '@firebase/firestore'
 import { useEffect, useMemo, useState } from 'react'
 
 export type UseUserHistories = {
@@ -16,10 +16,9 @@ export default function useUserHistories() {
     useEffect(() => {
         if (!auth.currentUser.uid) return () => {}
 
-        const q = query(
-            collection(db, 'booking'),
-            where('user', '==', doc(db, 'users', auth.currentUser.uid))
-        ).withConverter(Model.convert(BookingModel))
+        const q = query(collection(db, 'booking'), where('user', '==', auth.currentUser.uid)).withConverter(
+            Model.convert(BookingModel)
+        )
 
         const unsubscribe = onSnapshot(q, (ss) => {
             const results = ss.docs.map((doc) => {
@@ -34,7 +33,7 @@ export default function useUserHistories() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    const itemList = useMemo<UseUserHistories>(() => {
+    const itemList = useMemo(() => {
         return {
             items,
             category: {

@@ -22,7 +22,7 @@ const CourseInfo: NextPage<CourseInfoProps> = ({ slug, product }) => {
     }, [product.id, userCart.items])
 
     const createBooking = useCallback(async () => {
-        await axios.post('/api/enrollment', { product: product.id, user: auth.currentUser.uid })
+        await axios.post('/api/products/checkout', { product: product.id, user: auth.currentUser.uid })
         router.push('/checkout')
     }, [auth.currentUser.uid, axios, product.id, router])
 

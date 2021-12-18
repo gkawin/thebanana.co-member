@@ -39,8 +39,6 @@ export default class Model {
             return acc
         }, {})
 
-        console.log(result)
-
         return result
     }
 

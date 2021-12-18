@@ -16,6 +16,7 @@ export const RegistrationSummary: React.VFC<RegistrationSummaryProps> = () => {
 
     const getProductInfo = useCallback(
         (productId: string) => {
+            console.log(products)
             return products.find((product) => product.id === productId) || ({} as ProductModel)
         },
         [products]

@@ -25,7 +25,6 @@ const handleToken: NextApiHandler = async (req, res) => {
         if (error instanceof Boom) {
             res.status(error.output.statusCode).json(error.output.payload)
         } else {
-            console.log(error)
             res.status(500).json({})
         }
     }

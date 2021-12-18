@@ -73,7 +73,6 @@ const getBathText = (position: any, number: any, lengthOfDigits: any) => {
 const convert = (numberInput: any) => {
     const numberReverse = reverseNumber(numberInput)
     let textOutput = ''
-    // console.log('>', numberReverse.split(''))
     numberReverse.split('').forEach((number: any, i: any) => {
         textOutput = `${getBathText(i, number, numberReverse.length)}${getBathUnit(i, number)}${textOutput}`
     })
