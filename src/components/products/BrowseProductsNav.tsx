@@ -13,7 +13,7 @@ const categoriesNavbar = [
 export type BrowseProductsNavProps = { className?: string }
 
 export const BrowseProductsNav: React.VFC<BrowseProductsNavProps> = ({ className = '' }) => {
-    const [categoryList, setCategoryList] = useState<typeof categoriesNavbar>(categoriesNavbar)
+    const [categoryList] = useState<typeof categoriesNavbar>(categoriesNavbar)
     return (
         <ul className={className}>
             {categoryList.map(({ value, text, selected = false }) => (

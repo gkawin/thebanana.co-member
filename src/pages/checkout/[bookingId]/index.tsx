@@ -31,8 +31,12 @@ const CheckoutBookingIdPage: NextPage<InferGetServerSidePropsType<typeof getServ
         <div className="p-4">
             <h2 className="text-sub-title font-semibold">สรุปรายการลงทะเบียน</h2>
 
-            <RegistrationSummary booking={booking} product={product} />
-            <BookingInfoForm onSubmit={onCheckout} />
+            {!notFound && (
+                <>
+                    <RegistrationSummary booking={booking} product={product} />
+                    <BookingInfoForm onSubmit={onCheckout} />
+                </>
+            )}
 
             {notFound && renderNotFound()}
         </div>

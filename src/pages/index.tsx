@@ -1,5 +1,4 @@
 import { BrowseProductsNav } from '@/components/products/BrowseProductsNav'
-import useUserHistories from '@/concerns/use-user-histories'
 import useProductsList from '@/concerns/use-products-list'
 import { ProductCard } from '@/components/products/ProductCard'
 
