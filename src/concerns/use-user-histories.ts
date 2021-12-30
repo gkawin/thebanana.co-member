@@ -1,7 +1,7 @@
 import { useFirebase } from '@/core/RootContext'
 import { BookingModel, BookingStatus } from '@/models/BookingModel'
 import Model from '@/models/Model'
-import { collection, onSnapshot, query, where } from '@firebase/firestore'
+import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { useEffect, useMemo, useState } from 'react'
 
 export type UseUserHistories = {

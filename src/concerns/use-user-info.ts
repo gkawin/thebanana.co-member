@@ -3,7 +3,7 @@ import Model from '@/models/Model'
 import { UserAddressModel } from '@/models/UserAddressModel'
 import { UserModel } from '@/models/UserModel'
 import { UserSchoolModel } from '@/models/UserSchoolModel'
-import { collection, doc, getDoc, getDocs, orderBy, query } from '@firebase/firestore'
+import { collection, doc, getDoc, getDocs, orderBy, query } from 'firebase/firestore'
 import { useCallback } from 'react'
 
 export default function useUserInfo() {

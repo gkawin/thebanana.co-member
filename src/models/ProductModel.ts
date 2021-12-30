@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { Timestamp } from '@firebase/firestore'
+import { Timestamp } from 'firebase/firestore'
 import { Expose, Transform } from 'class-transformer'
 
 export class CourseModel {

@@ -1,4 +1,4 @@
-import { Timestamp } from '@firebase/firestore'
+import { Timestamp } from 'firebase/firestore'
 import { Transform } from 'class-transformer'
 
 export class UserSocialModel {

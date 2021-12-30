@@ -1,13 +1,12 @@
 import { ProductDescription } from '@/components/products/ProductDescription'
 import { ProductCoverImage } from '@/components/products/ProductCoverImage'
-import adminSDK from '@/libs/adminSDK'
-import Model from '@/models/Model'
 import { ProductModel } from '@/models/ProductModel'
-import { GetServerSideProps, NextPage } from 'next'
+import { NextPage } from 'next'
 import useUserCart from '@/concerns/use-user-histories'
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { useAxios, useFirebase } from '@/core/RootContext'
+import { collection, query, where } from 'firebase/firestore'
 
 export type CourseInfoProps = { slug: string; product: ProductModel }
 
@@ -15,7 +14,7 @@ const CourseInfo: NextPage<CourseInfoProps> = ({ slug, product }) => {
     const userCart = useUserCart()
     const router = useRouter()
     const axios = useAxios()
-    const { auth } = useFirebase()
+    const { auth, db } = useFirebase()
 
     const isEnrolled = useCallback(() => {
         return !!userCart.items.find((item) => item.product === product.id)
@@ -33,6 +32,12 @@ const CourseInfo: NextPage<CourseInfoProps> = ({ slug, product }) => {
             createBooking()
         }
     }
+
+    useEffect(() => {
+        if (!product) {
+            query(collection(db, 'products'), where('slug', '==', slug))
+        }
+    }, [])
 
     if (!product) return <div>Loading</div>
 
@@ -57,36 +62,6 @@ const CourseInfo: NextPage<CourseInfoProps> = ({ slug, product }) => {
             </div>
         </main>
     )
-}
-
-export const getServerSideProps: GetServerSideProps = async ({ query }) => {
-    const slug = query?.slug ?? 'not-found'
-    const sdk = adminSDK()
-    const productRef = await sdk
-        .firestore()
-        .collection('products')
-        .withConverter(Model.transform(ProductModel))
-        .where('slug', '==', slug)
-        .limit(1)
-        .get()
-
-    const product = productRef.docs[0]?.data() ?? null
-
-    if (!product) return { notFound: true }
-
-    return {
-        props: {
-            slug,
-            product: {
-                code: product.code,
-                coverImage: product.coverImage,
-                name: product.name,
-                description: product.description,
-                id: product.id,
-                pricing: product.pricing,
-            } as ProductModel,
-        },
-    }
 }
 
 export default CourseInfo

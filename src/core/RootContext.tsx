@@ -14,8 +14,8 @@ const firebaseConfig = {
     projectId: 'thebanana-d9286',
     storageBucket: 'thebanana-d9286.appspot.com',
     messagingSenderId: '652607083295',
-    appId: '1:652607083295:web:33c191031fff9434a9d62a',
-    measurementId: 'G-FFJ2NRF8KK',
+    appId: '1:652607083295:web:0fc0e776e8bd7d0da9d62a',
+    measurementId: 'G-1KLYQ0X2ET',
 }
 
 export type AppContext = { $axios?: AxiosInstance }
@@ -43,11 +43,10 @@ const RootContext: React.FC = ({ children }) => {
     })
 
     const createLiff = useCallback(async () => {
-        const { default: liff } = await import('@line/liff')
-        await liff.init({ liffId })
-        await liff.ready
-        if (!liff.isLoggedIn()) {
-            liff.login()
+        await window.liff.init({ liffId })
+        await window.liff.ready
+        if (!window.liff.isLoggedIn()) {
+            window.liff.login()
         }
     }, [])
 

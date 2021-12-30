@@ -1,7 +1,7 @@
 import { useFirebase } from '@/core/RootContext'
 import Model from '@/models/Model'
 import { ProductModel } from '@/models/ProductModel'
-import { collection, getDocs, query, where } from '@firebase/firestore'
+import { collection, getDocs, query, where } from 'firebase/firestore'
 import dayjs from 'dayjs'
 import { useEffect, useMemo, useState } from 'react'
 

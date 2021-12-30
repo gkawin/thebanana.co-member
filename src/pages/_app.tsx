@@ -17,6 +17,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                 <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
                 <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
                 <title>หน้าสมาชิก</title>
+                <script charSet="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
             </Head>
             <RootContext>
                 <UserCard />

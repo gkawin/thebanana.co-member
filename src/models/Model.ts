@@ -5,7 +5,7 @@ import {
     PartialWithFieldValue,
     Timestamp,
     WithFieldValue,
-} from '@firebase/firestore'
+} from 'firebase/firestore'
 import { instanceToPlain, plainToClass, plainToInstance } from 'class-transformer'
 
 interface ClassType<T> {

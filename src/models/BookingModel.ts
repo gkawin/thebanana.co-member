@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { Timestamp } from '@firebase/firestore'
+import { Timestamp } from 'firebase/firestore'
 import { Transform, Type } from 'class-transformer'
 
 export enum BookingStatus {

@@ -1,5 +1,5 @@
 import { useAxios, useFirebase } from '@/core/RootContext'
-import { addDoc, collection } from '@firebase/firestore'
+import { addDoc, collection } from 'firebase/firestore'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import Modal from 'react-modal'
