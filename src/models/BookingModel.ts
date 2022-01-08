@@ -1,6 +1,9 @@
 import 'reflect-metadata'
-import { Timestamp } from 'firebase/firestore'
-import { Transform, Type } from 'class-transformer'
+import { DocumentReference, getDoc } from 'firebase/firestore'
+import { Exclude, Type } from 'class-transformer'
+
+import { UserModel } from './UserModel'
+import { ProductModel } from './ProductModel'
 
 export enum BookingStatus {
     WAITING_FOR_PAYMENT = 'WAITING_FOR_PAYMENT',
@@ -15,16 +18,22 @@ export class BookingMetadataModel {
 }
 
 export class BookingModel {
-    user: string
+    getUser = async (): Promise<UserModel> => {
+        return (await getDoc(this.user)).data()
+    }
 
-    product: string
+    getProduct = async (): Promise<ProductModel> => {
+        return (await getDoc(this.product)).data()
+    }
 
-    @Transform(({ value }) => {
-        return value instanceof Timestamp ? value.toDate().toISOString() : value
-    })
+    @Exclude({ toPlainOnly: true })
+    product: DocumentReference<ProductModel>
+
+    @Exclude({ toPlainOnly: true })
+    user: DocumentReference<UserModel>
+
     createdOn: Date
 
-    @Transform(({ value }) => (value instanceof Timestamp ? value.toDate().toISOString() : value))
     expiredOn: Date
 
     status: BookingStatus

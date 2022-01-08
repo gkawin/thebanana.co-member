@@ -5,6 +5,7 @@ import Axios, { AxiosInstance } from 'axios'
 import { getFirestore } from 'firebase/firestore'
 import { getAuth, signInWithCustomToken } from 'firebase/auth'
 import { logEvent, getAnalytics } from 'firebase/analytics'
+import { SpinLoading } from '@/components/portal/SpinLoading'
 
 const liffId = '1653826193-QbmamAo0'
 const firebaseConfig = {
@@ -20,6 +21,7 @@ const firebaseConfig = {
 
 export type AppContext = { $axios?: AxiosInstance }
 const appContext = createContext<AppContext>(null)
+const loadingContext = createContext<{ loading: boolean; setLoading: (val: boolean) => void }>(null)
 
 export const useAxios = () => {
     const { $axios } = useContext(appContext)
@@ -37,10 +39,19 @@ export const useFirebase = () =>
         }
     }, [])
 
+export const useLoading = (init?: boolean) => {
+    const loadingCtx = useContext(loadingContext)
+
+    if (!loadingCtx) {
+        throw new Error('no context')
+    }
+
+    return loadingCtx
+}
+
 const RootContext: React.FC = ({ children }) => {
-    const [context, setContext] = useState<AppContext>({
-        $axios: null,
-    })
+    const [context, setContext] = useState<AppContext>(null)
+    const [loading, setLoading] = useState<boolean>(false)
 
     const createLiff = useCallback(async () => {
         await window.liff.init({ liffId })
@@ -93,6 +104,7 @@ const RootContext: React.FC = ({ children }) => {
                     console.log(user)
                     const $axios = await createAxios()
                     setContext({ $axios })
+                    setLoading(false)
                 }
             })
         }
@@ -102,9 +114,12 @@ const RootContext: React.FC = ({ children }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    if (!context.$axios) return <div>Loading</div>
-
-    return <appContext.Provider value={context}>{children}</appContext.Provider>
+    return (
+        <loadingContext.Provider value={{ loading, setLoading }}>
+            <SpinLoading global />
+            <appContext.Provider value={context}>{!!context && children}</appContext.Provider>
+        </loadingContext.Provider>
+    )
 }
 
 export default RootContext

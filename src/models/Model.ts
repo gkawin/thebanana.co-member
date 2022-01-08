@@ -1,57 +1,45 @@
 import 'reflect-metadata'
 import {
-    DocumentData,
+    DocumentReference,
     FirestoreDataConverter,
     PartialWithFieldValue,
     Timestamp,
     WithFieldValue,
 } from 'firebase/firestore'
-import { instanceToPlain, plainToClass, plainToInstance } from 'class-transformer'
+import { instanceToPlain, plainToInstance } from 'class-transformer'
 
 interface ClassType<T> {
     new (...args: any[]): T
 }
 
-const transformDocumentReference = (value: any) => {
-    return value?.path ?? value
-}
+const { TransformOperationExecutor } = require('class-transformer/esm5/TransformOperationExecutor')
 
-const transformTimestamp = (value: any) => {
-    if (typeof value === 'object') {
-        if ('_seconds' in value || 'seconds' in value) {
-            return (value as unknown as Timestamp).toDate()
+TransformOperationExecutor.prototype.transform = (function (transform) {
+    return function (source: any, value: any, targetType: any, arrayType: any, isMap: any, level: any) {
+        if (value instanceof DocumentReference || value instanceof DocumentReference) {
+            return value
         }
-        return value
+
+        if (value instanceof Timestamp || value instanceof Timestamp) {
+            return value.toDate()
+        }
+
+        // @ts-ignore
+        // tslint:disable-next-line:no-invalid-this
+        return transform.apply(this, [source, value, targetType, arrayType, isMap, level])
     }
-    return value
-}
+})(TransformOperationExecutor.prototype.transform)
 
 export default class Model {
-    static _converter(data: DocumentData) {
-        const result = Object.entries(data).reduce((acc, [key, value]) => {
-            if (Array.isArray(value)) {
-                const mapped = value.map((v) => transformDocumentReference(transformTimestamp(v)))
-                acc = { ...acc, [key]: mapped }
-                return acc
-            }
-
-            acc = { ...acc, [key]: transformDocumentReference(transformTimestamp(value)) }
-            return acc
-        }, {})
-
-        return result
-    }
-
     static convert<T>(target: ClassType<T>): FirestoreDataConverter<T> {
         return {
             toFirestore: (modelObject: WithFieldValue<T> | PartialWithFieldValue<T>) => {
                 return instanceToPlain(modelObject, { exposeUnsetFields: false })
             },
             fromFirestore: (ss) => {
-                const data = ss.data()
+                const payload = ss.data()
                 const id = ss.id
-                const o = Model._converter(data)
-                return plainToInstance(target, { id, ...o })
+                return plainToInstance(target, { id, ...payload }) as T
             },
         }
     }
@@ -61,9 +49,8 @@ export default class Model {
         },
         fromFirestore: (ss) => {
             const data = ss.data()
-            const o = Model._converter(data)
             const id = ss.id
-            return plainToClass(target, { id, ...o })
+            return plainToInstance(target, { id, ...data })
         },
     })
 }
