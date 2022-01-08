@@ -1,8 +1,7 @@
 import { useFirebase } from '@/core/RootContext'
 import { BookingModel, BookingStatus } from '@/models/BookingModel'
 import Model from '@/models/Model'
-import { instanceToPlain, plainToClass, plainToInstance } from 'class-transformer'
-import { collection, doc, getDoc, onSnapshot, query, where } from 'firebase/firestore'
+import { collection, doc, onSnapshot, query, where } from 'firebase/firestore'
 import { useEffect, useMemo, useState } from 'react'
 
 export type UseUserHistories = {
@@ -11,7 +10,7 @@ export type UseUserHistories = {
 }
 
 export default function useUserHistories() {
-    const [items, setItems] = useState(null)
+    const [items, setItems] = useState<BookingModel[]>(null)
     const { db, auth } = useFirebase()
 
     useEffect(() => {
@@ -26,18 +25,14 @@ export default function useUserHistories() {
             const results = await Promise.all(
                 ss.docs.map(async (doc) => {
                     if (!doc.exists()) return null
-                    const { getUser, getProduct, ...props } = doc.data()
-                    const user = await getUser()
-                    const product = await getProduct()
-
+                    const { user, product, ...props } = doc.data()
                     return {
                         ...props,
-                        user,
-                        product,
+                        user: await user,
+                        product: await product,
                     }
                 })
             )
-
             setItems(results)
         })
 

@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 import { DocumentReference, getDoc } from 'firebase/firestore'
-import { Exclude, Type } from 'class-transformer'
+import { Exclude, Transform, Type } from 'class-transformer'
 
 import { UserModel } from './UserModel'
 import { ProductModel } from './ProductModel'
@@ -18,19 +18,19 @@ export class BookingMetadataModel {
 }
 
 export class BookingModel {
-    getUser = async (): Promise<UserModel> => {
-        return (await getDoc(this.user)).data()
-    }
-
-    getProduct = async (): Promise<ProductModel> => {
-        return (await getDoc(this.product)).data()
-    }
+    @Exclude({ toPlainOnly: true })
+    @Type(() => ProductModel)
+    @Transform(({ value }) => {
+        return value instanceof DocumentReference ? getDoc(value).then((v) => v.data()) : value
+    })
+    product: DocumentReference<ProductModel> | Promise<ProductModel> | ProductModel
 
     @Exclude({ toPlainOnly: true })
-    product: DocumentReference<ProductModel>
-
-    @Exclude({ toPlainOnly: true })
-    user: DocumentReference<UserModel>
+    @Type(() => UserModel)
+    @Transform(({ value }) => {
+        return value instanceof DocumentReference ? getDoc(value).then((v) => v.data()) : value
+    })
+    user: DocumentReference<UserModel> | Promise<UserModel> | UserModel
 
     createdOn: Date
 

@@ -4,8 +4,6 @@ import { injectable } from 'tsyringe'
 import runsWithMethods from '@/middleware/runsWithMethods'
 import { OmiseService } from '@/services/omise.service'
 
-
-
 @injectable()
 class CreatePaymentHandler {
     constructor(private omise: OmiseService) {}
