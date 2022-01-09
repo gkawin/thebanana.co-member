@@ -9,6 +9,9 @@ on:
 env:
     CLOUD_RUN_PROJECT_ID: ${{ secrets.CLOUD_RUN_PROJECT_NAME }}
     CLOUD_RUN_REGION: asia-southeast1
+    # project-name but it can be anything you want
+    REPO: asia-docker.pkg.dev/$CLOUD_RUN_PROJECT_ID/asia.gcr.io
+    APP_NAME: member.thebanana.co
 
 jobs:
     build-and-deploy:
@@ -28,19 +31,18 @@ jobs:
             - name: Enable the necessary APIs and enable docker auth
               run: |-
                   gcloud config set project $CLOUD_RUN_PROJECT_ID
-                  gcloud services enable containerregistry.googleapis.com
                   gcloud services enable run.googleapis.com
-                  gcloud --quiet auth configure-docker
+                  gcloud auth configure-docker asia-docker.pkg.dev
             - name: Build and tag image
               run: |-
-                  docker build . --tag "asia.gcr.io/$CLOUD_RUN_PROJECT_ID:$GITHUB_SHA"
+                  docker build . --tag "$APP_NAME:$GITHUB_SHA"
             - name: Push image to GCR
               run: |-
-                  docker push asia.gcr.io/$CLOUD_RUN_PROJECT_ID:$GITHUB_SHA
+                  docker push $REPO/$APP_NAME:$GITHUB_SHA
             - name: Deploy
               run: |-
                   gcloud components install --quiet
-                  gcloud run deploy $CLOUD_RUN_PROJECT_ID --image asia.gcr.io/$CLOUD_RUN_PROJECT_ID:$GITHUB_SHA \
+                  gcloud run deploy $CLOUD_RUN_PROJECT_ID --image $APP_NAME:$GITHUB_SHA \
                   --project $CLOUD_RUN_PROJECT_ID \
                   --platform managed \
                   --region $CLOUD_RUN_REGION \
