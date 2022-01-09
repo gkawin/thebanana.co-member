@@ -1,9 +1,7 @@
-import 'reflect-metadata'
-import { DocumentReference, getDoc } from 'firebase/firestore'
-import { Exclude, Transform, Type } from 'class-transformer'
-
+import { DocumentReference } from 'firebase/firestore'
 import { UserModel } from './UserModel'
 import { ProductModel } from './ProductModel'
+import { JsonProperty, Serializable } from 'typescript-json-serializer'
 
 export enum BookingStatus {
     WAITING_FOR_PAYMENT = 'WAITING_FOR_PAYMENT',
@@ -17,27 +15,24 @@ export class BookingMetadataModel {
     nickname: string
 }
 
+@Serializable()
 export class BookingModel {
-    @Exclude({ toPlainOnly: true })
-    @Type(() => ProductModel)
-    @Transform(({ value }) => {
-        return value instanceof DocumentReference ? getDoc(value).then((v) => v.data()) : value
-    })
-    product: DocumentReference<ProductModel> | Promise<ProductModel> | ProductModel
+    @JsonProperty()
+    product:
+        | FirebaseFirestore.DocumentReference<ProductModel>
+        | DocumentReference<ProductModel>
+        | Promise<ProductModel>
+        | ProductModel
 
-    @Exclude({ toPlainOnly: true })
-    @Type(() => UserModel)
-    @Transform(({ value }) => {
-        return value instanceof DocumentReference ? getDoc(value).then((v) => v.data()) : value
-    })
-    user: DocumentReference<UserModel> | Promise<UserModel> | UserModel
-
+    @JsonProperty()
+    user: FirebaseFirestore.DocumentReference<UserModel> | DocumentReference<UserModel> | Promise<UserModel> | UserModel
+    @JsonProperty()
     createdOn: Date
-
+    @JsonProperty()
     expiredOn: Date
-
+    @JsonProperty()
     status: BookingStatus
 
-    @Type(() => BookingMetadataModel)
+    @JsonProperty({ type: () => BookingMetadataModel })
     metadata: BookingMetadataModel
 }

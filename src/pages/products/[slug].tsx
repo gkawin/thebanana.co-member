@@ -1,14 +1,16 @@
 import { ProductDescription } from '@/components/products/ProductDescription'
 import { ProductCoverImage } from '@/components/products/ProductCoverImage'
 import { ProductModel } from '@/models/ProductModel'
-import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
+import { GetServerSideProps, NextPage } from 'next'
 import useUserCart from '@/concerns/use-user-histories'
 import React, { useCallback } from 'react'
 import { useRouter } from 'next/router'
 import { useAxios, useFirebase } from '@/core/RootContext'
+import { serialize } from 'typescript-json-serializer'
+
+import { BookingStatus } from '@/models/BookingModel'
 import adminSDK from '@/libs/adminSDK'
 import Model from '@/models/Model'
-import { instanceToPlain } from 'class-transformer'
 
 export type CourseInfoProps = { slug: string; product: ProductModel }
 
@@ -19,19 +21,21 @@ const CourseInfo: NextPage<CourseInfoProps> = ({ product }) => {
     const { auth } = useFirebase()
 
     const isEnrolled = useCallback(() => {
-        return !!userCart.items.find((item) => item.product === product.id)
-    }, [product.id, userCart.items])
+        return !!userCart[BookingStatus.WAITING_FOR_PAYMENT].find(
+            (item: any) => (item.product as ProductModel).id === product.id
+        )
+    }, [product.id, userCart])
 
     const createBooking = useCallback(async () => {
         await axios.post('/api/products/checkout', { product: product.id, user: auth.currentUser.uid })
         router.push('/checkout')
     }, [auth.currentUser.uid, axios, product.id, router])
 
-    const handleOnClick = () => {
+    const handleOnClick = async () => {
         if (isEnrolled()) {
             router.push('/checkout')
         } else {
-            createBooking()
+            await createBooking()
         }
     }
 
@@ -60,33 +64,14 @@ const CourseInfo: NextPage<CourseInfoProps> = ({ product }) => {
     )
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
+export const getServerSideProps: GetServerSideProps<CourseInfoProps> = async ({ query }) => {
     const sdk = adminSDK()
-    const productCol = await sdk.firestore().collection('products').withConverter(Model.transform(ProductModel)).get()
-
-    if (productCol.empty) {
-        return {
-            paths: [{ params: { slug: 'not-found' } }],
-            fallback: false,
-        }
-    }
-
-    const allPaths = productCol.docs.map((doc) => ({ params: { slug: doc.data()?.slug ?? 'not-found' } }))
-    return {
-        paths: allPaths,
-        fallback: false,
-    }
-}
-
-export const getStaticProps: GetStaticProps<CourseInfoProps> = async ({ params }) => {
-    const sdk = adminSDK()
+    const slug = String(query.slug)
     const productCol = await sdk
         .firestore()
         .collection('products')
-        .withConverter(Model.transform(ProductModel))
-        .where('slug', '==', params?.slug)
-        .orderBy('effectiveDate', 'desc')
-        .limit(1)
+        .where('slug', '==', slug)
+        .withConverter(Model.convert(ProductModel))
         .get()
 
     if (productCol.empty) {
@@ -95,8 +80,8 @@ export const getStaticProps: GetStaticProps<CourseInfoProps> = async ({ params }
 
     return {
         props: {
-            slug: params?.slug?.toString() ?? null,
-            product: instanceToPlain(productCol.docs[0].data()),
+            slug,
+            product: serialize(productCol.docs[0].data()),
         },
     }
 }

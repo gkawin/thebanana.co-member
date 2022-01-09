@@ -1,21 +1,22 @@
-import { CheckoutFormField } from '@/components/checkout/BookingInfoForm'
+// import { CheckoutFormField } from '@/components/checkout/BookingInfoForm'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import Head from 'next/head'
 import { useEffect } from 'react'
 import useUserHistories from '@/concerns/use-user-histories'
-import { useRouter } from 'next/router'
+// import { useRouter } from 'next/router'
 import { RegistrationSummary } from '@/components/checkout/RegistrationSummary'
+import { ProductModel } from '@/models/ProductModel'
 
 const CheckoutPage: NextPage = () => {
     const histories = useUserHistories()
-    const { query } = useRouter()
+    // const { query } = useRouter()
 
     const shouldCheckout = histories.total > 0
 
-    const onCheckout = async (data: CheckoutFormField) => {
-        console.log(data)
-    }
+    // const onCheckout = async (data: CheckoutFormField) => {
+    //     console.log(data)
+    // }
 
     useEffect(() => {
         console.log(histories)
@@ -27,12 +28,12 @@ const CheckoutPage: NextPage = () => {
                 <title>จองและชำระเงิน</title>
             </Head>
             <h2 className="text-sub-title font-semibold">สรุปรายการลงทะเบียน</h2>
-            {/* {shouldCheckout && (
+            {shouldCheckout && (
                 <RegistrationSummary
-                    name={histories.WAITING_FOR_PAYMENT[0].product.name}
-                    price={histories.WAITING_FOR_PAYMENT[0].product.price}
+                    name={(histories.WAITING_FOR_PAYMENT[0].product as ProductModel).name}
+                    price={(histories.WAITING_FOR_PAYMENT[0].product as ProductModel).price}
                 />
-            )} */}
+            )}
             {!shouldCheckout && (
                 <div className="block">
                     ไม่มีวิชาที่คุณเลือกลงทะเบียนอยู่

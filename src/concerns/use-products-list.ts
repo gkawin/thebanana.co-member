@@ -1,5 +1,4 @@
 import { useFirebase } from '@/core/RootContext'
-import Model from '@/models/Model'
 import { ProductModel } from '@/models/ProductModel'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import dayjs from 'dayjs'
@@ -10,9 +9,7 @@ export default function useProductsList() {
     const { db } = useFirebase()
 
     useEffect(() => {
-        const productsRef = query(collection(db, 'products'), where('effectiveDate', '<=', new Date())).withConverter(
-            Model.convert(ProductModel)
-        )
+        const productsRef = query(collection(db, 'products'), where('effectiveDate', '<=', new Date()))
         getDocs(productsRef).then(({ docs }) => {
             const results = docs.reduce((prev, item) => {
                 const data = item.data()

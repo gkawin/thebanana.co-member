@@ -5,11 +5,8 @@ import { badData, badRequest, Boom } from '@hapi/boom'
 import adminSDK from '@/libs/adminSDK'
 
 import dayjs from 'dayjs'
-import Model from '@/models/Model'
-import { BookingModel, BookingStatus } from '@/models/BookingModel'
+import { BookingStatus } from '@/models/BookingModel'
 import { validate } from 'class-validator'
-import { EnrollDto } from '@/dtos/enroll.dto'
-import { plainToClass } from 'class-transformer'
 
 const sdk = adminSDK()
 const db = sdk.firestore()
@@ -18,16 +15,18 @@ const productCheckoutHandler: NextApiHandler = async (req, res) => {
     await runsWithMethods(req, res, { methods: ['POST'] })
 
     try {
-        const body = plainToClass(EnrollDto, req.body)
+        const body = req.body
         const validationErrors = await validate(body)
 
         if (validationErrors.length > 0) throw badRequest(validationErrors.toString())
 
-        const bookingCol = db.collection('booking').withConverter(Model.transform(BookingModel))
+        const bookingCol = db.collection('booking')
+        const productRef = db.collection('products').doc(body.product)
+        const userRef = db.collection('users').doc(body.user)
 
         const createdResult = await bookingCol
-            .where('user', '==', body.user)
-            .where('product', '==', body.product)
+            .where('user', '==', userRef)
+            .where('product', '==', productRef)
             .where('status', '==', BookingStatus.WAITING_FOR_PAYMENT)
             .get()
             .then(({ empty }) => {
@@ -36,10 +35,10 @@ const productCheckoutHandler: NextApiHandler = async (req, res) => {
             .then(() =>
                 bookingCol.add({
                     createdOn: new Date(),
-                    product: body.product,
+                    product: productRef,
                     status: BookingStatus.WAITING_FOR_PAYMENT,
                     expiredOn: dayjs().add(10, 'day').toDate(),
-                    user: body.user,
+                    user: userRef,
                     metadata: {
                         nickname: '',
                         schoolName: '',

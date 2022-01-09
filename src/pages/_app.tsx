@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-sync-scripts */
+import 'reflect-metadata'
 import '@/styles/globals.css'
 import RootContext from '@/core/RootContext'
 import type { AppProps } from 'next/app'

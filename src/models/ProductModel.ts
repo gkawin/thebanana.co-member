@@ -1,50 +1,53 @@
-import 'reflect-metadata'
-import { Timestamp } from 'firebase/firestore'
-import { Exclude, Expose, Transform } from 'class-transformer'
-
+import { withISOToServerTimestamp, withTimeToDate } from '@/utils/firestore'
+import { JsonProperty, Serializable } from 'typescript-json-serializer'
+import Model from './Model'
 export class CourseModel {
     name: string
 }
 
-export class ProductModel {
+@Serializable()
+export class ProductModel extends Model {
+    @JsonProperty()
     id: string
 
+    @JsonProperty()
     code: string
 
+    @JsonProperty()
     name: string
 
+    @JsonProperty()
     courses: string[]
 
+    @JsonProperty()
     description: string
 
-    @Transform(({ value }) => (!value ? null : value))
+    @JsonProperty()
     rating: number
 
+    @JsonProperty()
     coverImage: string
 
+    @JsonProperty()
     slug: string
 
-    @Transform(({ value }) => (value instanceof Timestamp ? value.toDate() : value))
-    @Exclude({ toPlainOnly: true })
+    @JsonProperty({ beforeDeserialize: withTimeToDate, beforeSerialize: withISOToServerTimestamp })
     effectiveDate: Date
 
-    @Transform(({ value }) => (value instanceof Timestamp ? value.toDate() : value))
-    @Exclude({ toPlainOnly: true })
+    @JsonProperty({ beforeDeserialize: withTimeToDate, beforeSerialize: withISOToServerTimestamp })
     expiredDate: Date
 
+    @JsonProperty()
     price: number
 
-    @Expose({ toPlainOnly: true })
     get pricing(): string {
         return `${(this.price || 0).toLocaleString('th', { minimumFractionDigits: 2, minimumIntegerDigits: 2 })} บาท`
     }
 
-    @Expose({ toPlainOnly: true })
     get startedDate() {
         return this.effectiveDate.toISOString()
     }
 
-    @Expose({ toPlainOnly: true })
     get endDate() {
         return this.expiredDate.toISOString()
     }

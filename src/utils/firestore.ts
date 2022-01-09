@@ -1,11 +1,12 @@
-import { firestore } from 'firebase-admin'
+import { Timestamp } from 'firebase/firestore'
 
-export const withServerTimestampToISO = (v: any) => {
-    if (v instanceof firestore.Timestamp) {
-        return v.toDate().toISOString()
+export const withTimeToDate = (v: any) => {
+    if (v instanceof Timestamp || typeof v.toDate !== undefined) {
+        return v.toDate()
     }
     return v
 }
+
 export const withISOToServerTimestamp = (v: string | Date) => {
     if (v instanceof Date) return v.toISOString()
     if (!v) return null

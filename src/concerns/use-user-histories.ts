@@ -1,6 +1,5 @@
 import { useFirebase } from '@/core/RootContext'
 import { BookingModel, BookingStatus } from '@/models/BookingModel'
-import Model from '@/models/Model'
 import { collection, doc, onSnapshot, query, where } from 'firebase/firestore'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -10,16 +9,13 @@ export type UseUserHistories = {
 }
 
 export default function useUserHistories() {
-    const [items, setItems] = useState<BookingModel[]>(null)
+    const [items, setItems] = useState(null)
     const { db, auth } = useFirebase()
 
     useEffect(() => {
         if (!auth.currentUser.uid) return () => {}
 
-        const q = query(
-            collection(db, 'booking'),
-            where('user', '==', doc(db, 'users', auth.currentUser.uid))
-        ).withConverter(Model.convert(BookingModel))
+        const q = query(collection(db, 'booking'), where('user', '==', doc(db, 'users', auth.currentUser.uid)))
 
         const unsubscribe = onSnapshot(q, async (ss) => {
             const results = await Promise.all(
@@ -46,7 +42,7 @@ export default function useUserHistories() {
         return {
             total: items?.length ?? 0,
             [BookingStatus.WAITING_FOR_PAYMENT]: (items || []).filter(
-                (item) => item.status === BookingStatus.WAITING_FOR_PAYMENT
+                (item: any) => item.status === BookingStatus.WAITING_FOR_PAYMENT
             ),
         }
     }, [items])
