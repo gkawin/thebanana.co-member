@@ -4,8 +4,10 @@
 
 const nextConfig = {
     images: {
-        loader: 'custom',
-        //     domains: ['fakeimg.pl', 'firebasestorage.googleapis.com'],
+        domains: ['fakeimg.pl', 'firebasestorage.googleapis.com'],
+    },
+    experimental: {
+        outputStandalone: true,
     },
 }
 module.exports = nextConfig
