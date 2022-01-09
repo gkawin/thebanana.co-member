@@ -23,25 +23,26 @@ jobs:
             # This step is where our service account will be authenticated
             - uses: google-github-actions/setup-gcloud@v0.2.0
               with:
-                  project_id: ${{ secrets.CLOUD_RUN_PROJECT_NAME }}
+                  project_id: ${{ secrets.b }}
                   service_account_key: ${{ secrets.CLOUD_RUN_SERVICE_ACCOUNT }}
                   service_account_email: ${{ secrets.CLOUD_RUN_SERVICE_ACCOUNT_EMAIL }}
 
             - name: Enable the necessary APIs and enable docker auth
               run: |-
+                  gcloud config set project $CLOUD_RUN_PROJECT_ID
                   gcloud services enable containerregistry.googleapis.com
                   gcloud services enable run.googleapis.com
                   gcloud --quiet auth configure-docker
             - name: Build and tag image
               run: |-
-                  docker build . --tag "asia-docker.pkg.dev/$CLOUD_RUN_PROJECT_ID/asia.gcr.io/$REPO_NAME:$GITHUB_SHA"
+                  docker build . --tag "asia.gcr.io/$REPO_NAME:$GITHUB_SHA"
             - name: Push image to GCR
               run: |-
-                  docker push asia-docker.pkg.dev/$CLOUD_RUN_PROJECT_ID/asia.gcr.io/$REPO_NAME:$GITHUB_SHA
+                  docker push asia.gcr.io/$REPO_NAME:$GITHUB_SHA
             - name: Deploy
               run: |-
                   gcloud components install --quiet
-                  gcloud run deploy $REPO_NAME --image asia-docker.pkg.dev/$CLOUD_RUN_PROJECT_ID/asia.gcr.io/$REPO_NAME:$GITHUB_SHA \
+                  gcloud run deploy $REPO_NAME --image asia.gcr.io/$REPO_NAME:$GITHUB_SHA \
                   --project $CLOUD_RUN_PROJECT_ID \
                   --platform managed \
                   --region $CLOUD_RUN_REGION \
