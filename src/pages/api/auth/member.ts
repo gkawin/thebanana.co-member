@@ -3,10 +3,10 @@ import { NextApiHandler } from 'next'
 import { badRequest } from '@hapi/boom'
 
 import { ok } from 'assert'
-import sdk from '@/libs/adminSDK'
+import adminSDK from '@/libs/adminSDK'
 
-const db = sdk().firestore()
 const loginHandler: NextApiHandler = async (req, res) => {
+    const { db } = adminSDK()
     await runsWithMethods(req, res, { methods: ['POST'] })
 
     const { connectId } = req.body

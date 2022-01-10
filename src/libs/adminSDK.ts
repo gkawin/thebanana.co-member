@@ -1,22 +1,26 @@
-import admin from 'firebase-admin'
+import * as firestore from 'firebase-admin/firestore'
+import * as auth from 'firebase-admin/auth'
+import { initializeApp, cert } from 'firebase-admin/app'
+
+let app: { db: firestore.Firestore; auth: auth.Auth } | null
 
 const adminSDK = () => {
     if (typeof window !== 'undefined') {
         throw Error('for server-side only')
     }
-    if (admin.apps.length > 0) {
-        return admin
-    }
-    return admin.initializeApp({
-        credential: admin.credential.cert({
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-            projectId: process.env.FIREBASE_PROJECT_ID,
-        }),
-        databaseURL: 'https://thebanana-d9286.firebaseio.com',
-    })
-}
 
-export const getServerTimestamp = () => admin.firestore.FieldValue.serverTimestamp()
+    const serviceAccount = Buffer.from(process.env.GCP_SERVICE_ACCOUNT, 'base64').toString()
+
+    if (!app) {
+        initializeApp({ credential: cert(JSON.parse(serviceAccount)) })
+
+        app = {
+            db: firestore.getFirestore(),
+            auth: auth.getAuth(),
+        }
+        return app
+    }
+    return app
+}
 
 export default Object.freeze(adminSDK)

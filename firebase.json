@@ -7,7 +7,10 @@
                 "source": "**",
                 "function": "nextjsFunc"
             }
-        ]
+        ],
+        "run": {
+            "region": "ap-southeast1"
+        }
     },
     "functions": {
         "source": ".",

@@ -1,12 +1,12 @@
 import { ProductDescription } from '@/components/products/ProductDescription'
 import { ProductCoverImage } from '@/components/products/ProductCoverImage'
 import { ProductModel } from '@/models/ProductModel'
-import { GetServerSideProps, NextPage } from 'next'
+import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import useUserCart from '@/concerns/use-user-histories'
 import React, { useCallback } from 'react'
 import { useRouter } from 'next/router'
 import { useAxios, useFirebase } from '@/core/RootContext'
-import { serialize } from 'typescript-json-serializer'
+// import { serialize } from 'typescript-json-serializer'
 
 import { BookingStatus } from '@/models/BookingModel'
 import adminSDK from '@/libs/adminSDK'
@@ -64,11 +64,20 @@ const CourseInfo: NextPage<CourseInfoProps> = ({ product }) => {
     )
 }
 
-export const getServerSideProps: GetServerSideProps<CourseInfoProps> = async ({ query }) => {
-    const sdk = adminSDK()
-    const slug = String(query.slug)
-    const productCol = await sdk
-        .firestore()
+export const getStaticPaths: GetStaticPaths = async () => {
+    const { db } = adminSDK()
+    const productCol = await db.collection('products').withConverter(Model.convert(ProductModel)).get()
+    const paths = productCol.docs.map((doc) => ({ params: { slug: doc.data().slug.toString() } }))
+    return {
+        paths,
+        fallback: false,
+    }
+}
+
+export const getStaticProps: GetStaticProps<CourseInfoProps> = async ({ params }) => {
+    const { db } = adminSDK()
+    const slug = String(params.slug)
+    const productCol = await db
         .collection('products')
         .where('slug', '==', slug)
         .withConverter(Model.convert(ProductModel))
@@ -81,7 +90,7 @@ export const getServerSideProps: GetServerSideProps<CourseInfoProps> = async ({ 
     return {
         props: {
             slug,
-            product: serialize(productCol.docs[0].data()),
+            product: {},
         },
     }
 }

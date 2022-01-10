@@ -6,9 +6,7 @@ import adminSDK from '@/libs/adminSDK'
 
 const handleToken: NextApiHandler = async (req, res) => {
     await runsWithMethods(req, res, { methods: ['POST'] })
-    const sdk = adminSDK()
-    const db = sdk.firestore()
-    const auth = sdk.auth()
+    const { db, auth } = adminSDK()
 
     try {
         const { connectId } = req.body

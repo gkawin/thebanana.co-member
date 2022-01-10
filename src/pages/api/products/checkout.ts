@@ -8,10 +8,8 @@ import dayjs from 'dayjs'
 import { BookingStatus } from '@/models/BookingModel'
 import { validate } from 'class-validator'
 
-const sdk = adminSDK()
-const db = sdk.firestore()
-
 const productCheckoutHandler: NextApiHandler = async (req, res) => {
+    const { db } = adminSDK()
     await runsWithMethods(req, res, { methods: ['POST'] })
 
     try {

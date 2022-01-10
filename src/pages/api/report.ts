@@ -3,29 +3,20 @@ import resolver from '@/services/resolver'
 import { injectable } from 'tsyringe'
 import runsWithMethods from '@/middleware/runsWithMethods'
 import adminSDK from '@/libs/adminSDK'
-import type { app, firestore } from 'firebase-admin'
+
 import { mobileThaiNumberToRegulary } from '@/utils/phone-number'
+import type { DocumentReference, CollectionReference, Firestore } from 'firebase-admin/firestore'
 
 @injectable()
 class Report {
-    static admin: app.App = null
+    #db: Firestore = null
     constructor() {
-        if (Report.admin === null) {
-            Report.admin = adminSDK() as app.App
-        }
-    }
-
-    private get admin() {
-        return Report.admin
+        this.#db = adminSDK().db
     }
 
     main: NextApiHandler = async (req, res) => {
         await runsWithMethods(req, res, { methods: ['GET'] })
-        const rs = await this.admin
-            .firestore()
-            .collection('transactions')
-            .where('createdOn', '>=', new Date('2021-11-01'))
-            .get()
+        const rs = await this.#db.collection('transactions').where('createdOn', '>=', new Date('2021-11-01')).get()
 
         let summary = 0
         const items = await Promise.all(
@@ -33,13 +24,12 @@ class Report {
                 const { totalAmount, createdOn, user } = doc.data()
                 summary += Number(totalAmount)
 
-                const userRef = user as firestore.DocumentReference
-                const parentRef = userRef.collection('parents') as firestore.CollectionReference
+                const userRef = user as DocumentReference
+                const parentRef = userRef.collection('parents') as CollectionReference
                 const userInfo = (await userRef.get()).data()
                 const parentInfo = await parentRef.get()
 
-                const courseRef = this.admin
-                    .firestore()
+                const courseRef = this.#db
                     .collection('registration_class')
                     .where('user', '==', user)
                     .where('createdOn', '>=', new Date('2021-11-01'))
