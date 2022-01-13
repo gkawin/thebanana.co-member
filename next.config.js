@@ -4,7 +4,7 @@
 
 const nextConfig = {
     images: {
-        loader: 'custom',
+        loader: 'default',
         domains: ['fakeimg.pl', 'firebasestorage.googleapis.com'],
     },
     // experimental: {

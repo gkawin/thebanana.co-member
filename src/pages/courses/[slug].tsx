@@ -6,7 +6,6 @@ import useUserCart from '@/concerns/use-user-histories'
 import React, { useCallback } from 'react'
 import { useRouter } from 'next/router'
 import { useAxios, useFirebase } from '@/core/RootContext'
-
 import { BookingStatus } from '@/models/BookingModel'
 import adminSDK from '@/libs/adminSDK'
 import Model from '@/models/Model'
@@ -79,10 +78,12 @@ export const getServerSideProps: GetServerSideProps<CourseInfoProps> = async ({ 
         return { notFound: true, props: { slug: null, product: null } } as any
     }
 
+    const product = productCol.docs[0].data()
+
     return {
         props: {
             slug,
-            product: serialize(productCol.docs[0].data()),
+            product: serialize(product),
         },
     }
 }

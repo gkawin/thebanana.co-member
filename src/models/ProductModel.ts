@@ -1,4 +1,4 @@
-import { withISOToServerTimestamp, withTimeToDate } from '@/utils/firestore'
+import { withDocumentReferenceToPath, withISOToServerTimestamp, withTimeToDate } from '@/utils/firestore'
 import { JsonProperty, Serializable } from 'typescript-json-serializer'
 import Model from './Model'
 export class CourseModel {
@@ -16,14 +16,11 @@ export class ProductModel extends Model {
     @JsonProperty()
     name: string
 
-    @JsonProperty()
-    courses: string[]
+    @JsonProperty({ beforeDeserialize: withDocumentReferenceToPath })
+    courseIds: string[]
 
     @JsonProperty()
     description: string
-
-    @JsonProperty()
-    rating: number
 
     @JsonProperty()
     coverImage: string
@@ -31,15 +28,16 @@ export class ProductModel extends Model {
     @JsonProperty()
     slug: string
 
-    @JsonProperty({ beforeDeserialize: withTimeToDate, beforeSerialize: withISOToServerTimestamp })
+    @JsonProperty({ beforeDeserialize: withTimeToDate, afterSerialize: withISOToServerTimestamp })
     effectiveDate: Date
 
-    @JsonProperty({ beforeDeserialize: withTimeToDate, beforeSerialize: withISOToServerTimestamp })
+    @JsonProperty({ beforeDeserialize: withTimeToDate, afterSerialize: withISOToServerTimestamp })
     expiredDate: Date
 
     @JsonProperty()
     price: number
 
+    @JsonProperty()
     get pricing(): string {
         return `${(this.price || 0).toLocaleString('th', { minimumFractionDigits: 2, minimumIntegerDigits: 2 })} บาท`
     }
