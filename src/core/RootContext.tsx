@@ -15,8 +15,8 @@ const firebaseConfig = {
     projectId: 'thebanana-d9286',
     storageBucket: 'thebanana-d9286.appspot.com',
     messagingSenderId: '652607083295',
-    appId: '1:652607083295:web:0fc0e776e8bd7d0da9d62a',
-    measurementId: 'G-1KLYQ0X2ET',
+    appId: '1:652607083295:web:4b660c65ebc8ceeaa9d62a',
+    measurementId: 'G-KQ0RJ6ZTG5',
 }
 
 export type AppContext = { $axios?: AxiosInstance }

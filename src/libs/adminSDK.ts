@@ -1,8 +1,6 @@
 import * as firestore from 'firebase-admin/firestore'
 import * as auth from 'firebase-admin/auth'
-import { initializeApp, cert } from 'firebase-admin/app'
-
-let app: { db: firestore.Firestore; auth: auth.Auth } | null
+import { initializeApp, cert, getApps } from 'firebase-admin/app'
 
 const adminSDK = () => {
     if (typeof window !== 'undefined') {
@@ -10,17 +8,16 @@ const adminSDK = () => {
     }
 
     const serviceAccount = Buffer.from(process.env.GCP_SERVICE_ACCOUNT, 'base64').toString()
+    const init = getApps().length != 0
 
-    if (!app) {
+    if (!init) {
         initializeApp({ credential: cert(JSON.parse(serviceAccount)) })
-
-        app = {
-            db: firestore.getFirestore(),
-            auth: auth.getAuth(),
-        }
-        return app
     }
-    return app
+
+    return {
+        db: firestore.getFirestore(),
+        auth: auth.getAuth(),
+    }
 }
 
 export default Object.freeze(adminSDK)
