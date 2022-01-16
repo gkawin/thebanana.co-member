@@ -30,10 +30,9 @@ const debounce = (callback: Function, wait = 500) => {
 
 export type NewAddressFormProps = {
     enabled: boolean
-    setNewAddr: (addr: SavedNewAddressField) => void
 }
 
-export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ setNewAddr, enabled = true }) => {
+export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ enabled = true }) => {
     const {
         register,
         handleSubmit,
@@ -62,7 +61,6 @@ export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ setNewAddr, ena
             }
             const result = await addDoc(collection(db, 'users', uid, 'address'), newAddr)
 
-            setNewAddr({ ...newAddr, id: result.id })
             setIsOpen(false)
         } catch (error) {
             alert('เพิ่มข้อมูลไม่สำเร็จ')
@@ -71,6 +69,7 @@ export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ setNewAddr, ena
         }
     }
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const handleDebounce = useCallback(
         debounce(async (fun: Function) => await fun(), 500),
         []
@@ -222,6 +221,7 @@ export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ setNewAddr, ena
                     </button>
                 </form>
             </Modal>
+
             <button
                 type="button"
                 className={`border  ${

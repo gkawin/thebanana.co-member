@@ -41,9 +41,7 @@ export default function useUserHistories() {
     const itemList = useMemo(() => {
         return {
             total: items?.length ?? 0,
-            [BookingStatus.WAITING_FOR_PAYMENT]: (items || []).filter(
-                (item: any) => item.status === BookingStatus.WAITING_FOR_PAYMENT
-            ),
+            [BookingStatus.CHECKOUT]: (items || []).filter((item: any) => item.status === BookingStatus.CHECKOUT),
         }
     }, [items])
 

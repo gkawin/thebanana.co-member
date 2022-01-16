@@ -1,12 +1,17 @@
 import { withDocumentReferenceToPath, withISOToServerTimestamp, withTimeToDate } from '@/utils/firestore'
 import { JsonProperty, Serializable } from 'typescript-json-serializer'
-import Model from './Model'
+
+import { DocumentReference as ClientDocRef } from 'firebase/firestore'
+import { DocumentReference } from 'firebase-admin/firestore'
+
 export class CourseModel {
     name: string
+    seats: number
+    semaster: string
 }
 
 @Serializable()
-export class ProductModel extends Model {
+export class ProductModel {
     @JsonProperty()
     id: string
 
@@ -16,8 +21,8 @@ export class ProductModel extends Model {
     @JsonProperty()
     name: string
 
-    @JsonProperty({ beforeDeserialize: withDocumentReferenceToPath })
-    courseIds: string[]
+    @JsonProperty({ afterSerialize: withDocumentReferenceToPath })
+    courses: DocumentReference<CourseModel>[] & ClientDocRef<CourseModel>[]
 
     @JsonProperty()
     description: string
@@ -37,7 +42,6 @@ export class ProductModel extends Model {
     @JsonProperty()
     price: number
 
-    @JsonProperty()
     get pricing(): string {
         return `${(this.price || 0).toLocaleString('th', { minimumFractionDigits: 2, minimumIntegerDigits: 2 })} บาท`
     }

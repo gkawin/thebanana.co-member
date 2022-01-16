@@ -2,37 +2,45 @@ import { DocumentReference } from 'firebase/firestore'
 import { UserModel } from './UserModel'
 import { ProductModel } from './ProductModel'
 import { JsonProperty, Serializable } from 'typescript-json-serializer'
+import { withISOToServerTimestamp, withTimeToDate } from '@/utils/firestore'
 
 export enum BookingStatus {
-    WAITING_FOR_PAYMENT = 'WAITING_FOR_PAYMENT',
+    PAYMENT = 'PAYMENT',
+    CHECKOUT = 'CHECKOUT',
     PAID = 'PAID',
     EXPIRED = 'EXPIRED',
 }
 
-export class BookingMetadataModel {
-    studentName: string
-    schoolName: string
-    nickname: string
-}
-
 @Serializable()
 export class BookingModel {
-    @JsonProperty()
-    product:
-        | FirebaseFirestore.DocumentReference<ProductModel>
-        | DocumentReference<ProductModel>
-        | Promise<ProductModel>
-        | ProductModel
+    static generateBookingCode = () =>
+        `${(process.pid * new Date().getTime())
+            .toString(32)
+            .toUpperCase()
+            .split('')
+            .sort(function () {
+                return 0.5 - Math.random()
+            })
+            .join('')}`
 
     @JsonProperty()
-    user: FirebaseFirestore.DocumentReference<UserModel> | DocumentReference<UserModel> | Promise<UserModel> | UserModel
+    bookingCode: string
+
     @JsonProperty()
+    product: FirebaseFirestore.DocumentReference<ProductModel> | DocumentReference<ProductModel>
+
+    @JsonProperty()
+    user: FirebaseFirestore.DocumentReference<UserModel> | DocumentReference<UserModel>
+
+    @JsonProperty({ beforeDeserialize: withTimeToDate, afterSerialize: withISOToServerTimestamp })
     createdOn: Date
-    @JsonProperty()
+
+    @JsonProperty({ beforeDeserialize: withTimeToDate, afterSerialize: withISOToServerTimestamp })
     expiredOn: Date
+
     @JsonProperty()
     status: BookingStatus
 
-    @JsonProperty({ type: () => BookingMetadataModel })
-    metadata: BookingMetadataModel
+    @JsonProperty()
+    metadata: Record<string, any>
 }

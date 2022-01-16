@@ -5,8 +5,11 @@ import { badData, badRequest, Boom } from '@hapi/boom'
 import adminSDK from '@/libs/adminSDK'
 
 import dayjs from 'dayjs'
-import { BookingStatus } from '@/models/BookingModel'
+import { BookingModel, BookingStatus } from '@/models/BookingModel'
 import { validate } from 'class-validator'
+import Model from '@/models/Model'
+import { ProductModel } from '@/models/ProductModel'
+import { UserModel } from '@/models/UserModel'
 
 const productCheckoutHandler: NextApiHandler = async (req, res) => {
     const { db } = adminSDK()
@@ -18,34 +21,32 @@ const productCheckoutHandler: NextApiHandler = async (req, res) => {
 
         if (validationErrors.length > 0) throw badRequest(validationErrors.toString())
 
-        const bookingCol = db.collection('booking')
-        const productRef = db.collection('products').doc(body.product)
-        const userRef = db.collection('users').doc(body.user)
+        const bookingCol = db.collection('booking').withConverter(Model.convert(BookingModel))
+        const productRef = db.collection('products').doc(body.product).withConverter(Model.convert(ProductModel))
+        const userRef = db.collection('users').doc(body.user).withConverter(Model.convert(UserModel))
+        let bookingCode = BookingModel.generateBookingCode()
 
-        const createdResult = await bookingCol
+        const booking = await bookingCol
             .where('user', '==', userRef)
             .where('product', '==', productRef)
-            .where('status', '==', BookingStatus.WAITING_FOR_PAYMENT)
+            .where('status', '==', BookingStatus.CHECKOUT)
             .get()
-            .then(({ empty }) => {
-                if (!empty) throw badData('product id is waiting for payment')
-            })
-            .then(() =>
-                bookingCol.add({
-                    createdOn: new Date(),
-                    product: productRef,
-                    status: BookingStatus.WAITING_FOR_PAYMENT,
-                    expiredOn: dayjs().add(10, 'day').toDate(),
-                    user: userRef,
-                    metadata: {
-                        nickname: '',
-                        schoolName: '',
-                        studentName: '',
-                    },
-                })
-            )
 
-        res.status(200).json({ status: 'success', booking_session: createdResult.path })
+        if (booking.empty) {
+            await bookingCol.add({
+                bookingCode,
+                createdOn: new Date(),
+                product: productRef,
+                status: BookingStatus.CHECKOUT,
+                expiredOn: dayjs().add(10, 'day').toDate(),
+                user: userRef,
+                metadata: {},
+            })
+        } else {
+            bookingCode = booking.docs[0].data().bookingCode
+        }
+
+        res.status(200).json({ status: 'success', bookingCode })
     } catch (error) {
         if (error instanceof Boom) {
             res.status(error.output.statusCode).json(error.output.payload)
