@@ -7,7 +7,6 @@ import type { AppProps } from 'next/app'
 import Head from 'next/head'
 
 import ReactModal from 'react-modal'
-import { UserCard } from '@/components/user/UserCard'
 
 ReactModal.setAppElement('#__next')
 
@@ -22,7 +21,6 @@ function MyApp({ Component, pageProps }: AppProps) {
                 <script charSet="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
             </Head>
             <RootContext>
-                <UserCard />
                 <Component {...pageProps} />
             </RootContext>
         </>

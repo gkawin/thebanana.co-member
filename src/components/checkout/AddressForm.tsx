@@ -21,7 +21,7 @@ export const AddressForm: React.VFC<AddressFormProps> = () => {
             {addresses.map(({ id, address }) => (
                 <li key={id} className="py-2">
                     <input
-                        className="self-center"
+                        className="form-radio self-center"
                         id={id}
                         type="radio"
                         value={id}
