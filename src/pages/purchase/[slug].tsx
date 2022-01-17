@@ -4,18 +4,20 @@ import Head from 'next/head'
 import { RegistrationSummary } from '@/components/checkout/RegistrationSummary'
 import adminSDK from '@/libs/adminSDK'
 import Model from '@/models/Model'
-import { BookingModel } from '@/models/BookingModel'
 import { serialize } from 'typescript-json-serializer'
 import { ProductModel } from '@/models/ProductModel'
 import { AddressForm } from '@/components/checkout/AddressForm'
 import { FormProvider, useForm } from 'react-hook-form'
 import Link from 'next/link'
 import { NewAddressForm } from '@/components/checkout/NewAddressForm'
-import { useAxios } from '@/core/RootContext'
-import { DatasetType } from '@/constants'
+// import { useAxios } from '@/core/RootContext'
+import { BookingStatus, DatasetType } from '@/constants'
+import { useRouter } from 'next/router'
+import { useEffect } from 'react'
 
 export type CheckoutPageProps = {
     product: ProductModel
+    bookingStatus: BookingStatus
 }
 
 export type CheckoutFormField = {
@@ -26,15 +28,21 @@ export type CheckoutFormField = {
     datasetType: DatasetType
 }
 
-const CheckoutPage: NextPage<CheckoutPageProps> = (props) => {
+const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
     const methods = useForm<CheckoutFormField>()
-    const { post } = useAxios()
+    // const { post } = useAxios()
+    const { push, replace, query } = useRouter()
 
     const onSubmit = async (payload: CheckoutFormField) => {
-        const { data } = await post('/api/checkout', payload)
-        if (data) {
-        }
+        // const { data } = await post('/api/checkout/payment', payload)
+        await push({ pathname: '/checkout/[bookingCode]/payment', query })
     }
+
+    useEffect(() => {
+        if (props.bookingStatus === BookingStatus.PAYMENT) {
+            // replace('/checkout/[bookingCode]/payment', { query })
+        }
+    }, [props.bookingStatus, query, replace])
 
     const isBookingNotExist = !props
     return (
@@ -57,7 +65,7 @@ const CheckoutPage: NextPage<CheckoutPageProps> = (props) => {
                             <NewAddressForm enabled />
                         </div>
                         <button type="submit" className="bg-indigo-500 rounded p-2 my-2 block w-full text-white">
-                            ไปยังหน้าชำระเงิน
+                            เลือกวิธีการชำระเงิน
                         </button>
                     </form>
                 </FormProvider>
@@ -75,37 +83,29 @@ const CheckoutPage: NextPage<CheckoutPageProps> = (props) => {
     )
 }
 
-export const getServerSideProps: GetServerSideProps<CheckoutPageProps> = async ({ query }) => {
+export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const { db } = adminSDK()
-    const bookingCode = query?.bookingCode
-
-    if (!bookingCode) {
-        return { notFound: true, props: null }
-    }
-
-    const bookingInfo = await db
-        .collection('booking')
-        .where('bookingCode', '==', bookingCode.toString())
-        .orderBy('createdOn', 'desc')
-        .withConverter(Model.convert(BookingModel))
-        .limit(1)
-        .get()
-        .then((ss) => ss.docs[0])
-
-    if (!bookingInfo.exists) {
-        return { props: null }
-    }
-
-    const product = await (bookingInfo.data().product as FirebaseFirestore.DocumentReference)
+    const slug = String(params.slug)
+    const productCol = await db
+        .collection('products')
         .withConverter(Model.convert(ProductModel))
+        .orderBy('slug')
+        .startAt(slug)
+        .endAt(`${slug}\uf8ff`)
         .get()
-        .then((data) => serialize(data.data()))
+
+    if (productCol.empty) {
+        return { notFound: true, props: { slug: null, product: null } } as any
+    }
+
+    const product = productCol.docs[0].data()
 
     return {
         props: {
-            product,
+            slug,
+            product: serialize(product),
         },
     }
 }
 
-export default CheckoutPage
+export default PurchasePage

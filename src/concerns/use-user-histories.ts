@@ -1,5 +1,6 @@
+import { BookingStatus } from '@/constants'
 import { useFirebase } from '@/core/RootContext'
-import { BookingModel, BookingStatus } from '@/models/BookingModel'
+import { BookingModel } from '@/models/BookingModel'
 import { collection, doc, onSnapshot, query, where } from 'firebase/firestore'
 import { useEffect, useMemo, useState } from 'react'
 

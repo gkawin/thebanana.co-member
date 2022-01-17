@@ -32,7 +32,7 @@ export const AddressForm: React.VFC<AddressFormProps> = () => {
                     </label>
                 </li>
             ))}
-            <small className="text-red-500">{errors.shippingAddress?.message}</small>
+            <small className="text-red-500">{errors.shippingAddressId?.message}</small>
         </ul>
     )
 }

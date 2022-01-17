@@ -1,4 +1,4 @@
-import { QueryDocumentSnapshot, FirestoreDataConverter as A } from 'firebase-admin/firestore'
+import { QueryDocumentSnapshot } from 'firebase-admin/firestore'
 import type { QueryDocumentSnapshot as ClientQuerySS, DocumentData, PartialWithFieldValue } from 'firebase/firestore'
 import { deserialize, serialize } from 'typescript-json-serializer'
 

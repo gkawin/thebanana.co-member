@@ -1,15 +1,16 @@
 import runsWithMethods from '@/middleware/runsWithMethods'
 import { NextApiHandler } from 'next'
-import { badData, badRequest, Boom } from '@hapi/boom'
+import { badRequest, Boom } from '@hapi/boom'
 
 import adminSDK from '@/libs/adminSDK'
 
 import dayjs from 'dayjs'
-import { BookingModel, BookingStatus } from '@/models/BookingModel'
+import { BookingModel } from '@/models/BookingModel'
 import { validate } from 'class-validator'
 import Model from '@/models/Model'
 import { ProductModel } from '@/models/ProductModel'
 import { UserModel } from '@/models/UserModel'
+import { BookingStatus } from '@/constants'
 
 const productCheckoutHandler: NextApiHandler = async (req, res) => {
     const { db } = adminSDK()

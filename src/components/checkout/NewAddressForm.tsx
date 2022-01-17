@@ -59,7 +59,7 @@ export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ enabled = true 
                 ...data,
                 createdOn: new Date(),
             }
-            const result = await addDoc(collection(db, 'users', uid, 'address'), newAddr)
+            await addDoc(collection(db, 'users', uid, 'address'), newAddr)
 
             setIsOpen(false)
         } catch (error) {
