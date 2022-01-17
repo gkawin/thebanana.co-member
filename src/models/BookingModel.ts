@@ -3,13 +3,7 @@ import { UserModel } from './UserModel'
 import { ProductModel } from './ProductModel'
 import { JsonProperty, Serializable } from 'typescript-json-serializer'
 import { withISOToServerTimestamp, withTimeToDate } from '@/utils/firestore'
-
-export enum BookingStatus {
-    PAYMENT = 'PAYMENT',
-    CHECKOUT = 'CHECKOUT',
-    PAID = 'PAID',
-    EXPIRED = 'EXPIRED',
-}
+import { BookingStatus } from '@/constants'
 
 @Serializable()
 export class BookingModel {

@@ -1,5 +1,5 @@
-import useUserInfo from '@/concerns/use-user-info'
-import { useEffect, useState } from 'react'
+import { useUserInfoContext } from '@/core/RootContext'
+import { useFormContext } from 'react-hook-form'
 
 export type CheckoutFormField = {
     studentName: string
@@ -8,19 +8,14 @@ export type CheckoutFormField = {
     shippingAddress: string
 }
 
-export type AddressFormProps = any
+export type AddressFormProps = {}
 
-export const AddressForm: React.VFC<AddressFormProps> = ({ register, errors }) => {
-    const { getAddrList } = useUserInfo()
-    const [addresses, setAddresses] = useState<{ id: string; address: string }[]>([])
-
-    useEffect(() => {
-        getAddrList().then((doc) => {
-            setAddresses(doc.docs.map((item) => ({ id: item.id, address: item.data().address })))
-        })
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
+export const AddressForm: React.VFC<AddressFormProps> = () => {
+    const {
+        register,
+        formState: { errors },
+    } = useFormContext()
+    const { addresses } = useUserInfoContext()
     return (
         <ul>
             {addresses.map(({ id, address }) => (
@@ -37,7 +32,7 @@ export const AddressForm: React.VFC<AddressFormProps> = ({ register, errors }) =
                     </label>
                 </li>
             ))}
-            <small className="text-red-500">{errors.shippingAddressId?.message}</small>
+            <small className="text-red-500">{errors.shippingAddress?.message}</small>
         </ul>
     )
 }

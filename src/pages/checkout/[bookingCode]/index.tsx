@@ -8,9 +8,11 @@ import { BookingModel } from '@/models/BookingModel'
 import { serialize } from 'typescript-json-serializer'
 import { ProductModel } from '@/models/ProductModel'
 import { AddressForm } from '@/components/checkout/AddressForm'
-import { useForm } from 'react-hook-form'
+import { FormProvider, useForm } from 'react-hook-form'
 import Link from 'next/link'
 import { NewAddressForm } from '@/components/checkout/NewAddressForm'
+import { useAxios } from '@/core/RootContext'
+import { DatasetType } from '@/constants'
 
 export type CheckoutPageProps = {
     product: ProductModel
@@ -21,16 +23,17 @@ export type CheckoutFormField = {
     school: string
     nickname: string
     shippingAddressId: string
+    datasetType: DatasetType
 }
 
 const CheckoutPage: NextPage<CheckoutPageProps> = (props) => {
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<CheckoutFormField>()
-    const onSubmit = async (data: CheckoutFormField) => {
-        console.log(data)
+    const methods = useForm<CheckoutFormField>()
+    const { post } = useAxios()
+
+    const onSubmit = async (payload: CheckoutFormField) => {
+        const { data } = await post('/api/checkout', payload)
+        if (data) {
+        }
     }
 
     const isBookingNotExist = !props
@@ -41,21 +44,23 @@ const CheckoutPage: NextPage<CheckoutPageProps> = (props) => {
             </Head>
             <h2 className="text-sub-title font-semibold">สรุปรายการลงทะเบียน</h2>
             {!isBookingNotExist && (
-                <form onSubmit={handleSubmit(onSubmit)} className="grid gap-y-4">
-                    <RegistrationSummary name={props.product.name} price={props.product.price} />
-                    <div className="p-4 rounded shadow-md border flex flex-col">
-                        <h2 className="text-2xl font-semibold">รายละเอียดผู้เรียน</h2>
-                        <BookingInfoForm register={register} errors={errors} />
-                    </div>
-                    <div className="p-4 rounded shadow-md border">
-                        <h2 className="text-sub-title font-semibold">ที่อยู่ในการจัดส่งเอกสาร</h2>
-                        <AddressForm register={register} errors={errors} />
-                        <NewAddressForm enabled />
-                    </div>
-                    <button type="submit" className="bg-indigo-500 rounded p-2 my-2 block w-full text-white">
-                        ไปยังหน้าชำระเงิน
-                    </button>
-                </form>
+                <FormProvider {...methods}>
+                    <form onSubmit={methods.handleSubmit(onSubmit)} className="grid gap-y-4">
+                        <RegistrationSummary name={props.product.name} price={props.product.price} />
+                        <div className="p-4 rounded shadow-md border flex flex-col">
+                            <h2 className="text-2xl font-semibold">รายละเอียดผู้เรียน</h2>
+                            <BookingInfoForm />
+                        </div>
+                        <div className="p-4 rounded shadow-md border">
+                            <h2 className="text-sub-title font-semibold">ที่อยู่ในการจัดส่งเอกสาร</h2>
+                            <AddressForm />
+                            <NewAddressForm enabled />
+                        </div>
+                        <button type="submit" className="bg-indigo-500 rounded p-2 my-2 block w-full text-white">
+                            ไปยังหน้าชำระเงิน
+                        </button>
+                    </form>
+                </FormProvider>
             )}
 
             {isBookingNotExist && (

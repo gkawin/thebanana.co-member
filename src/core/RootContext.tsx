@@ -2,10 +2,11 @@ import { useContext, useEffect, useMemo, useState, createContext, useCallback } 
 import { initializeApp, getApp, getApps } from 'firebase/app'
 
 import Axios, { AxiosInstance } from 'axios'
-import { getFirestore } from 'firebase/firestore'
+import { collection, doc, getDoc, getDocs, getFirestore, orderBy, query } from 'firebase/firestore'
 import { getAuth, signInWithCustomToken } from 'firebase/auth'
 import { logEvent, getAnalytics } from 'firebase/analytics'
 import { SpinLoading } from '@/components/portal/SpinLoading'
+import { UserModel } from '@/models/UserModel'
 
 const liffId = '1653826193-QbmamAo0'
 const firebaseConfig = {
@@ -19,7 +20,10 @@ const firebaseConfig = {
     measurementId: 'G-KQ0RJ6ZTG5',
 }
 
-export type AppContext = { $axios?: AxiosInstance }
+export type AppContext = {
+    $axios?: AxiosInstance
+    $userInfo: { addresses: any[]; schools: any[]; personal: UserModel }
+}
 const appContext = createContext<AppContext>(null)
 const loadingContext = createContext<{ loading: boolean; setLoading: (val: boolean) => void }>(null)
 
@@ -38,6 +42,11 @@ export const useFirebase = () =>
             auth: getAuth(app),
         }
     }, [])
+
+export const useUserInfoContext = () => {
+    const ctx = useContext(appContext)
+    return useMemo(() => ctx.$userInfo, [ctx.$userInfo])
+}
 
 export const useLoading = (init?: boolean) => {
     const loadingCtx = useContext(loadingContext)
@@ -86,6 +95,20 @@ const RootContext: React.FC = ({ children }) => {
         }
     }, [createAxios])
 
+    const createdFetchingUserInfo = useCallback(async (uid: string) => {
+        const db = getFirestore()
+        const schoolsRef = getDocs(query(collection(db, 'users', uid, 'school'), orderBy('createdOn', 'desc')))
+        const addressesRef = getDocs(query(collection(db, 'users', uid, 'address'), orderBy('createdOn', 'desc')))
+        const personalRef = getDoc(doc(db, 'users', uid))
+
+        const [addresses, schools, personal] = await Promise.all([addressesRef, schoolsRef, personalRef])
+        return {
+            addresses: addresses.empty ? [] : addresses.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
+            personal: personal.data() as UserModel,
+            schools: schools.empty ? [] : schools.docs.map((doc_1) => ({ id: doc_1.id, ...doc_1.data() })),
+        }
+    }, [])
+
     useEffect(() => {
         let unsubscribe = () => {}
         if (getApps().length === 0) {
@@ -103,7 +126,8 @@ const RootContext: React.FC = ({ children }) => {
                 } else {
                     console.log(user)
                     const $axios = await createAxios()
-                    setContext({ $axios })
+                    const $userInfo = await createdFetchingUserInfo(user.uid)
+                    setContext({ $axios, $userInfo })
                     setLoading(false)
                 }
             })
@@ -116,8 +140,10 @@ const RootContext: React.FC = ({ children }) => {
 
     return (
         <loadingContext.Provider value={{ loading, setLoading }}>
-            <SpinLoading global />
-            <appContext.Provider value={context}>{!!context && children}</appContext.Provider>
+            <appContext.Provider value={context}>
+                <SpinLoading global />
+                {!!context && children}
+            </appContext.Provider>
         </loadingContext.Provider>
     )
 }
