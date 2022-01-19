@@ -3,9 +3,7 @@ import { useUserInfoContext } from '@/core/RootContext'
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 
-export type BookingInfoFormProps = any
-
-export const BookingInfoForm: React.VFC<BookingInfoFormProps> = () => {
+export const BookingInfoCard: React.VFC = () => {
     const { personal, schools } = useUserInfoContext()
     const {
         register,
@@ -30,7 +28,8 @@ export const BookingInfoForm: React.VFC<BookingInfoFormProps> = () => {
 
     const isReadonly = datasetType === DatasetType.EXISITING
     return (
-        <>
+        <div className="p-4 rounded shadow-md border flex flex-col">
+            <h2 className="text-2xl font-semibold">รายละเอียดผู้เรียน</h2>
             <div className="py-2">
                 <span>
                     <input
@@ -87,6 +86,6 @@ export const BookingInfoForm: React.VFC<BookingInfoFormProps> = () => {
                 {...register('school', { required: 'กรุณาระบุ' })}
             />
             <small className="text-red-500 mb-2">{errors.school?.message}</small>
-        </>
+        </div>
     )
 }

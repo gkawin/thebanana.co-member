@@ -1,19 +1,15 @@
-import { BookingInfoForm } from '@/components/checkout/BookingInfoForm'
 import { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
-import { RegistrationSummary } from '@/components/checkout/RegistrationSummary'
 import adminSDK from '@/libs/adminSDK'
 import Model from '@/models/Model'
 import { serialize } from 'typescript-json-serializer'
 import { ProductModel } from '@/models/ProductModel'
-import { AddressForm } from '@/components/checkout/AddressForm'
 import { FormProvider, useForm } from 'react-hook-form'
 import Link from 'next/link'
-import { NewAddressForm } from '@/components/checkout/NewAddressForm'
-// import { useAxios } from '@/core/RootContext'
 import { BookingStatus, DatasetType } from '@/constants'
-import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { CheckoutSummary } from '@/components/checkout-flow/CheckoutSummary'
+import { PaymentProvider } from '@/core/PaymentContext'
+import { SelectPaymentMethod } from '@/components/checkout-flow/SelectPaymentMethod'
 
 export type CheckoutPageProps = {
     product: ProductModel
@@ -26,25 +22,15 @@ export type CheckoutFormField = {
     nickname: string
     shippingAddressId: string
     datasetType: DatasetType
+    paymentMethod: string
 }
 
 const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
     const methods = useForm<CheckoutFormField>()
-    // const { post } = useAxios()
-    const { push, replace, query } = useRouter()
-
-    const onSubmit = async (payload: CheckoutFormField) => {
-        // const { data } = await post('/api/checkout/payment', payload)
-        await push({ pathname: '/checkout/[bookingCode]/payment', query })
-    }
-
-    useEffect(() => {
-        if (props.bookingStatus === BookingStatus.PAYMENT) {
-            // replace('/checkout/[bookingCode]/payment', { query })
-        }
-    }, [props.bookingStatus, query, replace])
 
     const isBookingNotExist = !props
+    const onSubmitBookingInfo = async () => {}
+
     return (
         <div className="p-4">
             <Head>
@@ -52,23 +38,14 @@ const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
             </Head>
             <h2 className="text-sub-title font-semibold">สรุปรายการลงทะเบียน</h2>
             {!isBookingNotExist && (
-                <FormProvider {...methods}>
-                    <form onSubmit={methods.handleSubmit(onSubmit)} className="grid gap-y-4">
-                        <RegistrationSummary name={props.product.name} price={props.product.price} />
-                        <div className="p-4 rounded shadow-md border flex flex-col">
-                            <h2 className="text-2xl font-semibold">รายละเอียดผู้เรียน</h2>
-                            <BookingInfoForm />
-                        </div>
-                        <div className="p-4 rounded shadow-md border">
-                            <h2 className="text-sub-title font-semibold">ที่อยู่ในการจัดส่งเอกสาร</h2>
-                            <AddressForm />
-                            <NewAddressForm enabled />
-                        </div>
-                        <button type="submit" className="bg-indigo-500 rounded p-2 my-2 block w-full text-white">
-                            เลือกวิธีการชำระเงิน
-                        </button>
-                    </form>
-                </FormProvider>
+                <PaymentProvider productId={props.product.id}>
+                    <FormProvider {...methods}>
+                        <form onSubmit={methods.handleSubmit(onSubmitBookingInfo)} className="grid gap-y-4">
+                            <CheckoutSummary product={props.product} />
+                            <SelectPaymentMethod />
+                        </form>
+                    </FormProvider>
+                </PaymentProvider>
             )}
 
             {isBookingNotExist && (

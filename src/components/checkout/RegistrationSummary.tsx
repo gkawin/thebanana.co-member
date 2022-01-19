@@ -1,5 +1,3 @@
-import { CheckoutProductCard } from './CheckoutProductCard'
-
 export type RegistrationSummaryProps = { name: string; price: number }
 
 const calcVAT = (price: number, ratio = 0.07) => Number(price * ratio)
@@ -12,7 +10,11 @@ const withPricing = (price: number) =>
 export const RegistrationSummary: React.VFC<RegistrationSummaryProps> = ({ name, price = 0 }) => {
     return (
         <div className="p-4 border shadow-md rounded">
-            <CheckoutProductCard pricing={withPricing(price)} productName={name} />
+            <div className="grid grid-rows-2 grid-cols-2 gap-4 ">
+                <div className=" text-lg col-span-2">{name}</div>
+                <div className="self-end">ราคา/คน</div>
+                <div className="self-end justify-self-end font-semibold text-black">{withPricing(price)}</div>
+            </div>
 
             <div className="border w-full"></div>
 

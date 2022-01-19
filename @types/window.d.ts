@@ -8,5 +8,7 @@ declare global {
         recaptchaWidgetId?: any
         grecaptcha?: any
         liff?: Liff
+        Omise?: any
+        OmiseCard?: any
     }
 }

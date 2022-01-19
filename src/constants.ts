@@ -9,3 +9,14 @@ export enum BookingStatus {
     PAID = 'PAID',
     EXPIRED = 'EXPIRED',
 }
+
+export enum PaymentStep {
+    INIT,
+    SELECT_PAYMENT_METHOD,
+}
+
+export enum PaymentMethod {
+    BANK_TRANSFER = 'โอนเข้าบัญชี',
+    PROMPT_PAY = 'พร้อมเพย์',
+    CREDIT_CARD = 'บัตรเครดิต/เดบิต',
+}
