@@ -9,7 +9,8 @@ import Link from 'next/link'
 import { BookingStatus, DatasetType } from '@/constants'
 import { CheckoutSummary } from '@/components/checkout-flow/CheckoutSummary'
 import { PaymentProvider } from '@/core/PaymentContext'
-import { SelectPaymentMethod } from '@/components/checkout-flow/SelectPaymentMethod'
+import { KeyofPaymentMethods, SelectPaymentMethod } from '@/components/checkout-flow/SelectPaymentMethod'
+import { PaymentChargesButton } from '@/components/checkout/PaymentChargesButton'
 
 export type CheckoutPageProps = {
     product: ProductModel
@@ -22,15 +23,13 @@ export type CheckoutFormField = {
     nickname: string
     shippingAddressId: string
     datasetType: DatasetType
-    paymentMethod: string
+    paymentMethod: KeyofPaymentMethods
 }
 
 const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
     const methods = useForm<CheckoutFormField>()
 
     const isBookingNotExist = !props
-    const onSubmitBookingInfo = async () => {}
-
     return (
         <div className="p-4">
             <Head>
@@ -40,9 +39,10 @@ const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
             {!isBookingNotExist && (
                 <PaymentProvider productId={props.product.id}>
                     <FormProvider {...methods}>
-                        <form onSubmit={methods.handleSubmit(onSubmitBookingInfo)} className="grid gap-y-4">
+                        <form className="grid gap-y-4">
                             <CheckoutSummary product={props.product} />
                             <SelectPaymentMethod />
+                            <PaymentChargesButton product={props.product} />
                         </form>
                     </FormProvider>
                 </PaymentProvider>

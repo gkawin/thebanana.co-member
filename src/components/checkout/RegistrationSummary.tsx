@@ -1,11 +1,8 @@
+import { withPricing } from '@/utils/payment'
+
 export type RegistrationSummaryProps = { name: string; price: number }
 
 const calcVAT = (price: number, ratio = 0.07) => Number(price * ratio)
-const withPricing = (price: number) =>
-    `${(price ?? 0).toLocaleString('th', {
-        minimumFractionDigits: 2,
-        minimumIntegerDigits: 1,
-    })} บาท`
 
 export const RegistrationSummary: React.VFC<RegistrationSummaryProps> = ({ name, price = 0 }) => {
     return (

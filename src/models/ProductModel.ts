@@ -42,6 +42,7 @@ export class ProductModel {
     @JsonProperty()
     price: number
 
+    @JsonProperty()
     get pricing(): string {
         return `${(this.price || 0).toLocaleString('th', { minimumFractionDigits: 2, minimumIntegerDigits: 2 })} บาท`
     }
