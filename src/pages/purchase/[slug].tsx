@@ -29,6 +29,8 @@ export type CheckoutFormField = {
 const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
     const methods = useForm<CheckoutFormField>()
 
+    const handleChargedResult = () => {}
+
     const isBookingNotExist = !props
     return (
         <div className="p-4">
@@ -42,7 +44,7 @@ const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
                         <form className="grid gap-y-4">
                             <CheckoutSummary product={props.product} />
                             <SelectPaymentMethod />
-                            <PaymentChargesButton product={props.product} />
+                            <PaymentChargesButton product={props.product} onChargeResult={handleChargedResult} />
                         </form>
                     </FormProvider>
                 </PaymentProvider>

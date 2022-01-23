@@ -9,7 +9,7 @@ export type PaymentContextProps = {
     step: PaymentStep
     productId: string
     setPaymentStep: (step: PaymentStep) => void
-    createOmiseCharges: (product: ProductModel) => void
+    createOmiseCharges: <T = object>(product: ProductModel) => Promise<T>
 }
 
 const PaymentContext = createContext<PaymentContextProps>(null)
@@ -18,26 +18,30 @@ export const PaymentProvider: React.FC<{ productId: string }> = ({ children, pro
     const [step, setPaymentStep] = useState<PaymentStep>(PaymentStep.INIT)
     const { post } = useAxios()
 
-    const createOmiseCharges: PaymentContextProps['createOmiseCharges'] = useCallback(
-        (product) => {
+    const createOmiseCharges = useCallback<PaymentContextProps['createOmiseCharges']>(
+        (product: ProductModel) => {
             if (!(window.Omise && window.OmiseCard)) throw new Error('need initialized OmiseJs first.')
 
             window.OmiseCard.configure({
                 publicKey: 'pkey_test_5q52539zzmb9psl4k9p',
             })
 
-            window.OmiseCard.open({
-                amount: product.price * 100,
-                currency: 'THB',
-                defaultPaymentMethod: 'credit_card',
-                onCreateTokenSuccess: async (nonce: string) => {
-                    const isToken = nonce.startsWith('tokn_')
-                    await post('/api/payment/charge', {
-                        token: isToken ? nonce : null,
-                        source: !isToken ? nonce : null,
-                        product: serialize(product),
-                    })
-                },
+            return new Promise((resolve, reject) => {
+                window.OmiseCard.open({
+                    amount: product.price * 100,
+                    frameLabel: 'บริษัท วันบุ๊ค จำกัด',
+                    locale: 'th',
+                    onCreateTokenSuccess: async (nonce: string) => {
+                        const isToken = nonce.startsWith('tokn_')
+                        post('/api/payment/charge', {
+                            token: isToken ? nonce : null,
+                            source: !isToken ? nonce : null,
+                            product: serialize(product),
+                        })
+                            .then(({ data }) => resolve(data))
+                            .catch(reject)
+                    },
+                })
             })
         },
         [post]

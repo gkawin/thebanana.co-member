@@ -1,5 +1,6 @@
 // import adminSDK from '@/libs/adminSDK'
 import runsWithMethods from '@/middleware/runsWithMethods'
+import { ProductModel } from '@/models/ProductModel'
 import { OmiseService } from '@/services/omise.service'
 import resolver from '@/services/resolver'
 import { badRequest, Boom } from '@hapi/boom'
@@ -17,7 +18,7 @@ class Report {
     main: NextApiHandler = async (req, res) => {
         await runsWithMethods(req, res, { methods: ['POST'] })
         try {
-            const { token, source, product } = req.body
+            const { token, source, product } = req.body as { product: ProductModel; token?: string; source?: string }
             ok(token || product, badRequest())
             const chargedResult = await this.omise.charges.create({
                 amount: product.price * 100,
