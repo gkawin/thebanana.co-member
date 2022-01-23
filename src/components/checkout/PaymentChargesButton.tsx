@@ -6,6 +6,7 @@ import { withPricing } from '@/utils/payment'
 import { useFormContext } from 'react-hook-form'
 
 export type PaymentChargesButtonProps = { product: ProductModel; onChargeResult: any }
+
 export const PaymentChargesButton: React.VFC<PaymentChargesButtonProps> = ({ product, onChargeResult }) => {
     const { step, setPaymentStep, createOmiseCharges } = usePaymentContext()
     const { handleSubmit } = useFormContext<CheckoutFormField>()
@@ -15,7 +16,7 @@ export const PaymentChargesButton: React.VFC<PaymentChargesButtonProps> = ({ pro
             setPaymentStep(PaymentStep.SELECT_PAYMENT_METHOD)
         } else {
             if (data.paymentMethod === PaymentMethod[PaymentMethod.CREDIT_CARD]) {
-                createOmiseCharges(product).then(onChargeResult)
+                createOmiseCharges(data).then(onChargeResult)
             }
         }
     }

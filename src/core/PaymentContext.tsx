@@ -1,25 +1,27 @@
 import { PaymentStep } from '@/constants'
-import { ProductModel } from '@/models/ProductModel'
+import { CheckoutFormField } from '@/pages/purchase/[slug]'
 import Script from 'next/script'
 import { createContext, useCallback, useContext, useMemo, useState } from 'react'
-import { serialize } from 'typescript-json-serializer'
 import { useAxios } from './RootContext'
 
 export type PaymentContextProps = {
     step: PaymentStep
     productId: string
     setPaymentStep: (step: PaymentStep) => void
-    createOmiseCharges: <T = object>(product: ProductModel) => Promise<T>
+    createOmiseCharges: <T = object>(formData: CheckoutFormField) => Promise<T>
 }
+
+export type PaymentProviderProps = { productId: string; amount: number }
 
 const PaymentContext = createContext<PaymentContextProps>(null)
 
-export const PaymentProvider: React.FC<{ productId: string }> = ({ children, productId }) => {
+export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children, productId, amount = 0 }) => {
     const [step, setPaymentStep] = useState<PaymentStep>(PaymentStep.INIT)
     const { post } = useAxios()
 
     const createOmiseCharges = useCallback<PaymentContextProps['createOmiseCharges']>(
-        (product: ProductModel) => {
+        (formData) => {
+            if (!formData) throw new Error('payload error')
             if (!(window.Omise && window.OmiseCard)) throw new Error('need initialized OmiseJs first.')
 
             window.OmiseCard.configure({
@@ -28,15 +30,15 @@ export const PaymentProvider: React.FC<{ productId: string }> = ({ children, pro
 
             return new Promise((resolve, reject) => {
                 window.OmiseCard.open({
-                    amount: product.price * 100,
+                    amount: amount * 100,
                     frameLabel: 'บริษัท วันบุ๊ค จำกัด',
                     locale: 'th',
-                    onCreateTokenSuccess: async (nonce: string) => {
+                    onCreateTokenSuccess: (nonce: string) => {
                         const isToken = nonce.startsWith('tokn_')
                         post('/api/payment/charge', {
+                            ...formData,
                             token: isToken ? nonce : null,
                             source: !isToken ? nonce : null,
-                            product: serialize(product),
                         })
                             .then(({ data }) => resolve(data))
                             .catch(reject)
@@ -44,7 +46,7 @@ export const PaymentProvider: React.FC<{ productId: string }> = ({ children, pro
                 })
             })
         },
-        [post]
+        [amount, post]
     )
 
     return (

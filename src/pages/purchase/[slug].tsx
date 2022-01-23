@@ -11,6 +11,8 @@ import { CheckoutSummary } from '@/components/checkout-flow/CheckoutSummary'
 import { PaymentProvider } from '@/core/PaymentContext'
 import { KeyofPaymentMethods, SelectPaymentMethod } from '@/components/checkout-flow/SelectPaymentMethod'
 import { PaymentChargesButton } from '@/components/checkout/PaymentChargesButton'
+import { useEffect } from 'react'
+import { useFirebase } from '@/core/RootContext'
 
 export type CheckoutPageProps = {
     product: ProductModel
@@ -24,12 +26,21 @@ export type CheckoutFormField = {
     shippingAddressId: string
     datasetType: DatasetType
     paymentMethod: KeyofPaymentMethods
+    userId: string
+    productId: string
 }
 
 const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
     const methods = useForm<CheckoutFormField>()
+    const { auth } = useFirebase()
 
     const handleChargedResult = () => {}
+    useEffect(() => {
+        if (auth.currentUser.uid) {
+            methods.register('userId', { value: auth.currentUser.uid })
+            methods.register('productId', { value: props.product.id })
+        }
+    }, [auth.currentUser.uid, methods, props.product.id])
 
     const isBookingNotExist = !props
     return (
@@ -39,7 +50,7 @@ const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
             </Head>
             <h2 className="text-sub-title font-semibold">สรุปรายการลงทะเบียน</h2>
             {!isBookingNotExist && (
-                <PaymentProvider productId={props.product.id}>
+                <PaymentProvider productId={props.product.id} amount={props.product.price}>
                     <FormProvider {...methods}>
                         <form className="grid gap-y-4">
                             <CheckoutSummary product={props.product} />

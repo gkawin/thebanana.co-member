@@ -18,9 +18,6 @@ export class BookingModel {
             .join('')}`
 
     @JsonProperty()
-    bookingCode: string
-
-    @JsonProperty()
     product: FirebaseFirestore.DocumentReference<ProductModel> | DocumentReference<ProductModel>
 
     @JsonProperty()
