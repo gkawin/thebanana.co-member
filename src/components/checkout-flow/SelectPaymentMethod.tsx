@@ -5,6 +5,7 @@ import { useFormContext } from 'react-hook-form'
 import JCBImage from '@/public/jcb.png'
 import MasterCardImage from '@/public/mastercard.png'
 import VisaImage from '@/public/visa.png'
+import PromtPayLogo from '@/public/promt-pay-logo.png'
 
 export type KeyofPaymentMethods = keyof typeof PaymentMethod
 
@@ -14,32 +15,47 @@ export const SelectPaymentMethod: React.VFC = () => {
         formState: { errors },
     } = useFormContext()
     const { step } = usePaymentContext()
+    if (step !== PaymentStep.SELECT_PAYMENT_METHOD) return null
 
-    const renderAcceptedCreditCardLogo = () => {
+    const renderAcceptedCreditCardLogo = (label: KeyofPaymentMethods) => {
         return (
-            <div className="flex space-x-1">
-                <span>
-                    <Image src={JCBImage} alt="jcb" width={40} height={25} />
-                </span>
-                <span>
-                    <Image src={MasterCardImage} alt="mastercard" width={40} height={25} />
-                </span>
-                <span>
-                    <Image src={VisaImage} alt="visa" width={40} height={25} />
-                </span>
-            </div>
+            label === 'CREDIT_CARD' && (
+                <div className="flex space-x-1">
+                    <span>
+                        <Image src={JCBImage} alt="jcb" width={40} height={25} />
+                    </span>
+                    <span>
+                        <Image src={MasterCardImage} alt="mastercard" width={40} height={25} />
+                    </span>
+                    <span>
+                        <Image src={VisaImage} alt="visa" width={40} height={25} />
+                    </span>
+                </div>
+            )
         )
     }
 
-    const renderBankTrasferInfo = () => {
+    const renderBankTrasferInfo = (label: KeyofPaymentMethods) => {
         return (
-            <div className="flex space-x-1 text-sm text-gray-500 ">
-                <p>กรุณาโอนเงินไปที่บัญชี</p>
-            </div>
+            label === 'BANK_TRANSFER' && (
+                <div className="flex space-x-1 text-sm text-gray-500 ">
+                    <p>กรุณาโอนเงินไปที่บัญชี</p>
+                </div>
+            )
         )
     }
 
-    return step !== PaymentStep.SELECT_PAYMENT_METHOD ? null : (
+    const renderPromptPay = (label: KeyofPaymentMethods) => {
+        return (
+            label === 'PROMPT_PAY' && (
+                <div className="flex space-x-1 text-sm text-gray-500 ">
+                    <Image src={PromtPayLogo} alt="prompt-pay" width={48} height={48} />
+                </div>
+            )
+        )
+    }
+
+    return (
         <div className="p-4 rounded shadow-md border grid gap-y-4">
             <ul className="grid gap-y-4">
                 {Object.values(PaymentMethod)
@@ -56,8 +72,9 @@ export const SelectPaymentMethod: React.VFC = () => {
                             />
                             <label htmlFor={label}>
                                 {PaymentMethodLabel.get(PaymentMethod[label as KeyofPaymentMethods])}
-                                {label === PaymentMethod[PaymentMethod.CREDIT_CARD] && renderAcceptedCreditCardLogo()}
-                                {label === PaymentMethod[PaymentMethod.BANK_TRANSFER] && renderBankTrasferInfo()}
+                                {renderAcceptedCreditCardLogo(label as KeyofPaymentMethods)}
+                                {renderBankTrasferInfo(label as KeyofPaymentMethods)}
+                                {renderPromptPay(label as KeyofPaymentMethods)}
                             </label>
                         </li>
                     ))}

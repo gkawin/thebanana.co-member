@@ -9,8 +9,9 @@ export type CheckoutSummaryProps = { product: ProductModel }
 
 export const CheckoutSummary: React.VFC<CheckoutSummaryProps> = ({ product }) => {
     const { step } = usePaymentContext()
+    if (step !== PaymentStep.INIT) return null
 
-    return step !== PaymentStep.INIT ? null : (
+    return (
         <>
             <RegistrationSummary name={product.name} price={product.price} />
             <BookingInfoCard />
