@@ -9,7 +9,8 @@ import { validate } from 'class-validator'
 import { deserialize } from 'typescript-json-serializer'
 import adminSDK from '@/libs/adminSDK'
 import Model from '@/models/Model'
-import { PaymentChargeBody } from '@/dtos/PaymentChargeBody.dto'
+import { PaymentChargeBodyModel } from '@/models/PaymentChargeBody.model'
+import runWithAuthorization from '@/middleware/runWithAuthorization'
 
 @injectable()
 class PaymentChargeApi {
@@ -19,10 +20,11 @@ class PaymentChargeApi {
     }
 
     main: NextApiHandler = async (req, res) => {
+        await runWithAuthorization(req, res, {})
         await runsWithMethods(req, res, { methods: ['POST'] })
         try {
             if (!req.body) throw badRequest()
-            const payload = deserialize(JSON.stringify(req.body), PaymentChargeBody)
+            const payload = deserialize(JSON.stringify(req.body), PaymentChargeBodyModel)
 
             const hasErrors = await validate(payload)
             if (hasErrors.length > 0) {

@@ -4,7 +4,7 @@ import { IsEnum, IsString, ValidateIf } from 'class-validator'
 import { JsonProperty, Serializable } from 'typescript-json-serializer'
 
 @Serializable()
-export class PaymentChargeBody implements CheckoutFormField {
+export class PaymentChargeBodyModel implements CheckoutFormField {
     @JsonProperty()
     @IsString()
     studentName: string
@@ -38,11 +38,11 @@ export class PaymentChargeBody implements CheckoutFormField {
     userId: string
 
     @JsonProperty()
-    @ValidateIf((o: PaymentChargeBody) => o.token !== null)
+    @ValidateIf((o: PaymentChargeBodyModel) => o.token !== null)
     @IsString()
     token: string
 
     @JsonProperty()
-    @ValidateIf((o: PaymentChargeBody) => o.source !== null)
+    @ValidateIf((o: PaymentChargeBodyModel) => o.source !== null)
     source: string
 }
