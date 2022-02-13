@@ -1,19 +1,5 @@
 {
-    "hosting": {
-        "public": "public",
-        "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-        "rewrites": [
-            {
-                "source": "**",
-                "function": "nextjsFunc"
-            }
-        ],
-        "run": {
-            "region": "ap-southeast1"
-        }
-    },
-    "functions": {
-        "source": ".",
-        "runtime": "nodejs14"
-    }
+  "functions": {
+    "predeploy": "npm --prefix \"$RESOURCE_DIR\" run build"
+  }
 }

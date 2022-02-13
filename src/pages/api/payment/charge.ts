@@ -11,6 +11,9 @@ import adminSDK from '@/libs/adminSDK'
 import Model from '@/models/Model'
 import { PaymentChargeBodyModel } from '@/models/PaymentChargeBody.model'
 import runWithAuthorization from '@/middleware/runWithAuthorization'
+import { BookingModel } from '@/models/BookingModel'
+import { UserModel } from '@/models/UserModel'
+import { BookingStatus, SourceOfFund } from '@/constants'
 
 @injectable()
 class PaymentChargeApi {
@@ -31,26 +34,58 @@ class PaymentChargeApi {
                 throw badRequest(hasErrors.toString())
             }
 
-            const productRef = this.#db
-                .collection('products')
-                .doc(payload.productId)
-                .withConverter(Model.convert(ProductModel))
-            const product = (await productRef.get()).data()
-            const { token, source, ...props } = payload
+            const { token, source, productId, userId, shippingAddressId, ...metadata } = payload
 
-            const chargedResult = await this.omise.charges.create({
-                amount: product.price * 100,
-                currency: 'thb',
-                card: token,
-                source,
-                description: product.name,
+            const productRef = this.#db.collection('products').doc(productId).withConverter(Model.convert(ProductModel))
+            const userRef = this.#db.collection('users').doc(userId).withConverter(Model.convert(UserModel))
+            const bookingRef = this.#db.collection('booking').withConverter(Model.convert(BookingModel))
+            const addressRef = userRef.collection('address').doc(shippingAddressId)
+
+            const product = (await productRef.get()).data()
+            const bookingCode = BookingModel.generateBookingCode()
+
+            let bookingMetadata: BookingModel = {
+                bookingCode,
+                billingId: null,
+                sourceOfFund: null,
+                createdOn: new Date(),
+                expiredOn: null,
+                product: productRef,
+                user: userRef,
+                status: BookingStatus.CHECKOUT,
                 metadata: {
-                    ...props,
-                    effectiveDate: product.effectiveDate.toISOString(),
-                    expiredDate: product.expiredDate.toISOString(),
+                    ...metadata,
+                    shippingAddressId: addressRef,
                 },
-            })
-            res.status(200).json({ chargedResult: chargedResult.id, status: 'success' })
+            }
+
+            try {
+                const chargedResult = await this.omise.charges.create({
+                    amount: product.price * 100,
+                    currency: 'thb',
+                    card: token,
+                    source,
+                    description: product.name,
+                    metadata: {
+                        bookingCode,
+                        effectiveDate: product.effectiveDate.toISOString(),
+                        expiredDate: product.expiredDate.toISOString(),
+                    },
+                })
+                bookingMetadata = {
+                    ...bookingMetadata,
+                    billingId: chargedResult.id,
+                    sourceOfFund: SourceOfFund.OMISE,
+                    status: BookingStatus.PAID,
+                }
+            } catch (error) {
+                console.error(error)
+                bookingMetadata = { ...bookingMetadata, status: BookingStatus.ERROR }
+            }
+
+            await bookingRef.doc(bookingCode).create(bookingMetadata)
+
+            res.status(200).json({ status: 'success' })
         } catch (error) {
             if (error instanceof Boom) {
                 res.status(error.output.statusCode).json(error.output.payload)

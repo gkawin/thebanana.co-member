@@ -8,6 +8,7 @@ export enum BookingStatus {
     CHECKOUT = 'CHECKOUT',
     PAID = 'PAID',
     EXPIRED = 'EXPIRED',
+    ERROR = 'ERROR',
 }
 
 export enum PaymentStep {
@@ -26,3 +27,7 @@ export const PaymentMethodLabel = new Map<PaymentMethod, string>([
     [PaymentMethod.PROMPT_PAY, 'พร้อมเพย์'],
     [PaymentMethod.CREDIT_CARD, 'บัตรเครดิต/เดบิต'],
 ])
+
+export enum SourceOfFund {
+    OMISE = 'OMISE',
+}

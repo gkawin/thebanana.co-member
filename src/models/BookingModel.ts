@@ -3,7 +3,7 @@ import { UserModel } from './UserModel'
 import { ProductModel } from './ProductModel'
 import { JsonProperty, Serializable } from 'typescript-json-serializer'
 import { withISOToServerTimestamp, withTimeToDate } from '@/utils/firestore'
-import { BookingStatus } from '@/constants'
+import { BookingStatus, SourceOfFund } from '@/constants'
 
 @Serializable()
 export class BookingModel {
@@ -16,6 +16,15 @@ export class BookingModel {
                 return 0.5 - Math.random()
             })
             .join('')}`
+
+    @JsonProperty()
+    bookingCode: string
+
+    @JsonProperty()
+    billingId: string
+
+    @JsonProperty()
+    sourceOfFund: SourceOfFund
 
     @JsonProperty()
     product: FirebaseFirestore.DocumentReference<ProductModel> | DocumentReference<ProductModel>
