@@ -5,7 +5,7 @@ import type { CheckoutFormField } from '@/pages/purchase/[slug]'
 import { withPricing } from '@/utils/payment'
 import { useFormContext } from 'react-hook-form'
 
-export type PaymentChargesButtonProps = { product: ProductModel; onChargeResult: any }
+export type PaymentChargesButtonProps = { product: ProductModel; onChargeResult: (isCompleted: boolean) => void }
 
 export const PaymentChargesButton: React.VFC<PaymentChargesButtonProps> = ({ product, onChargeResult }) => {
     const { step, setPaymentStep, createOmiseCharges } = usePaymentContext()
@@ -16,7 +16,9 @@ export const PaymentChargesButton: React.VFC<PaymentChargesButtonProps> = ({ pro
             setPaymentStep(PaymentStep.SELECT_PAYMENT_METHOD)
         } else {
             if (data.paymentMethod === PaymentMethod[PaymentMethod.CREDIT_CARD]) {
-                createOmiseCharges(data).then(onChargeResult)
+                createOmiseCharges(data)
+                    .then(() => onChargeResult(true))
+                    .catch(() => onChargeResult(false))
             }
         }
     }
