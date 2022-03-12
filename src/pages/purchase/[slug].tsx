@@ -6,10 +6,10 @@ import { serialize } from 'typescript-json-serializer'
 import { ProductModel } from '@/models/ProductModel'
 import { FormProvider, useForm } from 'react-hook-form'
 import Link from 'next/link'
-import { BookingStatus, DatasetType } from '@/constants'
+import { BookingStatus, DatasetType, PaymentMethod } from '@/constants'
 import { CheckoutSummary } from '@/components/checkout-flow/CheckoutSummary'
 import { PaymentProvider } from '@/core/PaymentContext'
-import { KeyofPaymentMethods, SelectPaymentMethod } from '@/components/checkout-flow/SelectPaymentMethod'
+import { SelectPaymentMethod } from '@/components/checkout-flow/SelectPaymentMethod'
 import { PaymentChargesButton } from '@/components/checkout/PaymentChargesButton'
 import { useEffect, useState } from 'react'
 import { useFirebase } from '@/core/RootContext'
@@ -26,7 +26,7 @@ export type CheckoutFormField = {
     nickname: string
     shippingAddressId: string
     datasetType: DatasetType
-    paymentMethod: KeyofPaymentMethods
+    paymentMethod: PaymentMethod
     userId: string
     productId: string
 }
@@ -34,10 +34,10 @@ export type CheckoutFormField = {
 const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
     const methods = useForm<CheckoutFormField>()
     const { auth } = useFirebase()
-    const [paymentCompleted, setPaymentCompleted] = useState(false)
+    const [bookingCode, setBookingCode] = useState(null)
 
-    const handleChargedResult = (isCompleted: boolean) => {
-        setPaymentCompleted(isCompleted)
+    const handleChargedResult = (bookingCode: string) => {
+        setBookingCode(bookingCode)
     }
 
     useEffect(() => {
@@ -56,7 +56,7 @@ const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
             <h2 className="text-sub-title font-semibold">สรุปรายการลงทะเบียน</h2>
             {!isBookingNotExist && (
                 <PaymentProvider productId={props.product.id} amount={props.product.price}>
-                    <PaymentStatusModal paymentCompleted={paymentCompleted} />
+                    <PaymentStatusModal bookingCode={bookingCode} />
                     <FormProvider {...methods}>
                         <form className="grid gap-y-4">
                             <CheckoutSummary product={props.product} />

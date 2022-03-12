@@ -1,71 +1,118 @@
 import runsWithMethods from '@/middleware/runsWithMethods'
-import resolver from '@/services/resolver'
-import { NextApiHandler } from 'next'
-import { injectable } from 'tsyringe'
-import { deserialize } from 'typescript-json-serializer'
-import { validate } from 'class-validator'
-import { badRequest, Boom } from '@hapi/boom'
-import adminSDK from '@/libs/adminSDK'
-import Model from '@/models/Model'
-import { BookingModel } from '@/models/BookingModel'
-import { ProductModel } from '@/models/ProductModel'
-import { BookingStatus } from '@/constants'
-import { UserModel } from '@/models/UserModel'
 import runWithAuthorization from '@/middleware/runWithAuthorization'
-import { PaymentEventBodyModel } from '@/models/PaymentEventBody.model'
+import { PaymentEventBodyModel } from '@/models/payment/PaymentEventBody.model'
+import { Boom } from '@hapi/boom'
+import { NextApiHandler } from 'next'
+import { deserialize } from 'typescript-json-serializer'
 
-@injectable()
-class PaymentEventApi {
-    #db: FirebaseFirestore.Firestore = null
-    constructor() {
-        this.#db = adminSDK().db
-    }
-
-    main: NextApiHandler = async (req, res) => {
-        await runWithAuthorization(req, res, {})
-        await runsWithMethods(req, res, { methods: ['POST'] })
-
-        try {
-            const body = deserialize(req.body, PaymentEventBodyModel)
-            const errors = await validate(body)
-            if (errors.length > 0) {
-                throw badRequest(errors.toString())
-            }
-
-            const bookingRef = this.#db.collection('booking').withConverter(Model.convert(BookingModel))
-            const productRef = this.#db
-                .collection('products')
-                .doc(body.data.metadata.productId)
-                .withConverter(Model.convert(ProductModel))
-            const userRef = this.#db
-                .collection('users')
-                .doc(body.data.metadata.userId)
-                .withConverter(Model.convert(UserModel))
-
-            if (body.key === 'charge.create') {
-                const bookingCode = BookingModel.generateBookingCode()
-                await bookingRef.doc(bookingCode).create({
-                    createdOn: new Date(),
-                    expiredOn: null,
-                    metadata: { ...body.data.metadata },
-                    product: productRef,
-                    status: BookingStatus.PAID,
-                    user: userRef,
-                })
-                res.status(200).json({ status: 'success', bookingCode })
-            } else {
-                res.status(200).json({ status: 'fail' })
-            }
-        } catch (error) {
-            console.log(error)
-            if (error instanceof Boom) {
-                res.status(error.output.statusCode).json(error.output.payload)
-            } else {
-                res.status(500).json(error)
-            }
+export const PaymentEventHandler: NextApiHandler = async (req, res) => {
+    await runWithAuthorization(req, res, {})
+    await runsWithMethods(req, res, { methods: ['POST'] })
+    try {
+        const body = deserialize(req.body, PaymentEventBodyModel)
+        res.status(200).json(body)
+    } catch (error) {
+        console.log(error)
+        if (error instanceof Boom) {
+            res.status(error.output.statusCode).json(error.output.payload)
+        } else {
+            res.status(500).json(error)
         }
     }
 }
 
-const handler = resolver.resolve(PaymentEventApi)
-export default handler.main
+// class PaymentEventApi {
+//     #bookingRef: FirebaseFirestore.CollectionReference<BookingModel>
+//     #productRef: FirebaseFirestore.CollectionReference<ProductModel>
+//     #userRef: FirebaseFirestore.CollectionReference<UserModel>
+//     constructor() {
+//         const db = adminSDK().db
+//         this.#bookingRef = db.collection('booking').withConverter(Model.convert(BookingModel))
+//         this.#productRef = db.collection('products').withConverter(Model.convert(ProductModel))
+//         this.#userRef = db.collection('users').withConverter(Model.convert(UserModel))
+//     }
+
+//     main: NextApiHandler = async (req, res) => {
+//         await runWithAuthorization(req, res, {})
+//         await runsWithMethods(req, res, { methods: ['POST'] })
+
+//         try {
+//             const body = new PaymentEventBodyModel()
+//             // const errors = await validate(body)
+//             // console.log(errors)
+//             // if (errors.length > 0) {
+//             //     throw badRequest(errors.toString())
+//             // }
+
+//             // let bookingCode = null
+//             // switch (body.key) {
+//             //     case OmiseHookEvent.CREATE:
+//             //         bookingCode = await this.handleChargeCreated(body)
+//             //         break
+
+//             //     case OmiseHookEvent.COMPLETE:
+//             //         bookingCode = await this.handleChargeCompleted(body)
+//             //         break
+
+//             //     default:
+//             //         break
+//             // }
+
+//             res.status(200).json({ event: {} })
+//         } catch (error) {
+//             console.log(error)
+//             if (error instanceof Boom) {
+//                 res.status(error.output.statusCode).json(error.output.payload)
+//             } else {
+//                 res.status(500).json(error)
+//             }
+//         }
+//     }
+
+//     private async handleChargeCreated(body: PaymentEventBodyModel): Promise<string | null> {
+//         try {
+//             const bookingCode = body.data.metadata.bookingCode
+//             if (!bookingCode) throw badRequest('required bookingCode')
+
+//             const product = this.#productRef.doc(body.data.metadata.productId)
+//             const user = this.#userRef.doc(body.data.metadata.userId)
+//             const result = await this.#bookingRef.doc(bookingCode).create({
+//                 createdOn: new Date(),
+//                 expiredOn: null,
+//                 metadata: { ...body.data.metadata },
+//                 product,
+//                 status: BookingStatus.CREATED,
+//                 user,
+//                 billingId: body.id,
+//                 bookingCode,
+//                 sourceOfFund: SourceOfFund.OMISE,
+//                 source: body.data.source,
+//             })
+//             console.log(result)
+//             return bookingCode
+//         } catch (error) {
+//             console.error(error)
+//             return null
+//         }
+//     }
+
+//     private async handleChargeCompleted(body: PaymentEventBodyModel) {
+//         try {
+//             const bookingCode = body.data.metadata.bookingCode
+//             if (!bookingCode) throw badRequest('required bookingCode')
+
+//             const result = await this.#bookingRef.doc(bookingCode).update({
+//                 status: BookingStatus.PAID,
+//                 updatedAt: new Date().toISOString(),
+//             })
+//             console.log(result)
+//             return bookingCode
+//         } catch (error) {
+//             console.error(error)
+//             return null
+//         }
+//     }
+// }
+
+// const handler = container.resolve(PaymentEventApi)
+export default PaymentEventHandler

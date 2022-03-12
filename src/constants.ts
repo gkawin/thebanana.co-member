@@ -9,6 +9,7 @@ export enum BookingStatus {
     PAID = 'PAID',
     EXPIRED = 'EXPIRED',
     ERROR = 'ERROR',
+    CREATED = 'CREATED',
 }
 
 export enum PaymentStep {
@@ -30,4 +31,9 @@ export const PaymentMethodLabel = new Map<PaymentMethod, string>([
 
 export enum SourceOfFund {
     OMISE = 'OMISE',
+}
+
+export enum OmiseHookEvent {
+    CREATE = 'charge.create',
+    COMPLETE = 'charge.complete',
 }

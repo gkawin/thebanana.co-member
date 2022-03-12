@@ -1,14 +1,14 @@
-import { PaymentStep } from '@/constants'
-import { usePaymentContext } from '@/core/PaymentContext'
 import { faCheckCircle, faTimesCircle } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter } from 'next/router'
 import ReactModal from 'react-modal'
 
-export type PaymentStatusModalProps = { paymentCompleted: boolean }
+export type PaymentStatusModalProps = { bookingCode?: string }
 
-export const PaymentStatusModal: React.VFC<PaymentStatusModalProps> = ({ paymentCompleted }) => {
+export const PaymentStatusModal: React.VFC<PaymentStatusModalProps> = ({ bookingCode }) => {
     const router = useRouter()
+
+    const paymentCompleted = !!bookingCode
 
     const icon = paymentCompleted ? faCheckCircle : faTimesCircle
     const message = paymentCompleted ? 'ชำระเงินสำเร็จ' : 'ชำระเงินไม่สำเร็จ กรุณาติดต่อเจ้าหน้าที่'
@@ -31,7 +31,7 @@ export const PaymentStatusModal: React.VFC<PaymentStatusModalProps> = ({ payment
                 <div className="grid gap-y-4 text-center space-y-4">
                     <div className="text-2xl">
                         <div className="font-light">หมายเลขการชำระเงิน </div>
-                        <div className="font-semibold">X234236DD</div>
+                        <div className="font-semibold">{bookingCode}</div>
                     </div>
 
                     {message}

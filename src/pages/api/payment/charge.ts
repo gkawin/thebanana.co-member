@@ -9,11 +9,10 @@ import { validate } from 'class-validator'
 import { deserialize } from 'typescript-json-serializer'
 import adminSDK from '@/libs/adminSDK'
 import Model from '@/models/Model'
-import { PaymentChargeBodyModel } from '@/models/PaymentChargeBody.model'
+import { PaymentChargeBodyModel } from '@/models/payment/PaymentChargeBody.model'
 import runWithAuthorization from '@/middleware/runWithAuthorization'
 import { BookingModel } from '@/models/BookingModel'
 import { UserModel } from '@/models/UserModel'
-import { BookingStatus, SourceOfFund } from '@/constants'
 
 @injectable()
 class PaymentChargeApi {
@@ -44,48 +43,26 @@ class PaymentChargeApi {
             const product = (await productRef.get()).data()
             const bookingCode = BookingModel.generateBookingCode()
 
-            let bookingMetadata: BookingModel = {
-                bookingCode,
-                billingId: null,
-                sourceOfFund: null,
-                createdOn: new Date(),
-                expiredOn: null,
-                product: productRef,
-                user: userRef,
-                status: BookingStatus.CHECKOUT,
-                metadata: {
-                    ...metadata,
-                    shippingAddressId: addressRef,
-                },
-            }
-
             try {
                 const chargedResult = await this.omise.charges.create({
                     amount: product.price * 100,
                     currency: 'thb',
-                    card: token,
+                    card: token ?? null,
                     source,
                     description: product.name,
                     metadata: {
                         bookingCode,
+                        productId: productId,
+                        userId: userId,
                         effectiveDate: product.effectiveDate.toISOString(),
                         expiredDate: product.expiredDate.toISOString(),
                     },
                 })
-                bookingMetadata = {
-                    ...bookingMetadata,
-                    billingId: chargedResult.id,
-                    sourceOfFund: SourceOfFund.OMISE,
-                    status: BookingStatus.PAID,
-                }
+                console.log(chargedResult)
+                res.status(200).json({ status: 'success', bookingCode })
             } catch (error) {
                 console.error(error)
-                bookingMetadata = { ...bookingMetadata, status: BookingStatus.ERROR }
             }
-
-            await bookingRef.doc(bookingCode).create(bookingMetadata)
-
-            res.status(200).json({ status: 'success' })
         } catch (error) {
             if (error instanceof Boom) {
                 res.status(error.output.statusCode).json(error.output.payload)
