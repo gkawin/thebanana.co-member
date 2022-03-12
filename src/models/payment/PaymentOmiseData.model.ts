@@ -1,6 +1,7 @@
 import { JsonProperty, Serializable } from 'typescript-json-serializer'
+import { PaymentCardModel } from './PaymentCard.model'
 import { PaymentDataSourceModel } from './PaymentDataSource.model'
-import { PaymentMetadata } from './PaymentMetadata.model'
+import { PaymentMetadataModel } from './PaymentMetadata.model'
 
 @Serializable()
 export class PaymentOmiseDataModel {
@@ -38,11 +39,14 @@ export class PaymentOmiseDataModel {
     transaction_fees: { fee_flat: string; fee_rate: string; vat_rate: string }
 
     @JsonProperty()
-    metadata: PaymentMetadata
+    metadata: PaymentMetadataModel
 
     @JsonProperty()
     description: string
 
     @JsonProperty()
     source?: PaymentDataSourceModel
+
+    @JsonProperty()
+    card?: PaymentCardModel
 }

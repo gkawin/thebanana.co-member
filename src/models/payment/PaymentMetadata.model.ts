@@ -1,19 +1,22 @@
 import { JsonProperty, Serializable } from 'typescript-json-serializer'
 
 @Serializable()
-export class PaymentMetadata {
+export class PaymentMetadataModel {
     @JsonProperty()
     bookingCode: string
-
-    @JsonProperty()
-    effectiveDate: Date
-
-    @JsonProperty()
-    expiredDate: Date
 
     @JsonProperty()
     productId: string
 
     @JsonProperty()
     userId: string
+
+    @JsonProperty()
+    shippingAddressId: string
+
+    @JsonProperty()
+    effectiveDate: Date
+
+    @JsonProperty()
+    expiredDate: Date
 }

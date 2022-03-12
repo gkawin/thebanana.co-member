@@ -18,9 +18,9 @@ export enum PaymentStep {
 }
 
 export enum PaymentMethod {
-    BANK_TRANSFER,
-    PROMPT_PAY,
-    CREDIT_CARD,
+    BANK_TRANSFER = 'BANK_TRANSFER',
+    PROMPT_PAY = 'PROMPT_PAY',
+    CREDIT_CARD = 'CREDIT_CARD',
 }
 
 export const PaymentMethodLabel = new Map<PaymentMethod, string>([

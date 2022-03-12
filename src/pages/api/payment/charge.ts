@@ -12,13 +12,15 @@ import Model from '@/models/Model'
 import { PaymentChargeBodyModel } from '@/models/payment/PaymentChargeBody.model'
 import runWithAuthorization from '@/middleware/runWithAuthorization'
 import { BookingModel } from '@/models/BookingModel'
-import { UserModel } from '@/models/UserModel'
+import dayjs from 'dayjs'
+import { PaymentMetadataModel } from '@/models/payment/PaymentMetadata.model'
 
 @injectable()
 class PaymentChargeApi {
-    #db: FirebaseFirestore.Firestore = null
+    #productRef: FirebaseFirestore.CollectionReference<ProductModel>
     constructor(private omise: OmiseService) {
-        this.#db = adminSDK().db
+        const db = adminSDK().db
+        this.#productRef = db.collection('products').withConverter(Model.convert(ProductModel))
     }
 
     main: NextApiHandler = async (req, res) => {
@@ -33,36 +35,29 @@ class PaymentChargeApi {
                 throw badRequest(hasErrors.toString())
             }
 
-            const { token, source, productId, userId, shippingAddressId, ...metadata } = payload
-
-            const productRef = this.#db.collection('products').doc(productId).withConverter(Model.convert(ProductModel))
-            const userRef = this.#db.collection('users').doc(userId).withConverter(Model.convert(UserModel))
-            const bookingRef = this.#db.collection('booking').withConverter(Model.convert(BookingModel))
-            const addressRef = userRef.collection('address').doc(shippingAddressId)
-
+            const productRef = this.#productRef.doc(payload.productId).withConverter(Model.convert(ProductModel))
             const product = (await productRef.get()).data()
             const bookingCode = BookingModel.generateBookingCode()
+            const today = dayjs()
 
-            try {
-                const chargedResult = await this.omise.charges.create({
-                    amount: product.price * 100,
-                    currency: 'thb',
-                    card: token ?? null,
-                    source,
-                    description: product.name,
-                    metadata: {
-                        bookingCode,
-                        productId: productId,
-                        userId: userId,
-                        effectiveDate: product.effectiveDate.toISOString(),
-                        expiredDate: product.expiredDate.toISOString(),
-                    },
-                })
-                console.log(chargedResult)
-                res.status(200).json({ status: 'success', bookingCode })
-            } catch (error) {
-                console.error(error)
-            }
+            const chargedResult = await this.omise.charges.create({
+                amount: product.price * 100,
+                currency: 'thb',
+                card: payload.token ?? null,
+                source: payload.source,
+                description: product.name,
+                customer: `${payload.studentName} (${payload.nickname})`,
+                metadata: {
+                    bookingCode,
+                    productId: payload.productId,
+                    userId: payload.userId,
+                    shippingAddressId: payload.shippingAddressId,
+                    effectiveDate: today.toDate(),
+                    expiredDate: today.add(7, 'day').toDate(),
+                } as PaymentMetadataModel,
+            })
+            console.log(chargedResult)
+            res.status(200).json({ status: 'success', bookingCode })
         } catch (error) {
             if (error instanceof Boom) {
                 res.status(error.output.statusCode).json(error.output.payload)

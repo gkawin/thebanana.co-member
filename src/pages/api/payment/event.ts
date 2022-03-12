@@ -1,118 +1,125 @@
+import { BookingStatus, OmiseHookEvent, PaymentMethod, SourceOfFund } from '@/constants'
+import adminSDK from '@/libs/adminSDK'
 import runsWithMethods from '@/middleware/runsWithMethods'
 import runWithAuthorization from '@/middleware/runWithAuthorization'
+import { BookingModel } from '@/models/BookingModel'
+import Model from '@/models/Model'
 import { PaymentEventBodyModel } from '@/models/payment/PaymentEventBody.model'
-import { Boom } from '@hapi/boom'
+import { ProductModel } from '@/models/ProductModel'
+import { UserAddressModel } from '@/models/UserAddressModel'
+import { UserModel } from '@/models/UserModel'
+import { badRequest, Boom } from '@hapi/boom'
 import { NextApiHandler } from 'next'
+import { container } from 'tsyringe'
 import { deserialize } from 'typescript-json-serializer'
 
-export const PaymentEventHandler: NextApiHandler = async (req, res) => {
-    await runWithAuthorization(req, res, {})
-    await runsWithMethods(req, res, { methods: ['POST'] })
-    try {
-        const body = deserialize(req.body, PaymentEventBodyModel)
-        res.status(200).json(body)
-    } catch (error) {
-        console.log(error)
-        if (error instanceof Boom) {
-            res.status(error.output.statusCode).json(error.output.payload)
-        } else {
-            res.status(500).json(error)
+class PaymentEventApi {
+    #bookingRef: FirebaseFirestore.CollectionReference<BookingModel>
+    #productRef: FirebaseFirestore.CollectionReference<ProductModel>
+    #userRef: FirebaseFirestore.CollectionReference<UserModel>
+    constructor() {
+        const db = adminSDK().db
+        this.#bookingRef = db.collection('booking').withConverter(Model.convert(BookingModel))
+        this.#productRef = db.collection('products').withConverter(Model.convert(ProductModel))
+        this.#userRef = db.collection('users').withConverter(Model.convert(UserModel))
+    }
+
+    main: NextApiHandler = async (req, res) => {
+        await runWithAuthorization(req, res, {})
+        await runsWithMethods(req, res, { methods: ['POST'] })
+
+        try {
+            const body = deserialize(req.body, PaymentEventBodyModel)
+
+            let bookingCode = null
+            switch (body.key) {
+                case OmiseHookEvent.CREATE:
+                    bookingCode = await this.handleChargeCreated(body)
+                    break
+
+                case OmiseHookEvent.COMPLETE:
+                    bookingCode = await this.handleChargeCompleted(body)
+                    break
+
+                default:
+                    break
+            }
+
+            res.status(200).json({ event: body })
+        } catch (error) {
+            console.log(error)
+            if (error instanceof Boom) {
+                res.status(error.output.statusCode).json(error.output.payload)
+            } else {
+                res.status(500).json(error)
+            }
+        }
+    }
+
+    private async handleChargeCreated(body: PaymentEventBodyModel): Promise<string | null> {
+        try {
+            const {
+                bookingCode = null,
+                effectiveDate = null,
+                expiredDate = null,
+                productId = null,
+                userId = null,
+                shippingAddressId = null,
+            } = body.data.metadata
+            if (!bookingCode) throw badRequest('required bookingCode')
+            if (!productId) throw badRequest('required productId')
+            if (!userId) throw badRequest('required userId')
+            if (!shippingAddressId) throw badRequest('required shippingAddressId')
+
+            const product = this.#productRef.doc(productId)
+            const user = this.#userRef.doc(userId)
+            const shippingAddress = user
+                .collection('address')
+                .withConverter(Model.convert(UserAddressModel))
+                .doc(shippingAddressId)
+            const result = await this.#bookingRef.doc(bookingCode).create({
+                paymentMethod: body.data.card ? PaymentMethod.CREDIT_CARD : PaymentMethod.PROMPT_PAY,
+                createdOn: effectiveDate,
+                expiredOn: expiredDate,
+                shippingAddress: shippingAddress,
+                product,
+                status: BookingStatus.CREATED,
+                user,
+                billingId: body.id,
+                bookingCode,
+                sourceOfFund: SourceOfFund.OMISE,
+                scannableCode: !body.data.source?.scannable_code
+                    ? null
+                    : ({
+                          type: body.data.source?.scannable_code.type,
+                          ...body.data.source?.scannable_code.image,
+                      } as any),
+            })
+            console.log(result)
+            return bookingCode
+        } catch (error) {
+            console.error(error)
+            return null
+        }
+    }
+
+    private async handleChargeCompleted(body: PaymentEventBodyModel) {
+        try {
+            const bookingCode = body.data.metadata.bookingCode
+            if (!bookingCode) throw badRequest('required bookingCode')
+
+            const result = await this.#bookingRef.doc(bookingCode).update({
+                status: BookingStatus.PAID,
+                updatedAt: new Date().toISOString(),
+            })
+            console.log(result)
+            return bookingCode
+        } catch (error) {
+            console.error(error)
+            return null
         }
     }
 }
 
-// class PaymentEventApi {
-//     #bookingRef: FirebaseFirestore.CollectionReference<BookingModel>
-//     #productRef: FirebaseFirestore.CollectionReference<ProductModel>
-//     #userRef: FirebaseFirestore.CollectionReference<UserModel>
-//     constructor() {
-//         const db = adminSDK().db
-//         this.#bookingRef = db.collection('booking').withConverter(Model.convert(BookingModel))
-//         this.#productRef = db.collection('products').withConverter(Model.convert(ProductModel))
-//         this.#userRef = db.collection('users').withConverter(Model.convert(UserModel))
-//     }
-
-//     main: NextApiHandler = async (req, res) => {
-//         await runWithAuthorization(req, res, {})
-//         await runsWithMethods(req, res, { methods: ['POST'] })
-
-//         try {
-//             const body = new PaymentEventBodyModel()
-//             // const errors = await validate(body)
-//             // console.log(errors)
-//             // if (errors.length > 0) {
-//             //     throw badRequest(errors.toString())
-//             // }
-
-//             // let bookingCode = null
-//             // switch (body.key) {
-//             //     case OmiseHookEvent.CREATE:
-//             //         bookingCode = await this.handleChargeCreated(body)
-//             //         break
-
-//             //     case OmiseHookEvent.COMPLETE:
-//             //         bookingCode = await this.handleChargeCompleted(body)
-//             //         break
-
-//             //     default:
-//             //         break
-//             // }
-
-//             res.status(200).json({ event: {} })
-//         } catch (error) {
-//             console.log(error)
-//             if (error instanceof Boom) {
-//                 res.status(error.output.statusCode).json(error.output.payload)
-//             } else {
-//                 res.status(500).json(error)
-//             }
-//         }
-//     }
-
-//     private async handleChargeCreated(body: PaymentEventBodyModel): Promise<string | null> {
-//         try {
-//             const bookingCode = body.data.metadata.bookingCode
-//             if (!bookingCode) throw badRequest('required bookingCode')
-
-//             const product = this.#productRef.doc(body.data.metadata.productId)
-//             const user = this.#userRef.doc(body.data.metadata.userId)
-//             const result = await this.#bookingRef.doc(bookingCode).create({
-//                 createdOn: new Date(),
-//                 expiredOn: null,
-//                 metadata: { ...body.data.metadata },
-//                 product,
-//                 status: BookingStatus.CREATED,
-//                 user,
-//                 billingId: body.id,
-//                 bookingCode,
-//                 sourceOfFund: SourceOfFund.OMISE,
-//                 source: body.data.source,
-//             })
-//             console.log(result)
-//             return bookingCode
-//         } catch (error) {
-//             console.error(error)
-//             return null
-//         }
-//     }
-
-//     private async handleChargeCompleted(body: PaymentEventBodyModel) {
-//         try {
-//             const bookingCode = body.data.metadata.bookingCode
-//             if (!bookingCode) throw badRequest('required bookingCode')
-
-//             const result = await this.#bookingRef.doc(bookingCode).update({
-//                 status: BookingStatus.PAID,
-//                 updatedAt: new Date().toISOString(),
-//             })
-//             console.log(result)
-//             return bookingCode
-//         } catch (error) {
-//             console.error(error)
-//             return null
-//         }
-//     }
-// }
-
-// const handler = container.resolve(PaymentEventApi)
-export default PaymentEventHandler
+const handler = container.resolve(PaymentEventApi)
+export default handler.main

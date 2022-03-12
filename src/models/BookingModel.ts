@@ -3,8 +3,11 @@ import { UserModel } from './UserModel'
 import { ProductModel } from './ProductModel'
 import { JsonProperty, Serializable } from 'typescript-json-serializer'
 import { withISOToServerTimestamp, withTimeToDate } from '@/utils/firestore'
-import { BookingStatus, SourceOfFund } from '@/constants'
+import { BookingStatus, PaymentMethod, SourceOfFund } from '@/constants'
 import dayjs from 'dayjs'
+import { PaymentMetadataModel } from './payment/PaymentMetadata.model'
+import { PaymentScanableImageModel } from './payment/PaymentScanableImage.model'
+import { UserAddressModel } from './UserAddressModel'
 
 @Serializable()
 export class BookingModel {
@@ -39,9 +42,19 @@ export class BookingModel {
     @JsonProperty()
     status: BookingStatus
 
-    @JsonProperty({ isDictionary: true })
-    metadata: Record<string, any>
+    @JsonProperty()
+    shippingAddress: FirebaseFirestore.DocumentReference<UserAddressModel> | DocumentReference<UserAddressModel>
 
-    @JsonProperty({ isDictionary: true })
-    source: Record<string, any>
+    @JsonProperty()
+    paymentMethod: PaymentMethod
+
+    @JsonProperty({
+        predicate: (p) => {
+            if (p?.type === 'qr') {
+                return PaymentScanableImageModel
+            }
+            return null
+        },
+    })
+    scannableCode?: PaymentScanableImageModel | null
 }
