@@ -1,5 +1,5 @@
 import { BookingStatus, OmiseHookEvent, PaymentMethod, SourceOfFund } from '@/constants'
-import adminSDK from '@/libs/adminSDK'
+import { AdminSDK } from '@/libs/adminSDK'
 import runsWithMethods from '@/middleware/runsWithMethods'
 import runWithAuthorization from '@/middleware/runWithAuthorization'
 import { BookingModel } from '@/models/BookingModel'
@@ -8,20 +8,21 @@ import { PaymentEventBodyModel } from '@/models/payment/PaymentEventBody.model'
 import { ProductModel } from '@/models/ProductModel'
 import { UserAddressModel } from '@/models/UserAddressModel'
 import { UserModel } from '@/models/UserModel'
+import resolver from '@/services/resolver'
 import { badRequest, Boom } from '@hapi/boom'
 import { NextApiHandler } from 'next'
-import { container } from 'tsyringe'
+import { injectable } from 'tsyringe'
 import { deserialize } from 'typescript-json-serializer'
 
+@injectable()
 class PaymentEventApi {
     #bookingRef: FirebaseFirestore.CollectionReference<BookingModel>
     #productRef: FirebaseFirestore.CollectionReference<ProductModel>
     #userRef: FirebaseFirestore.CollectionReference<UserModel>
-    constructor() {
-        const db = adminSDK().db
-        this.#bookingRef = db.collection('booking').withConverter(Model.convert(BookingModel))
-        this.#productRef = db.collection('products').withConverter(Model.convert(ProductModel))
-        this.#userRef = db.collection('users').withConverter(Model.convert(UserModel))
+    constructor(private sdk: AdminSDK) {
+        this.#bookingRef = this.sdk.db.collection('booking').withConverter(Model.convert(BookingModel))
+        this.#productRef = this.sdk.db.collection('products').withConverter(Model.convert(ProductModel))
+        this.#userRef = this.sdk.db.collection('users').withConverter(Model.convert(UserModel))
     }
 
     main: NextApiHandler = async (req, res) => {
@@ -121,5 +122,5 @@ class PaymentEventApi {
     }
 }
 
-const handler = container.resolve(PaymentEventApi)
+const handler = resolver.resolve(PaymentEventApi)
 export default handler.main

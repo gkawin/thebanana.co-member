@@ -38,7 +38,7 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children, prod
                             post('/api/payment/charge', {
                                 ...formData,
                                 token: isToken ? nonce : null,
-                                source: !isToken ? nonce : null,
+                                source: null,
                             })
                                 .then(({ data }) => resolve(data))
                                 .catch(reject)

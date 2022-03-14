@@ -7,7 +7,7 @@ import { NextApiHandler } from 'next'
 import { injectable } from 'tsyringe'
 import { validate } from 'class-validator'
 import { deserialize } from 'typescript-json-serializer'
-import adminSDK from '@/libs/adminSDK'
+import { AdminSDK } from '@/libs/adminSDK'
 import Model from '@/models/Model'
 import { PaymentChargeBodyModel } from '@/models/payment/PaymentChargeBody.model'
 import runWithAuthorization from '@/middleware/runWithAuthorization'
@@ -18,9 +18,8 @@ import { PaymentMetadataModel } from '@/models/payment/PaymentMetadata.model'
 @injectable()
 class PaymentChargeApi {
     #productRef: FirebaseFirestore.CollectionReference<ProductModel>
-    constructor(private omise: OmiseService) {
-        const db = adminSDK().db
-        this.#productRef = db.collection('products').withConverter(Model.convert(ProductModel))
+    constructor(private omise: OmiseService, private sdk: AdminSDK) {
+        this.#productRef = this.sdk.db.collection('products').withConverter(Model.convert(ProductModel))
     }
 
     main: NextApiHandler = async (req, res) => {

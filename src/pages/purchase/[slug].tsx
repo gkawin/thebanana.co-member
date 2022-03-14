@@ -47,7 +47,7 @@ const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
         }
     }, [auth.currentUser.uid, methods, props.product.id])
 
-    const isBookingNotExist = !props
+    const isBookingNotExist = !props.product
     return (
         <div className="p-4">
             <Head>
