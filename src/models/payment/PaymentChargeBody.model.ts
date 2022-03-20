@@ -1,4 +1,4 @@
-import { DatasetType } from '@/constants'
+import { DatasetType, PaymentMethod } from '@/constants'
 import { CheckoutFormField } from '@/pages/purchase/[slug]'
 import { IsEnum, IsString, ValidateIf } from 'class-validator'
 import { JsonProperty, Serializable } from 'typescript-json-serializer'
@@ -26,8 +26,8 @@ export class PaymentChargeBodyModel implements CheckoutFormField {
     datasetType: DatasetType
 
     @JsonProperty()
-    @IsString()
-    paymentMethod: 'BANK_TRANSFER' | 'PROMPT_PAY' | 'CREDIT_CARD'
+    @IsEnum(PaymentMethod)
+    paymentMethod: PaymentMethod
 
     @JsonProperty()
     @IsString()

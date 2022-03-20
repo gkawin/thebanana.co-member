@@ -14,6 +14,8 @@ import runWithAuthorization from '@/middleware/runWithAuthorization'
 import { BookingModel } from '@/models/BookingModel'
 import dayjs from 'dayjs'
 import { PaymentMetadataModel } from '@/models/payment/PaymentMetadata.model'
+import { PaymentMethod } from '@/constants'
+import { PaymentOmiseDataModel } from '@/models/payment/PaymentOmiseData.model'
 
 @injectable()
 class PaymentChargeApi {
@@ -39,24 +41,34 @@ class PaymentChargeApi {
             const bookingCode = BookingModel.generateBookingCode()
             const today = dayjs()
 
-            const chargedResult = await this.omise.charges.create({
-                amount: product.price * 100,
-                currency: 'thb',
-                card: payload.token ?? null,
-                source: payload.source,
-                description: product.name,
-                customer: `${payload.studentName} (${payload.nickname})`,
-                metadata: {
+            const chargedResult = await this.omise.charges
+                .create({
+                    amount: product.price * 100,
+                    currency: 'thb',
+                    card: payload.token ?? null,
+                    source: payload.source,
+                    description: product.name,
+                    customer: `${payload.studentName} (${payload.nickname})`,
+                    metadata: {
+                        bookingCode,
+                        productId: payload.productId,
+                        userId: payload.userId,
+                        shippingAddressId: payload.shippingAddressId,
+                        effectiveDate: today.toDate(),
+                        expiredDate: today.add(7, 'day').toDate(),
+                    } as PaymentMetadataModel,
+                })
+                .then((result) => deserialize(result, PaymentOmiseDataModel))
+
+            if (chargedResult.source.type === 'promptpay') {
+                res.status(200).json({
+                    status: 'success',
                     bookingCode,
-                    productId: payload.productId,
-                    userId: payload.userId,
-                    shippingAddressId: payload.shippingAddressId,
-                    effectiveDate: today.toDate(),
-                    expiredDate: today.add(7, 'day').toDate(),
-                } as PaymentMetadataModel,
-            })
-            console.log(chargedResult)
-            res.status(200).json({ status: 'success', bookingCode })
+                    ...chargedResult.source.scannableCode.image,
+                })
+            } else {
+                res.status(200).json({ status: 'success', bookingCode })
+            }
         } catch (error) {
             if (error instanceof Boom) {
                 res.status(error.output.statusCode).json(error.output.payload)

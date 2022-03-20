@@ -113,7 +113,6 @@ class PaymentEventApi {
                 status: BookingStatus.PAID,
                 updatedAt: new Date().toISOString(),
             })
-            console.log(result)
             return bookingCode
         } catch (error) {
             console.error(error)

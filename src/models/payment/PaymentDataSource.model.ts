@@ -3,6 +3,9 @@ import { PaymentScanableCodeModel } from './PaymentScanableCode.model'
 
 @Serializable()
 export class PaymentDataSourceModel {
+    @JsonProperty({ name: 'scannable_code' })
+    scannableCode?: PaymentScanableCodeModel
+
     @JsonProperty()
-    scannable_code?: PaymentScanableCodeModel
+    type: string
 }
