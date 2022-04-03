@@ -7,6 +7,7 @@ import { getAuth, signInWithCustomToken } from 'firebase/auth'
 import { logEvent, getAnalytics } from 'firebase/analytics'
 import { SpinLoading } from '@/components/portal/SpinLoading'
 import { UserModel } from '@/models/UserModel'
+import Script from 'next/script'
 
 const liffId = '1653826193-QbmamAo0'
 const firebaseConfig = {
@@ -139,12 +140,19 @@ const RootContext: React.FC = ({ children }) => {
     }, [])
 
     return (
-        <loadingContext.Provider value={{ loading, setLoading }}>
-            <appContext.Provider value={context}>
-                <SpinLoading global />
-                {!!context && children}
-            </appContext.Provider>
-        </loadingContext.Provider>
+        <>
+            <Script
+                charSet="utf-8"
+                src="https://static.line-scdn.net/liff/edge/2/sdk.js"
+                strategy="beforeInteractive"
+            ></Script>
+            <loadingContext.Provider value={{ loading, setLoading }}>
+                <appContext.Provider value={context}>
+                    <SpinLoading global />
+                    {!!context && children}
+                </appContext.Provider>
+            </loadingContext.Provider>
+        </>
     )
 }
 

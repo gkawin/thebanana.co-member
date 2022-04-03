@@ -14,7 +14,7 @@ const CourseInfo: NextPage<CourseInfoProps> = ({ product, slug }) => {
     if (!product) return <div>Loading</div>
 
     return (
-        <main>
+        <section>
             <figure className="md:w-full md:pb-4 bg-yellow-100">
                 <div className="max-w-xl mx-auto">
                     <ProductCoverImage
@@ -29,12 +29,12 @@ const CourseInfo: NextPage<CourseInfoProps> = ({ product, slug }) => {
                 <ProductDescription className="py-4" description={product.description} name={product.name} />
                 <div className="text-xl font-semibold">{product.pricing}</div>
                 <Link href={`/purchase/${slug}`}>
-                    <a type="button" className="bg-yellow-500 text-white rounded p-2 text-center">
+                    <a type="button" className="bg-indigo-700 text-white rounded p-2 text-center">
                         จองและชำระเงิน
                     </a>
                 </Link>
             </div>
-        </main>
+        </section>
     )
 }
 

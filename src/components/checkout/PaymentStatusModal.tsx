@@ -60,7 +60,7 @@ export const PaymentStatusModal: React.FC = () => {
                     {renderQRCodeImage()}
                 </div>
                 <Link href="/inventory">
-                    <a type="button" className="p-2 text-center bg-indigo-500 text-white w-full rounded">
+                    <a type="button" className="p-2 text-center bg-indigo-700 text-white w-full rounded">
                         ไปหน้าคอร์สเรียนของฉัน
                     </a>
                 </Link>

@@ -1,7 +1,5 @@
-/** @type import('tailwindcss/tailwind-config').TailwindConfig */
-const config = {
-    purge: ['./pages/**/*.{js,ts,jsx,tsx}', './components/**/*.{js,ts,jsx,tsx}'],
-    darkMode: false, // or 'media' or 'class'
+module.exports = {
+    content: ['./src/pages/**/*.{js,ts,jsx,tsx}', './src/components/**/*.{js,ts,jsx,tsx}'],
     theme: {
         extend: {
             fontSize: {
@@ -19,14 +17,9 @@ const config = {
             },
         },
     },
-    variants: {
-        extend: {},
-    },
     plugins: [
         require('@tailwindcss/forms')({
             strategy: 'class',
         }),
     ],
 }
-
-module.exports = config

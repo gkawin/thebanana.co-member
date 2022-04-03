@@ -21,7 +21,7 @@ export const PaymentChargesButton: React.VFC<PaymentChargesButtonProps> = ({ pro
 
     return (
         <>
-            <button className="bg-indigo-500 rounded p-2 text-white" type="button" onClick={handleSubmit(onClick)}>
+            <button className="bg-indigo-700 rounded p-2 text-white" type="button" onClick={handleSubmit(onClick)}>
                 {step === PaymentStep.INIT && 'เลือกวิธีการชำระ'}
                 {step === PaymentStep.SELECT_PAYMENT_METHOD && `ชำระ ${withPricing(product.price)}`}
             </button>

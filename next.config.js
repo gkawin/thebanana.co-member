@@ -8,8 +8,5 @@ const nextConfig = {
         domains: ['fakeimg.pl', 'firebasestorage.googleapis.com'],
     },
     assetPrefix: isProd ? 'https://member.thebanana.co' : '',
-    // experimental: {
-    //     outputStandalone: true,
-    // },
 }
 module.exports = nextConfig
