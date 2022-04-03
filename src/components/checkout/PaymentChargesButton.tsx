@@ -1,13 +1,13 @@
-import { PaymentMethod, PaymentStep } from '@/constants'
+import { PaymentStep } from '@/constants'
 import { usePaymentContext } from '@/core/PaymentContext'
 import { ProductModel } from '@/models/ProductModel'
 import type { CheckoutFormField } from '@/pages/purchase/[slug]'
 import { withPricing } from '@/utils/payment'
 import { useFormContext } from 'react-hook-form'
 
-export type PaymentChargesButtonProps = { product: ProductModel; onChargeResult: (bookingCode?: string) => void }
+export type PaymentChargesButtonProps = { product: ProductModel }
 
-export const PaymentChargesButton: React.VFC<PaymentChargesButtonProps> = ({ product, onChargeResult }) => {
+export const PaymentChargesButton: React.VFC<PaymentChargesButtonProps> = ({ product }) => {
     const { step, setPaymentStep, createOmiseCharges } = usePaymentContext()
     const { handleSubmit } = useFormContext<CheckoutFormField>()
 
@@ -15,10 +15,7 @@ export const PaymentChargesButton: React.VFC<PaymentChargesButtonProps> = ({ pro
         if (step === PaymentStep.INIT) {
             setPaymentStep(PaymentStep.SELECT_PAYMENT_METHOD)
         } else {
-            const method = PaymentMethod[data.paymentMethod] as unknown as PaymentMethod
-            createOmiseCharges<{ bookingCode: string }>(data, method)
-                .then(({ bookingCode }) => onChargeResult(bookingCode))
-                .catch(() => onChargeResult(null))
+            createOmiseCharges(data, data.paymentMethod)
         }
     }
 

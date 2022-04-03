@@ -53,7 +53,7 @@ export const SelectPaymentMethod: React.VFC = () => {
                 {Object.values(PaymentMethod)
                     .filter((v) => typeof v === 'string')
                     .map((label: string, idx) => {
-                        const method = PaymentMethod[label as any] as unknown as PaymentMethod
+                        const method = PaymentMethod[label as keyof typeof PaymentMethod]
                         return (
                             <li
                                 key={label}
