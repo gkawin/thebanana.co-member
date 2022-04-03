@@ -1,4 +1,4 @@
-import { PaymentMethod, PaymentStep } from '@/constants'
+import { PaymentStep } from '@/constants'
 import { usePaymentContext } from '@/core/PaymentContext'
 import { ProductModel } from '@/models/ProductModel'
 import type { CheckoutFormField } from '@/pages/purchase/[slug]'
@@ -15,8 +15,6 @@ export const PaymentChargesButton: React.VFC<PaymentChargesButtonProps> = ({ pro
         if (step === PaymentStep.INIT) {
             setPaymentStep(PaymentStep.SELECT_PAYMENT_METHOD)
         } else {
-            console.log(data.paymentMethod)
-            // const method = PaymentMethod[data.paymentMethod] as unknown as PaymentMethod
             createOmiseCharges(data, data.paymentMethod)
         }
     }

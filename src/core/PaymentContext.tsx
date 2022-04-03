@@ -45,7 +45,6 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children, prod
                         defaultPaymentMethod: 'credit_card',
                         onCreateTokenSuccess: (nonce: string) => {
                             const isToken = nonce.startsWith('tokn_')
-                            console.log(nonce)
                             post('/api/payment/charge', {
                                 ...formData,
                                 token: isToken ? nonce : null,
