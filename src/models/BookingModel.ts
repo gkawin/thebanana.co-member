@@ -5,7 +5,6 @@ import { JsonProperty, Serializable } from 'typescript-json-serializer'
 import { withISOToServerTimestamp, withTimeToDate } from '@/utils/firestore'
 import { BookingStatus, PaymentMethod, SourceOfFund } from '@/constants'
 import dayjs from 'dayjs'
-import { PaymentMetadataModel } from './payment/PaymentMetadata.model'
 import { PaymentScanableImageModel } from './payment/PaymentScanableImage.model'
 import { UserAddressModel } from './UserAddressModel'
 

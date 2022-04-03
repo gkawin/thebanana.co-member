@@ -78,6 +78,7 @@ class PaymentEventApi {
                 .collection('address')
                 .withConverter(Model.convert(UserAddressModel))
                 .doc(shippingAddressId)
+
             const result = await this.#bookingRef.doc(bookingCode).create({
                 paymentMethod: body.data.card ? PaymentMethod.CREDIT_CARD : PaymentMethod.PROMPT_PAY,
                 createdOn: effectiveDate,
@@ -89,12 +90,6 @@ class PaymentEventApi {
                 billingId: body.id,
                 bookingCode,
                 sourceOfFund: SourceOfFund.OMISE,
-                scannableCode: !body.data.source?.scannable_code
-                    ? null
-                    : ({
-                          type: body.data.source?.scannable_code.type,
-                          ...body.data.source?.scannable_code.image,
-                      } as any),
             })
             console.log(result)
             return bookingCode
