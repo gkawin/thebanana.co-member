@@ -2,7 +2,7 @@ import { useFirebase } from '@/core/RootContext'
 import { BookingModel } from '@/models/BookingModel'
 import Model from '@/models/Model'
 import { ProductModel } from '@/models/ProductModel'
-import { collection, doc, getDoc, onSnapshot, query, where, DocumentReference, orderBy } from 'firebase/firestore'
+import { collection, doc, getDoc, onSnapshot, query, where, DocumentReference } from 'firebase/firestore'
 import { useEffect, useMemo, useState } from 'react'
 
 export type UseMyBooking = Pick<BookingModel, 'bookingCode' | 'billingId' | 'expiredOn' | 'status'> & {
