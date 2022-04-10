@@ -5,6 +5,7 @@ import runWithAuthorization from '@/middleware/runWithAuthorization'
 import { BookingModel } from '@/models/BookingModel'
 import Model from '@/models/Model'
 import { PaymentEventBodyModel } from '@/models/payment/PaymentEventBody.model'
+import { PaymentMetadataModel } from '@/models/payment/PaymentMetadata.model'
 import { ProductModel } from '@/models/ProductModel'
 import { UserAddressModel } from '@/models/UserAddressModel'
 import { UserModel } from '@/models/UserModel'
@@ -15,10 +16,11 @@ import { injectable } from 'tsyringe'
 import { deserialize } from 'typescript-json-serializer'
 
 @injectable()
-class PaymentEventApi {
+class HookPaymentBooking {
     #bookingRef: FirebaseFirestore.CollectionReference<BookingModel>
     #productRef: FirebaseFirestore.CollectionReference<ProductModel>
     #userRef: FirebaseFirestore.CollectionReference<UserModel>
+
     constructor(private sdk: AdminSDK) {
         this.#bookingRef = this.sdk.db.collection('booking').withConverter(Model.convert(BookingModel))
         this.#productRef = this.sdk.db.collection('products').withConverter(Model.convert(ProductModel))
@@ -31,6 +33,7 @@ class PaymentEventApi {
 
         try {
             const body = deserialize(req.body, PaymentEventBodyModel)
+            this.validateRequesting(body)
 
             let bookingCode = null
             switch (body.key) {
@@ -57,20 +60,22 @@ class PaymentEventApi {
         }
     }
 
+    private validateRequesting(body: PaymentEventBodyModel) {
+        const {
+            bookingCode = null,
+            productId = null,
+            userId = null,
+            shippingAddressId = null,
+        } = body.data.metadata as PaymentMetadataModel
+        if (!bookingCode) throw badRequest('required bookingCode')
+        if (!productId) throw badRequest('required productId')
+        if (!userId) throw badRequest('required userId')
+        if (!shippingAddressId) throw badRequest('required shippingAddressId')
+    }
+
     private async handleChargeCreated(body: PaymentEventBodyModel): Promise<string | null> {
         try {
-            const {
-                bookingCode = null,
-                effectiveDate = null,
-                expiredDate = null,
-                productId = null,
-                userId = null,
-                shippingAddressId = null,
-            } = body.data.metadata
-            if (!bookingCode) throw badRequest('required bookingCode')
-            if (!productId) throw badRequest('required productId')
-            if (!userId) throw badRequest('required userId')
-            if (!shippingAddressId) throw badRequest('required shippingAddressId')
+            const { bookingCode, productId, shippingAddressId, userId, startDate, endDate, price } = body.data.metadata
 
             const product = this.#productRef.doc(productId)
             const user = this.#userRef.doc(userId)
@@ -80,16 +85,17 @@ class PaymentEventApi {
                 .doc(shippingAddressId)
 
             const result = await this.#bookingRef.doc(bookingCode).create({
+                billingId: body.id,
+                sourceOfFund: SourceOfFund.OMISE,
+                shippingAddress,
                 paymentMethod: body.data.card ? PaymentMethod.CREDIT_CARD : PaymentMethod.PROMPT_PAY,
-                createdOn: effectiveDate,
-                expiredOn: expiredDate,
-                shippingAddress: shippingAddress,
+                createdOn: new Date(),
                 product,
                 status: BookingStatus.CREATED,
                 user,
-                billingId: body.id,
-                bookingCode,
-                sourceOfFund: SourceOfFund.OMISE,
+                startDate,
+                endDate,
+                price,
             })
             console.log(result)
             return bookingCode
@@ -117,5 +123,5 @@ class PaymentEventApi {
     }
 }
 
-const handler = resolver.resolve(PaymentEventApi)
+const handler = resolver.resolve(HookPaymentBooking)
 export default handler.main

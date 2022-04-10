@@ -4,12 +4,17 @@ export enum DatasetType {
 }
 
 export enum BookingStatus {
-    PAYMENT = 'PAYMENT',
-    CHECKOUT = 'CHECKOUT',
     PAID = 'PAID',
-    EXPIRED = 'EXPIRED',
-    ERROR = 'ERROR',
     CREATED = 'CREATED',
+    EXPIRED = 'EXPIRED',
+    REJECTED = 'REJECTED',
+    CANCELLED = 'CANCELLED',
+}
+
+export enum BookingGroup {
+    UpComming,
+    Past,
+    Cancelled,
 }
 
 export enum PaymentStep {

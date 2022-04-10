@@ -19,4 +19,16 @@ export class PaymentMetadataModel {
 
     @JsonProperty()
     expiredDate: Date
+
+    @JsonProperty()
+    productCode: string
+
+    @JsonProperty()
+    price: number
+
+    @JsonProperty()
+    startDate: Date
+
+    @JsonProperty()
+    endDate: Date
 }

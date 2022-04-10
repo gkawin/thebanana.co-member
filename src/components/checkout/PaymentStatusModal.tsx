@@ -33,9 +33,9 @@ export const PaymentStatusModal: React.FC = () => {
                         unoptimized
                         src={chargeResult.metadata.downloadUri}
                         alt="qr_code"
-                        layout="responsive"
-                        width={50}
-                        height={50}
+                        layout="intrinsic"
+                        width={300}
+                        height={300}
                     />
                 </div>
             )
@@ -59,7 +59,7 @@ export const PaymentStatusModal: React.FC = () => {
                     </div>
                     {renderQRCodeImage()}
                 </div>
-                <Link href="/inventory">
+                <Link href="/my/booking">
                     <a type="button" className="p-2 text-center bg-indigo-700 text-white w-full rounded">
                         ไปหน้าคอร์สเรียนของฉัน
                     </a>

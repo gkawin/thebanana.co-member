@@ -17,8 +17,6 @@ export class BookingModel {
         const random = Math.floor(Math.random() * (max - min) + min)
         return `${day}-${random}`
     }
-    @JsonProperty()
-    bookingCode: string
 
     @JsonProperty()
     billingId: string
@@ -34,9 +32,6 @@ export class BookingModel {
 
     @JsonProperty({ beforeDeserialize: withTimeToDate, afterSerialize: withISOToServerTimestamp })
     createdOn: Date
-
-    @JsonProperty({ beforeDeserialize: withTimeToDate, afterSerialize: withISOToServerTimestamp })
-    expiredOn: Date
 
     @JsonProperty()
     status: BookingStatus
@@ -56,4 +51,13 @@ export class BookingModel {
         },
     })
     scannableCode?: PaymentScanableImageModel | null
+
+    @JsonProperty()
+    price: number
+
+    @JsonProperty({ beforeDeserialize: withTimeToDate, afterSerialize: withISOToServerTimestamp })
+    startDate: Date
+
+    @JsonProperty({ beforeDeserialize: withTimeToDate, afterSerialize: withISOToServerTimestamp })
+    endDate: Date
 }

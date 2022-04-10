@@ -39,7 +39,6 @@ class PaymentChargeApi {
 
             const productRef = this.#productRef.doc(payload.productId).withConverter(Model.convert(ProductModel))
             const product = (await productRef.get()).data()
-            const bookingCode = BookingModel.generateBookingCode()
             const today = dayjs()
             const expiredDate = today.add(7, 'day')
 
@@ -52,12 +51,16 @@ class PaymentChargeApi {
                     description: product.name,
                     customer: payload.token ? null : `${payload.studentName} (${payload.nickname})`,
                     metadata: {
-                        bookingCode,
+                        bookingCode: BookingModel.generateBookingCode(),
                         productId: payload.productId,
+                        productCode: product.code,
                         userId: payload.userId,
+                        price: product.price,
                         shippingAddressId: payload.shippingAddressId,
                         effectiveDate: today.toDate(),
                         expiredDate: expiredDate.toDate(),
+                        startDate: product.startDate,
+                        endDate: product.endDate,
                     } as PaymentMetadataModel,
                 })
                 .then((result) => deserialize(result, PaymentOmiseDataModel))
@@ -65,13 +68,12 @@ class PaymentChargeApi {
             if (chargedResult?.source?.type === 'promptpay') {
                 res.status(200).json({
                     status: 'success',
-                    bookingCode,
                     expiredDate: expiredDate.toDate(),
                     metadata: chargedResult.source.scannableCode.image,
                     source: PaymentMethod.PROMPT_PAY,
                 } as unknown as ChargeResult)
             } else {
-                res.status(200).json({ status: 'success', bookingCode })
+                res.status(200).json({ status: 'success' })
             }
         } catch (error) {
             if (error instanceof Boom) {

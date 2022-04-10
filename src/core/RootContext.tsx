@@ -84,13 +84,13 @@ const RootContext: React.FC = ({ children }) => {
 
     const createAuthorization = useCallback(async () => {
         const axios = await createAxios()
-        const { sub: connectId } = window.liff.getDecodedIDToken()
+        const decodedToken = window.liff.getDecodedIDToken()
         const memberResult = await axios.post<{ isMember: boolean }>('/api/auth/member', {
-            connectId,
+            connectId: decodedToken?.sub,
         })
         if (memberResult) {
             const authenResult = await axios.post<{ authenticationCode: string }>('/api/auth/token', {
-                connectId,
+                connectId: decodedToken?.sub,
             })
             await signInWithCustomToken(getAuth(), authenResult.data.authenticationCode)
         }

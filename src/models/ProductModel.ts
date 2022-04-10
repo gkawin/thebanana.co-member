@@ -47,11 +47,12 @@ export class ProductModel {
         return `${(this.price || 0).toLocaleString('th', { minimumFractionDigits: 2, minimumIntegerDigits: 2 })} บาท`
     }
 
-    get startedDate() {
-        return this.effectiveDate.toISOString()
-    }
+    @JsonProperty({ beforeDeserialize: withTimeToDate, afterSerialize: withISOToServerTimestamp })
+    startDate: Date
 
-    get endDate() {
-        return this.expiredDate.toISOString()
-    }
+    @JsonProperty({ beforeDeserialize: withTimeToDate, afterSerialize: withISOToServerTimestamp })
+    endDate: Date
+
+    @JsonProperty()
+    isActive: boolean
 }
