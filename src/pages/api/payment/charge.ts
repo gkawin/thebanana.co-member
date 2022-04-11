@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import runsWithMethods from '@/middleware/runsWithMethods'
 import { ProductModel } from '@/models/ProductModel'
 import { OmiseService } from '@/services/omise.service'
@@ -41,6 +42,7 @@ class PaymentChargeApi {
             const product = (await productRef.get()).data()
             const today = dayjs()
             const expiredDate = today.add(7, 'day')
+            const bookingCode = BookingModel.generateBookingCode()
 
             const chargedResult = await this.omise.charges
                 .create({
@@ -51,7 +53,7 @@ class PaymentChargeApi {
                     description: product.name,
                     customer: payload.token ? null : `${payload.studentName} (${payload.nickname})`,
                     metadata: {
-                        bookingCode: BookingModel.generateBookingCode(),
+                        bookingCode,
                         productId: payload.productId,
                         productCode: product.code,
                         userId: payload.userId,
@@ -71,9 +73,10 @@ class PaymentChargeApi {
                     expiredDate: expiredDate.toDate(),
                     metadata: chargedResult.source.scannableCode.image,
                     source: PaymentMethod.PROMPT_PAY,
+                    bookingCode,
                 } as unknown as ChargeResult)
             } else {
-                res.status(200).json({ status: 'success' })
+                res.status(200).json({ status: 'success', bookingCode })
             }
         } catch (error) {
             if (error instanceof Boom) {

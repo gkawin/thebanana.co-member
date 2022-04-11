@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import omise from 'omise'
 import { singleton } from 'tsyringe'
 

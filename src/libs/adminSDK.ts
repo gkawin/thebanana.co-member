@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import * as firestore from 'firebase-admin/firestore'
 import * as auth from 'firebase-admin/auth'
 import { initializeApp, cert, getApps } from 'firebase-admin/app'

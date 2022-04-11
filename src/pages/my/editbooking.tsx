@@ -13,6 +13,7 @@ const MyEditBooking: NextPage = () => {
 
 export const getServerSideProps: GetServerSideProps = async ({ query }) => {
     if (!query?.bookingCode) return { props: {}, notFound: true }
+
     return {
         props: {},
     }

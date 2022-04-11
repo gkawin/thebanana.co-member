@@ -19,6 +19,9 @@ export class BookingModel {
     }
 
     @JsonProperty()
+    bookingCode: string
+
+    @JsonProperty()
     billingId: string
 
     @JsonProperty()

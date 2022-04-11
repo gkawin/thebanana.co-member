@@ -54,7 +54,7 @@ export const PaymentStatusModal: React.FC = () => {
                 </div>
                 <div className="grid gap-y-4 text-center space-y-4">
                     <div className="text-xl">
-                        <div className="font-light">หมายเลขการชำระเงิน </div>
+                        <div className="font-light">หมายเลขการจองของคุณคือ</div>
                         <div className="font-semibold">{chargeResult?.bookingCode}</div>
                     </div>
                     {renderQRCodeImage()}

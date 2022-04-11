@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import { BookingStatus, OmiseHookEvent, PaymentMethod, SourceOfFund } from '@/constants'
 import { AdminSDK } from '@/libs/adminSDK'
 import runsWithMethods from '@/middleware/runsWithMethods'
@@ -86,6 +87,7 @@ class HookPaymentBooking {
 
             const result = await this.#bookingRef.doc(bookingCode).create({
                 billingId: body.id,
+                bookingCode: bookingCode,
                 sourceOfFund: SourceOfFund.OMISE,
                 shippingAddress,
                 paymentMethod: body.data.card ? PaymentMethod.CREDIT_CARD : PaymentMethod.PROMPT_PAY,

@@ -49,6 +49,7 @@ export default function useMyBooking() {
 
                         return {
                             billingId: props.billingId,
+                            bookingCode: props.bookingCode,
                             startDate: props.startDate.toISOString(),
                             endDate: props.endDate.toISOString(),
                             pricing: withPricing(props.price),

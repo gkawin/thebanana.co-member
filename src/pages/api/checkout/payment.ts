@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import { NextApiHandler } from 'next'
 import resolver from '@/services/resolver'
 import { injectable } from 'tsyringe'
