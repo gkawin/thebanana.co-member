@@ -24,7 +24,6 @@ export default function useMyBooking() {
                     where('status', 'in', [BookingStatus.PAID, BookingStatus.CREATED]),
                     where('endDate', '<', new Date()),
                 ]
-
             case BookingGroup.Cancelled:
                 return [where('status', 'in', [BookingStatus.REJECTED, BookingStatus.CANCELLED])]
             default:
