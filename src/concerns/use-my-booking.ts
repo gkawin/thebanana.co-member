@@ -59,7 +59,7 @@ export default function useMyBooking(options?: { bookingCode: string }) {
         if (bookingCode) {
             queries.push(where('bookingCode', '==', bookingCode))
         }
-        console.log(queries)
+
         return queries
     }
 

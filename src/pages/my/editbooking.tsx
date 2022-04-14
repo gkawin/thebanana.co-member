@@ -1,26 +1,15 @@
 import useMyBooking from '@/concerns/use-my-booking'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faReceipt } from '@fortawesome/free-solid-svg-icons'
-import dayjs from 'dayjs'
-import dayjsTH from 'dayjs/locale/th'
-import buddhistEra from 'dayjs/plugin/buddhistEra'
+import { faReceipt, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+
 import { GetServerSideProps, NextPage } from 'next'
 import { useUserInfoContext } from '@/core/RootContext'
 import { PaymentMethodLabel } from '@/constants'
-
-dayjs.extend(buddhistEra)
-dayjs.locale(dayjsTH)
+import Link from 'next/link'
+import { withThaiDateFormat } from '@/utils/date'
 
 export type MyEditBookingProps = {
     bookingCode: string
-}
-
-const withThaiDateFormat = (date: string, customFormat = 'DD MMMM BBBB') => {
-    if (dayjs(date).isValid()) {
-        return dayjs(date).format(customFormat)
-    }
-    console.error('Invalid date format')
-    return date
 }
 
 const MyEditBooking: NextPage<MyEditBookingProps> = ({ bookingCode }) => {
@@ -31,6 +20,12 @@ const MyEditBooking: NextPage<MyEditBookingProps> = ({ bookingCode }) => {
     return (
         bookingInfo && (
             <div className="container py-4 grid gap-y-4">
+                <Link href="/my/booking">
+                    <a className="text-indigo-500 ">
+                        <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
+                        กลับไปหน้าการจอง
+                    </a>
+                </Link>
                 <div className="px-2 py-4 rounded shadow-gray-300 shadow border border-gray-50">
                     <div>หมายเลขการจอง: {bookingInfo.bookingCode}</div>
                     <div>เริ่มเรียน: {withThaiDateFormat(bookingInfo.startDate, 'dddd DD MMMM BBBB')}</div>

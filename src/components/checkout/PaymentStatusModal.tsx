@@ -2,15 +2,10 @@ import { PaymentMethod } from '@/constants'
 import { usePaymentContext } from '@/core/PaymentContext'
 import { faCheckCircle, faTimesCircle } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import dayjs from 'dayjs'
-import buddhishEra from 'dayjs/plugin/buddhistEra'
-import 'dayjs/locale/th'
 import Image from 'next/image'
 import ReactModal from 'react-modal'
 import Link from 'next/link'
-
-dayjs.extend(buddhishEra)
-dayjs.locale('th')
+import { withThaiDateFormat } from '@/utils/date'
 
 export const PaymentStatusModal: React.FC = () => {
     const { chargeResult } = usePaymentContext()
@@ -26,7 +21,7 @@ export const PaymentStatusModal: React.FC = () => {
                     <div>
                         <span className="font-thin">กรุณาทำรายการก่อนวันที่</span>{' '}
                         <span className="font-semibold text-red-500 underline">
-                            {dayjs(chargeResult.expiredDate).format('DD MMMM BBBB HH:MM')}
+                            {withThaiDateFormat(chargeResult.expiredDate, 'DD MMMM BBBB HH:MM')}
                         </span>
                     </div>
                     <Image

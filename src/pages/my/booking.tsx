@@ -1,13 +1,8 @@
 import { BookingFilterPanel } from '@/components/my-booking/BookingFilterPanel'
 import useMyBooking from '@/concerns/use-my-booking'
-import dayjs from 'dayjs'
-import buddhistEra from 'dayjs/plugin/buddhistEra'
-import dayjsTH from 'dayjs/locale/th'
 import { NextPage } from 'next'
 import Link from 'next/link'
-
-dayjs.extend(buddhistEra)
-dayjs.locale(dayjsTH)
+import { withThaiDateFormat } from '@/utils/date'
 
 const MyBookingPage: NextPage = () => {
     const { items, setBookingGroup, bookingGroup } = useMyBooking()
@@ -42,13 +37,13 @@ const MyBookingPage: NextPage = () => {
                                     <div className="font-thin text-xs text-gray-600">
                                         เริ่ม{' '}
                                         <span className="font-semibold">
-                                            {dayjs(booking.startDate).format('DD MMM BBBB')}
+                                            {withThaiDateFormat(booking.startDate, 'dd DD MMM BBBB')}
                                         </span>
                                     </div>
                                     <div className="font-thin text-xs text-gray-600">
                                         ถึง{' '}
                                         <span className="font-semibold">
-                                            {dayjs(booking.endDate).format('DD MMM BBBB')}
+                                            {withThaiDateFormat(booking.endDate, 'dd DD MMM BBBB')}
                                         </span>
                                     </div>
                                     <div className="text-red-500">{booking.pricing}</div>
