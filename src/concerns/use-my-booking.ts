@@ -1,34 +1,66 @@
-import { BookingGroup, BookingStatus } from '@/constants'
+import { BookingGroup, BookingStatus, PaymentMethod } from '@/constants'
 import { useFirebase } from '@/core/RootContext'
 import { BookingModel } from '@/models/BookingModel'
 import Model from '@/models/Model'
 import { ProductModel } from '@/models/ProductModel'
+import { UserAddressModel } from '@/models/UserAddressModel'
 import { withPricing } from '@/utils/payment'
-import { collection, doc, DocumentReference, getDoc, onSnapshot, query, where } from 'firebase/firestore'
+import {
+    collection,
+    doc,
+    DocumentReference,
+    getDoc,
+    onSnapshot,
+    query,
+    QueryConstraint,
+    where,
+} from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 
-export default function useMyBooking() {
-    const [items, setItems] = useState([])
+export type BookingInfo = {
+    billingId: string
+    bookingCode: string
+    startDate: string
+    endDate: string
+    pricing: string
+    status: string
+    userId: string
+    productName: string
+    shippingAddress: string
+    paymentMethod: PaymentMethod
+}
+
+export default function useMyBooking(options?: { bookingCode: string }) {
+    const [items, setItems] = useState<BookingInfo[]>([])
     const { db, auth } = useFirebase()
     const [bookingGroup, setBookingGroup] = useState<BookingGroup>(BookingGroup.UpComming)
 
     const queryBooinkGroupCondition = () => {
+        const bookingCode = options?.bookingCode ?? null
+
+        let queries: QueryConstraint[] = []
         switch (bookingGroup) {
             case BookingGroup.UpComming:
-                return [
+                queries = [
                     where('status', 'in', [BookingStatus.PAID, BookingStatus.CREATED]),
                     where('endDate', '>=', new Date()),
                 ]
+                break
             case BookingGroup.Past:
-                return [
+                queries = [
                     where('status', 'in', [BookingStatus.PAID, BookingStatus.CREATED]),
                     where('endDate', '<', new Date()),
                 ]
+                break
             case BookingGroup.Cancelled:
-                return [where('status', 'in', [BookingStatus.REJECTED, BookingStatus.CANCELLED])]
-            default:
-                return []
+                queries = [where('status', 'in', [BookingStatus.REJECTED, BookingStatus.CANCELLED])]
+                break
         }
+        if (bookingCode) {
+            queries.push(where('bookingCode', '==', bookingCode))
+        }
+        console.log(queries)
+        return queries
     }
 
     useEffect(() => {
@@ -46,6 +78,9 @@ export default function useMyBooking() {
                         if (!doc.exists()) return null
                         const props = doc.data()
                         const product = (await getDoc(props.product as DocumentReference<ProductModel>)).data()
+                        const address = (
+                            await getDoc(props.shippingAddress as DocumentReference<UserAddressModel>)
+                        ).data()
 
                         return {
                             billingId: props.billingId,
@@ -56,6 +91,8 @@ export default function useMyBooking() {
                             status: props.status,
                             userId: props.user.id,
                             productName: product.name,
+                            shippingAddress: address && address.address,
+                            paymentMethod: props.paymentMethod,
                         }
                     })
                     .filter(Boolean)
