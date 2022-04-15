@@ -49,4 +49,13 @@ export class PaymentOmiseDataModel {
 
     @JsonProperty()
     card?: PaymentCardModel
+
+    @JsonProperty()
+    status: 'successful' | 'failed'
+
+    @JsonProperty({ name: 'failure_message' })
+    failureMessage: string
+
+    @JsonProperty({ name: 'failure_code' })
+    failureCode: string
 }

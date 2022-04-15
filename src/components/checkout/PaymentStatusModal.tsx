@@ -1,64 +1,27 @@
-import { PaymentMethod } from '@/constants'
 import { usePaymentContext } from '@/core/PaymentContext'
-import { faCheckCircle, faTimesCircle } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import Image from 'next/image'
 import ReactModal from 'react-modal'
-import Link from 'next/link'
-import { withThaiDateFormat } from '@/utils/date'
+import { ObservationPaymentStatusContent } from './ObservationPaymentStatusContent'
 
 export const PaymentStatusModal: React.FC = () => {
     const { chargeResult } = usePaymentContext()
-    const paymentCompleted = !!chargeResult
+    const paymentCompleted = chargeResult?.status === 'success'
 
-    const icon = paymentCompleted ? faCheckCircle : faTimesCircle
-
-    const renderQRCodeImage = () => {
-        if (!paymentCompleted) return null
-        if (chargeResult.source === PaymentMethod.PROMPT_PAY) {
-            return (
-                <div className="relative">
-                    <div>
-                        <span className="font-thin">กรุณาทำรายการก่อนวันที่</span>{' '}
-                        <span className="font-semibold text-red-500 underline">
-                            {withThaiDateFormat(chargeResult.expiredDate, 'DD MMMM BBBB HH:MM')}
-                        </span>
-                    </div>
-                    <Image
-                        unoptimized
-                        src={chargeResult.metadata.downloadUri}
-                        alt="qr_code"
-                        layout="intrinsic"
-                        width={300}
-                        height={300}
-                    />
-                </div>
-            )
-        }
-        return null
-    }
+    const desc = paymentCompleted ? 'หมายเลขการจองของคุณคือ' : 'การชำระเงินไม่สำเร็จ'
+    const bookingCode = paymentCompleted ? chargeResult?.bookingCode : 'กรุณาตรวจสอบการทำรายการที่ธนาคารอีกครั้ง'
 
     return (
         <ReactModal
-            isOpen={paymentCompleted}
+            isOpen={!!chargeResult}
             className=" p-4 bg-white m-auto w-10/12 border border-gray-200 rounded transform translate-y-8"
         >
-            <div className="flex flex-col space-y-4 relative">
-                <div className="self-center">
-                    <FontAwesomeIcon icon={icon} color={paymentCompleted ? 'green' : 'red'} size="4x" />
-                </div>
-                <div className="grid gap-y-4 text-center space-y-4">
-                    <div className="text-xl">
-                        <div className="font-light">หมายเลขการจองของคุณคือ</div>
-                        <div className="font-semibold">{chargeResult?.bookingCode}</div>
+            <div className="flex flex-col space-y-4">
+                <div className="grid gap-y-4 text-center">
+                    <div className="text-xl space-y-4">
+                        <div className="text-gray-500">{desc}</div>
+                        <div className="text-2xl">{bookingCode}</div>
                     </div>
-                    {renderQRCodeImage()}
+                    <ObservationPaymentStatusContent chargeResult={chargeResult} />
                 </div>
-                <Link href="/my/booking">
-                    <a type="button" className="p-2 text-center bg-indigo-700 text-white w-full rounded">
-                        ไปหน้าคอร์สเรียนของฉัน
-                    </a>
-                </Link>
             </div>
         </ReactModal>
     )

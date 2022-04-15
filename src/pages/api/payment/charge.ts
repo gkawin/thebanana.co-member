@@ -3,7 +3,7 @@ import runsWithMethods from '@/middleware/runsWithMethods'
 import { ProductModel } from '@/models/ProductModel'
 import { OmiseService } from '@/services/omise.service'
 import resolver from '@/services/resolver'
-import { badRequest, Boom } from '@hapi/boom'
+import { badData, badRequest, Boom } from '@hapi/boom'
 import { NextApiHandler } from 'next'
 import { injectable } from 'tsyringe'
 import { validate } from 'class-validator'
@@ -66,6 +66,10 @@ class PaymentChargeApi {
                     } as PaymentMetadataModel,
                 })
                 .then((result) => deserialize(result, PaymentOmiseDataModel))
+
+            if (chargedResult.status === 'failed') {
+                throw badData(chargedResult.failureMessage)
+            }
 
             if (chargedResult?.source?.type === 'promptpay') {
                 res.status(200).json({

@@ -42,10 +42,14 @@ class HookPaymentBooking {
                     bookingCode = await this.handleChargeCreated(body)
                     break
 
-                case OmiseHookEvent.COMPLETE:
-                    bookingCode = await this.handleChargeCompleted(body)
+                case OmiseHookEvent.COMPLETE: {
+                    if (body.data.status === 'failed') {
+                        bookingCode = await this.handleChargeFailure(body)
+                    } else {
+                        bookingCode = await this.handleChargeCompleted(body)
+                    }
                     break
-
+                }
                 default:
                     break
             }
@@ -115,6 +119,24 @@ class HookPaymentBooking {
             const result = await this.#bookingRef.doc(bookingCode).update({
                 status: BookingStatus.PAID,
                 updatedAt: new Date().toISOString(),
+            })
+            console.log(result)
+            return bookingCode
+        } catch (error) {
+            console.error(error)
+            return null
+        }
+    }
+
+    private async handleChargeFailure(body: PaymentEventBodyModel) {
+        try {
+            const bookingCode = body.data.metadata.bookingCode
+            if (!bookingCode) throw badRequest('required bookingCode')
+            const result = await this.#bookingRef.doc(bookingCode).update({
+                status: BookingStatus.REJECTED,
+                updatedAt: new Date().toISOString(),
+                failureMessage: body.data.failureMessage,
+                failureCode: body.data.failureCode,
             })
             console.log(result)
             return bookingCode

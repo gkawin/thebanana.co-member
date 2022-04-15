@@ -14,7 +14,7 @@ export const BookingFilterPanel: React.VFC<BookingFilterPanelProps> = (props) =>
                 <li className="mr-2">
                     <div
                         onClick={() => props.setBookingGroup(BookingGroup.UpComming)}
-                        className={`inline-block p-4 rounded-t-lg border-b-2 ${getTabClasses(BookingGroup.UpComming)}`}
+                        className={`inline-block p-2 rounded-t-lg border-b-2 ${getTabClasses(BookingGroup.UpComming)}`}
                     >
                         กำลังจะมาถึง
                     </div>
@@ -22,7 +22,7 @@ export const BookingFilterPanel: React.VFC<BookingFilterPanelProps> = (props) =>
                 <li className="mr-2">
                     <div
                         onClick={() => props.setBookingGroup(BookingGroup.Past)}
-                        className={`inline-block p-4 rounded-t-lg border-b-2 ${getTabClasses(BookingGroup.Past)}`}
+                        className={`inline-block p-2 rounded-t-lg border-b-2 ${getTabClasses(BookingGroup.Past)}`}
                         aria-current="page"
                     >
                         เรียนแล้ว
@@ -31,7 +31,7 @@ export const BookingFilterPanel: React.VFC<BookingFilterPanelProps> = (props) =>
                 <li className="mr-2">
                     <div
                         onClick={() => props.setBookingGroup(BookingGroup.Cancelled)}
-                        className={`inline-block p-4 rounded-t-lg border-b-2 ${getTabClasses(BookingGroup.Cancelled)}`}
+                        className={`inline-block p-2 rounded-t-lg border-b-2 ${getTabClasses(BookingGroup.Cancelled)}`}
                     >
                         ยกเลิก
                     </div>

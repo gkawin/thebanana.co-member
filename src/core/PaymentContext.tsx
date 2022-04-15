@@ -13,13 +13,13 @@ export type PaymentContextProps = {
 }
 
 export type PaymentProviderProps = { productId: string; amount: number }
-export type ChargeResult = {
+export type ChargeResult = Partial<{
     bookingCode: string
     expiredDate: string
     status: string
     source: PaymentMethod
     metadata: Record<string, any>
-}
+}>
 
 const PaymentContext = createContext<PaymentContextProps>(null)
 
@@ -58,7 +58,10 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children, prod
                                 })
                                 .catch((error) => {
                                     console.error(error)
-                                    setChargeResult(null)
+                                    setChargeResult({
+                                        ...error,
+                                        status: 'failed',
+                                    })
                                 })
                         },
                     })
@@ -88,7 +91,10 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children, prod
                                 })
                                 .catch((error) => {
                                     console.error(error)
-                                    setChargeResult(null)
+                                    setChargeResult({
+                                        ...error,
+                                        status: 'failed',
+                                    })
                                 })
                         }
                     )

@@ -23,17 +23,17 @@ export type BookingInfo = {
     startDate: string
     endDate: string
     pricing: string
-    status: string
+    status: BookingStatus
     userId: string
     productName: string
     shippingAddress: string
     paymentMethod: PaymentMethod
 }
 
-export default function useMyBooking(options?: { bookingCode: string }) {
+export default function useMyBooking(options?: { bookingCode: string; bookingGroup?: BookingGroup }) {
     const [items, setItems] = useState<BookingInfo[]>([])
     const { db, auth } = useFirebase()
-    const [bookingGroup, setBookingGroup] = useState<BookingGroup>(BookingGroup.UpComming)
+    const [bookingGroup, setBookingGroup] = useState<BookingGroup>(options?.bookingGroup ?? BookingGroup.UpComming)
 
     const queryBooinkGroupCondition = () => {
         const bookingCode = options?.bookingCode ?? null
@@ -47,10 +47,7 @@ export default function useMyBooking(options?: { bookingCode: string }) {
                 ]
                 break
             case BookingGroup.Past:
-                queries = [
-                    where('status', 'in', [BookingStatus.PAID, BookingStatus.CREATED]),
-                    where('endDate', '<', new Date()),
-                ]
+                queries = [where('status', 'in', [BookingStatus.PAID]), where('endDate', '<', new Date())]
                 break
             case BookingGroup.Cancelled:
                 queries = [where('status', 'in', [BookingStatus.REJECTED, BookingStatus.CANCELLED])]
@@ -101,6 +98,7 @@ export default function useMyBooking(options?: { bookingCode: string }) {
         })
 
         return () => {
+            console.log('unsubsceribe')
             unsubscribe()
         }
         // NOTE: only booking Group has been changed.
