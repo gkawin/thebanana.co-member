@@ -6,6 +6,10 @@ interface ClassType<T> {
     new (...args: any[]): T
 }
 
+type ExcludedToJson<K> = K extends 'toJSON' ? never : K
+
+type ExcludedModel<M> = { [K in ExcludedToJson<keyof M>]?: any }
+
 export default class Model {
     static convert<T>(target: ClassType<T>) {
         return {
@@ -20,3 +24,9 @@ export default class Model {
         }
     }
 }
+
+export const withModel = <T>(cls: new (...args: unknown[]) => T) => ({
+    fromJson(json: ExcludedModel<T>) {
+        return deserialize(json, cls)
+    },
+})

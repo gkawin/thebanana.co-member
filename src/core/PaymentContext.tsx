@@ -1,4 +1,5 @@
 import { PaymentMethod, PaymentStep } from '@/constants'
+import type { ChargeResultModel } from '@/models/payment/ChargeResult.model'
 import { CheckoutFormField } from '@/pages/purchase/[slug]'
 import Script from 'next/script'
 import { createContext, useCallback, useContext, useMemo, useState } from 'react'
@@ -7,26 +8,29 @@ import { useAxios } from './RootContext'
 export type PaymentContextProps = {
     step: PaymentStep
     productId: string
-    chargeResult?: ChargeResult
+    chargeResult?: any
     setPaymentStep: (step: PaymentStep) => void
     createOmiseCharges: (formData: CheckoutFormField, method: PaymentMethod) => void
 }
 
 export type PaymentProviderProps = { productId: string; amount: number }
-export type ChargeResult = Partial<{
-    bookingCode: string
-    expiredDate: string
-    status: string
-    source: PaymentMethod
-    metadata: Record<string, any>
-}>
 
 const PaymentContext = createContext<PaymentContextProps>(null)
 
 export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children, productId, amount = 0 }) => {
     const [step, setPaymentStep] = useState<PaymentStep>(PaymentStep.INIT)
-    const [chargeResult, setChargeResult] = useState<ChargeResult>(null)
+    const [chargeResult, setChargeResult] = useState<ChargeResultModel>(null)
     const { post } = useAxios()
+
+    const handleChargeApi = useCallback(async (formData: { token?: string; source?: string } & Record<string, any>) => {
+        try {
+            const chargeResult = await post('/api/payment/charge', formData)
+            setChargeResult(chargeResult.data)
+        } catch (error) {
+            setChargeResult(null)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     const createOmiseCharges = useCallback<PaymentContextProps['createOmiseCharges']>(
         (formData, method) => {
@@ -45,24 +49,7 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children, prod
                         defaultPaymentMethod: 'credit_card',
                         onCreateTokenSuccess: (nonce: string) => {
                             const isToken = nonce.startsWith('tokn_')
-                            post('/api/payment/charge', {
-                                ...formData,
-                                token: isToken ? nonce : null,
-                                source: null,
-                            })
-                                .then(({ data }) => {
-                                    setChargeResult({
-                                        ...data,
-                                        status: 'success',
-                                    })
-                                })
-                                .catch((error) => {
-                                    console.error(error)
-                                    setChargeResult({
-                                        ...error,
-                                        status: 'failed',
-                                    })
-                                })
+                            handleChargeApi({ ...formData, token: isToken ? nonce : null, source: null })
                         },
                     })
                     break
@@ -77,32 +64,14 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children, prod
                             currency: 'THB',
                         },
                         (statusCode: any, response: any) => {
-                            post('/api/payment/charge', {
-                                ...formData,
-                                token: null,
-                                source: response.id,
-                                type: response.type,
-                            })
-                                .then(({ data }) => {
-                                    setChargeResult({
-                                        ...data,
-                                        status: 'success',
-                                    })
-                                })
-                                .catch((error) => {
-                                    console.error(error)
-                                    setChargeResult({
-                                        ...error,
-                                        status: 'failed',
-                                    })
-                                })
+                            handleChargeApi({ ...formData, token: null, source: response.id, type: response.type })
                         }
                     )
                     break
                 }
             }
         },
-        [amount, post]
+        [amount, handleChargeApi]
     )
 
     return (

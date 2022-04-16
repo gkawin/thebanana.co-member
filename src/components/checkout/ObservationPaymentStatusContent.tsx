@@ -1,10 +1,9 @@
 import useMyBooking, { BookingInfo } from '@/concerns/use-my-booking'
 import { BookingGroup, BookingStatus, PaymentMethod } from '@/constants'
-import { ChargeResult } from '@/core/PaymentContext'
 import Image from 'next/image'
 import Link from 'next/link'
 
-export const ObservationPaymentStatusContent: React.VFC<{ chargeResult?: ChargeResult }> = ({ chargeResult }) => {
+export const ObservationPaymentStatusContent: React.VFC<{ chargeResult?: any }> = ({ chargeResult }) => {
     const { items: upCommingItems } = useMyBooking({
         bookingCode: chargeResult.bookingCode,
         bookingGroup: BookingGroup.UpComming,

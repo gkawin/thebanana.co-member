@@ -3,21 +3,21 @@ import runsWithMethods from '@/middleware/runsWithMethods'
 import { ProductModel } from '@/models/ProductModel'
 import { OmiseService } from '@/services/omise.service'
 import resolver from '@/services/resolver'
-import { badData, badRequest, Boom } from '@hapi/boom'
+import { badRequest, Boom } from '@hapi/boom'
 import { NextApiHandler } from 'next'
 import { injectable } from 'tsyringe'
 import { validate } from 'class-validator'
 import { deserialize } from 'typescript-json-serializer'
 import { AdminSDK } from '@/libs/adminSDK'
-import Model from '@/models/Model'
+import Model, { withModel } from '@/models/Model'
 import { PaymentChargeBodyModel } from '@/models/payment/PaymentChargeBody.model'
 import runWithAuthorization from '@/middleware/runWithAuthorization'
 import { BookingModel } from '@/models/BookingModel'
 import dayjs from 'dayjs'
 import { PaymentMetadataModel } from '@/models/payment/PaymentMetadata.model'
 import { PaymentOmiseDataModel } from '@/models/payment/PaymentOmiseData.model'
-import { ChargeResult } from '@/core/PaymentContext'
 import { PaymentMethod } from '@/constants'
+import { ChargeResultModel } from '@/models/payment/ChargeResult.model'
 
 @injectable()
 class PaymentChargeApi {
@@ -67,21 +67,20 @@ class PaymentChargeApi {
                 })
                 .then((result) => deserialize(result, PaymentOmiseDataModel))
 
-            if (chargedResult.status === 'failed') {
-                throw badData(chargedResult.failureMessage)
-            }
+            const response = withModel(ChargeResultModel).fromJson({
+                bookingCode,
+                price: product.price,
+                card: chargedResult?.card ?? null,
+                qrCode: chargedResult?.source?.scannableCode?.image ?? null,
+                bookingExpiredDate: expiredDate.toDate(),
+                failureCode: chargedResult.failureCode,
+                failureMessage: chargedResult.failureMessage,
+                status: chargedResult.status,
+                paymentMethod:
+                    chargedResult?.source?.type === 'promptpay' ? PaymentMethod.PROMPT_PAY : PaymentMethod.CREDIT_CARD,
+            })
 
-            if (chargedResult?.source?.type === 'promptpay') {
-                res.status(200).json({
-                    status: 'success',
-                    expiredDate: expiredDate.toDate(),
-                    metadata: chargedResult.source.scannableCode.image,
-                    source: PaymentMethod.PROMPT_PAY,
-                    bookingCode,
-                } as unknown as ChargeResult)
-            } else {
-                res.status(200).json({ status: 'success', bookingCode })
-            }
+            res.status(200).json(response)
         } catch (error) {
             if (error instanceof Boom) {
                 res.status(error.output.statusCode).json(error.output.payload)

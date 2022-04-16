@@ -14,9 +14,9 @@ export class PaymentScanableImageModel {
     @JsonProperty()
     kind: string
 
-    @JsonProperty({ name: 'download_uri' })
-    downloadUri: string
+    @JsonProperty()
+    download_uri: string
 
-    @JsonProperty({ name: 'created_at' })
-    createdAt: string
+    @JsonProperty()
+    created_at: string
 }

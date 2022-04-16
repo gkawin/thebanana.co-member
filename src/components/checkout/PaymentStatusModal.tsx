@@ -4,11 +4,6 @@ import { ObservationPaymentStatusContent } from './ObservationPaymentStatusConte
 
 export const PaymentStatusModal: React.FC = () => {
     const { chargeResult } = usePaymentContext()
-    const paymentCompleted = chargeResult?.status === 'success'
-
-    const desc = paymentCompleted ? 'หมายเลขการจองของคุณคือ' : 'การชำระเงินไม่สำเร็จ'
-    const bookingCode = paymentCompleted ? chargeResult?.bookingCode : 'กรุณาตรวจสอบการทำรายการที่ธนาคารอีกครั้ง'
-
     return (
         <ReactModal
             isOpen={!!chargeResult}
@@ -17,8 +12,8 @@ export const PaymentStatusModal: React.FC = () => {
             <div className="flex flex-col space-y-4">
                 <div className="grid gap-y-4 text-center">
                     <div className="text-xl space-y-4">
-                        <div className="text-gray-500">{desc}</div>
-                        <div className="text-2xl">{bookingCode}</div>
+                        <div className="text-gray-500">หมายเลขการจองของคุณคือ</div>
+                        <div className="text-2xl">{chargeResult?.bookingCode}</div>
                     </div>
                     <ObservationPaymentStatusContent chargeResult={chargeResult} />
                 </div>
