@@ -8,7 +8,7 @@ import { useAxios } from './RootContext'
 export type PaymentContextProps = {
     step: PaymentStep
     productId: string
-    chargeResult?: any
+    chargeResult?: ChargeResultModel
     setPaymentStep: (step: PaymentStep) => void
     createOmiseCharges: (formData: CheckoutFormField, method: PaymentMethod) => void
 }
@@ -27,7 +27,7 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children, prod
             const chargeResult = await post('/api/payment/charge', formData)
             setChargeResult(chargeResult.data)
         } catch (error) {
-            setChargeResult(null)
+            setChargeResult(error as ChargeResultModel)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])

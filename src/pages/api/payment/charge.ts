@@ -3,7 +3,7 @@ import runsWithMethods from '@/middleware/runsWithMethods'
 import { ProductModel } from '@/models/ProductModel'
 import { OmiseService } from '@/services/omise.service'
 import resolver from '@/services/resolver'
-import { badRequest, Boom } from '@hapi/boom'
+import { badData, badRequest, Boom } from '@hapi/boom'
 import { NextApiHandler } from 'next'
 import { injectable } from 'tsyringe'
 import { validate } from 'class-validator'
@@ -12,12 +12,12 @@ import { AdminSDK } from '@/libs/adminSDK'
 import Model, { withModel } from '@/models/Model'
 import { PaymentChargeBodyModel } from '@/models/payment/PaymentChargeBody.model'
 import runWithAuthorization from '@/middleware/runWithAuthorization'
-import { BookingModel } from '@/models/BookingModel'
 import dayjs from 'dayjs'
 import { PaymentMetadataModel } from '@/models/payment/PaymentMetadata.model'
 import { PaymentOmiseDataModel } from '@/models/payment/PaymentOmiseData.model'
-import { PaymentMethod } from '@/constants'
+import { FailureCode, FailureMessage, PaymentMethod } from '@/constants'
 import { ChargeResultModel } from '@/models/payment/ChargeResult.model'
+import { BookingModel } from '@/models/BookingModel'
 
 @injectable()
 class PaymentChargeApi {
@@ -67,23 +67,39 @@ class PaymentChargeApi {
                 })
                 .then((result) => deserialize(result, PaymentOmiseDataModel))
 
-            const response = withModel(ChargeResultModel).fromJson({
-                bookingCode,
-                price: product.price,
-                card: chargedResult?.card ?? null,
-                qrCode: chargedResult?.source?.scannableCode?.image ?? null,
-                bookingExpiredDate: expiredDate.toDate(),
-                failureCode: chargedResult.failureCode,
-                failureMessage: chargedResult.failureMessage,
-                status: chargedResult.status,
-                paymentMethod:
-                    chargedResult?.source?.type === 'promptpay' ? PaymentMethod.PROMPT_PAY : PaymentMethod.CREDIT_CARD,
-            })
+            const response = withModel(ChargeResultModel)
+            const paymentMethod =
+                chargedResult?.source?.type === 'promptpay' ? PaymentMethod.PROMPT_PAY : PaymentMethod.CREDIT_CARD
 
-            res.status(200).json(response)
+            if (chargedResult.status === 'failed') {
+                console.error(chargedResult)
+                const message = FailureCode[chargedResult.failureCode as any] as unknown as FailureCode
+                throw badData(
+                    null,
+                    response.fromJson({
+                        card: null,
+                        qrCode: null,
+                        paymentMethod,
+                        failureMessage: FailureMessage.get(message),
+                        status: chargedResult.status,
+                        bookingCode,
+                    })
+                )
+            }
+
+            res.status(200).json(
+                response.fromJson({
+                    card: chargedResult?.card ?? null,
+                    qrCode: chargedResult?.source?.scannableCode?.image ?? null,
+                    status: chargedResult.status,
+                    paymentMethod,
+                    bookingCode,
+                })
+            )
         } catch (error) {
             if (error instanceof Boom) {
-                res.status(error.output.statusCode).json(error.output.payload)
+                console.log(error)
+                res.status(error.output.statusCode).json(error.data)
             } else {
                 console.error(error)
                 res.status(500).json(error)

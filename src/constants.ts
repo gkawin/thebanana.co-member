@@ -42,3 +42,23 @@ export enum OmiseHookEvent {
     CREATE = 'charge.create',
     COMPLETE = 'charge.complete',
 }
+
+export enum FailureCode {
+    insufficient_fund,
+    stolen_or_lost_card,
+    failed_processing,
+    payment_rejected,
+    failed_fraud_check,
+    invalid_account_number,
+    invalid_security_code,
+}
+
+export const FailureMessage = new Map<FailureCode, string>([
+    [FailureCode.insufficient_fund, 'ยอดเงินในบัตรเครดิตไม่เพียงพอ กรุณาติดต่อธนาคารเจ้าของบัตร'],
+    [FailureCode.stolen_or_lost_card, 'ไม่สามารถทำรายการบนบัตรนี้ได้ กรุณาติดต่อธนาคารเจ้าของบัตร'],
+    [FailureCode.failed_processing, 'ไม่สามารถทำรายการบนบัตรนี้ได้ กรุณาติดต่อธนาคารเจ้าของบัตร'],
+    [FailureCode.payment_rejected, 'ไม่สามารถทำรายการบนบัตรนี้ได้ กรุณาติดต่อธนาคารเจ้าของบัตร'],
+    [FailureCode.failed_fraud_check, 'ไม่สามารถทำรายการบนบัตรนี้ได้ กรุณาติดต่อธนาคารเจ้าของบัตร'],
+    [FailureCode.invalid_account_number, 'กรุณากรอกเลขบนบัตรเครดิตให้ถูกต้อง ครบถ้วน'],
+    [FailureCode.invalid_security_code, 'กรุณากรอกเลขบนบัตรเครดิตให้ถูกต้อง ครบถ้วน'],
+])

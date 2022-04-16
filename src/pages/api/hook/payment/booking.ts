@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { BookingStatus, OmiseHookEvent, PaymentMethod, SourceOfFund } from '@/constants'
+import { BookingStatus, PaymentMethod, SourceOfFund } from '@/constants'
 import { AdminSDK } from '@/libs/adminSDK'
 import runsWithMethods from '@/middleware/runsWithMethods'
 import runWithAuthorization from '@/middleware/runWithAuthorization'
@@ -36,25 +36,39 @@ class HookPaymentBooking {
             const body = deserialize(req.body, PaymentEventBodyModel)
             this.validateRequesting(body)
 
-            let bookingCode = null
-            switch (body.key) {
-                case OmiseHookEvent.CREATE:
-                    bookingCode = await this.handleChargeCreated(body)
-                    break
+            const status = body.data.status
 
-                case OmiseHookEvent.COMPLETE: {
-                    if (body.data.status === 'failed') {
-                        bookingCode = await this.handleChargeFailure(body)
-                    } else {
-                        bookingCode = await this.handleChargeCompleted(body)
-                    }
+            switch (status) {
+                case 'successful': {
+                    await this.createNewBooking(body, BookingStatus.PAID)
                     break
                 }
-                default:
+                case 'failed': {
                     break
+                }
             }
 
-            res.status(200).json({ event: body, bookingCode })
+            // let bookingCode = null
+            // switch (body.key) {
+            //     case OmiseHookEvent.CREATE: {
+            //         if ()
+            //         bookingCode = await this.handleChargeCreated(body)
+            //         break
+            //     }
+
+            //     case OmiseHookEvent.COMPLETE: {
+            //         if (body.data.status === 'failed') {
+            //             bookingCode = await this.handleChargeFailure(body)
+            //         } else {
+            //             bookingCode = await this.handleChargeCompleted(body)
+            //         }
+            //         break
+            //     }
+            //     default:
+            //         break
+            // }
+
+            res.status(200).json({ status: 'success' })
         } catch (error) {
             console.log(error)
             if (error instanceof Boom) {
@@ -78,7 +92,7 @@ class HookPaymentBooking {
         if (!shippingAddressId) throw badRequest('required shippingAddressId')
     }
 
-    private async handleChargeCreated(body: PaymentEventBodyModel): Promise<string | null> {
+    private async createNewBooking(body: PaymentEventBodyModel, status: BookingStatus): Promise<string | null> {
         try {
             const { bookingCode, productId, shippingAddressId, userId, startDate, endDate, price } = body.data.metadata
 
@@ -97,7 +111,7 @@ class HookPaymentBooking {
                 paymentMethod: body.data.card ? PaymentMethod.CREDIT_CARD : PaymentMethod.PROMPT_PAY,
                 createdOn: new Date(),
                 product,
-                status: BookingStatus.CREATED,
+                status,
                 user,
                 startDate,
                 endDate,

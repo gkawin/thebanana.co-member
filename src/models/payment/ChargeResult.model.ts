@@ -9,9 +9,6 @@ export class ChargeResultModel {
     bookingCode: string
 
     @JsonProperty()
-    bookingExpiredDate: Date
-
-    @JsonProperty()
     status: 'pending' | 'failed' | 'successful'
 
     @JsonProperty()
@@ -29,11 +26,8 @@ export class ChargeResultModel {
     @JsonProperty()
     failureCode?: string
 
-    @JsonProperty()
-    price: number
-
     @JsonProperty({ isDictionary: true })
-    metadata: {
+    metadata?: {
         productCode: string
         productName: string
         effectiveDate: Date
