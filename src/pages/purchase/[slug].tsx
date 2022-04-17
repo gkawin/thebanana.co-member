@@ -48,7 +48,7 @@ const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
             <Head>
                 <title>จองและชำระเงิน</title>
             </Head>
-            <h2 className="text-sub-title font-semibold">สรุปรายการลงทะเบียน</h2>
+            <h2 className="text-sub-title font-semibold">เลือกวิธีการชำระเงิน</h2>
             {!isBookingNotExist && (
                 <PaymentProvider productId={props.product.id} amount={props.product.price}>
                     <PaymentStatusModal />

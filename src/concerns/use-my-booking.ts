@@ -1,4 +1,4 @@
-import { BookingGroup, BookingStatus, PaymentMethod } from '@/constants'
+import { BookingGroup, BookingStatus, FailureCode, PaymentMethod } from '@/constants'
 import { useFirebase } from '@/core/RootContext'
 import { BookingModel } from '@/models/BookingModel'
 import Model from '@/models/Model'
@@ -28,9 +28,10 @@ export type BookingInfo = {
     productName: string
     shippingAddress: string
     paymentMethod: PaymentMethod
+    failureCode: FailureCode
 }
 
-export default function useMyBooking(options?: { bookingCode: string; bookingGroup?: BookingGroup }) {
+export default function useMyBooking(options?: { bookingCode?: string; bookingGroup?: BookingGroup }) {
     const [items, setItems] = useState<BookingInfo[]>([])
     const { db, auth } = useFirebase()
     const [bookingGroup, setBookingGroup] = useState<BookingGroup>(options?.bookingGroup ?? BookingGroup.UpComming)
@@ -39,22 +40,24 @@ export default function useMyBooking(options?: { bookingCode: string; bookingGro
         const bookingCode = options?.bookingCode ?? null
 
         let queries: QueryConstraint[] = []
-        switch (bookingGroup) {
-            case BookingGroup.UpComming:
-                queries = [
-                    where('status', 'in', [BookingStatus.PAID, BookingStatus.CREATED]),
-                    where('endDate', '>=', new Date()),
-                ]
-                break
-            case BookingGroup.Past:
-                queries = [where('status', 'in', [BookingStatus.PAID]), where('endDate', '<', new Date())]
-                break
-            case BookingGroup.Cancelled:
-                queries = [where('status', 'in', [BookingStatus.REJECTED, BookingStatus.CANCELLED])]
-                break
-        }
+
         if (bookingCode) {
             queries.push(where('bookingCode', '==', bookingCode))
+        } else {
+            switch (bookingGroup) {
+                case BookingGroup.UpComming:
+                    queries = [
+                        where('status', 'in', [BookingStatus.PAID, BookingStatus.PENDING]),
+                        where('endDate', '>=', new Date()),
+                    ]
+                    break
+                case BookingGroup.Past:
+                    queries = [where('status', 'in', [BookingStatus.PAID]), where('endDate', '<', new Date())]
+                    break
+                case BookingGroup.Cancelled:
+                    queries = [where('status', 'in', [BookingStatus.REJECTED, BookingStatus.CANCELLED])]
+                    break
+            }
         }
 
         return queries
@@ -90,6 +93,7 @@ export default function useMyBooking(options?: { bookingCode: string; bookingGro
                             productName: product.name,
                             shippingAddress: address && address.address,
                             paymentMethod: props.paymentMethod,
+                            failureCode: props.failureCode,
                         }
                     })
                     .filter(Boolean)

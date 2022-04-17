@@ -71,21 +71,9 @@ class PaymentChargeApi {
             const paymentMethod =
                 chargedResult?.source?.type === 'promptpay' ? PaymentMethod.PROMPT_PAY : PaymentMethod.CREDIT_CARD
 
-            if (chargedResult.status === 'failed') {
-                console.error(chargedResult)
-                const message = FailureCode[chargedResult.failureCode as any] as unknown as FailureCode
-                throw badData(
-                    null,
-                    response.fromJson({
-                        card: null,
-                        qrCode: null,
-                        paymentMethod,
-                        failureMessage: FailureMessage.get(message),
-                        status: chargedResult.status,
-                        bookingCode,
-                    })
-                )
-            }
+            const message = chargedResult?.failureCode
+                ? (FailureCode[chargedResult.failureCode as any] as unknown as FailureCode)
+                : null
 
             res.status(200).json(
                 response.fromJson({
@@ -93,13 +81,15 @@ class PaymentChargeApi {
                     qrCode: chargedResult?.source?.scannableCode?.image ?? null,
                     status: chargedResult.status,
                     paymentMethod,
+                    failureCode: chargedResult?.failureCode,
+                    failureMessage: FailureMessage.get(message),
                     bookingCode,
                 })
             )
         } catch (error) {
             if (error instanceof Boom) {
                 console.log(error)
-                res.status(error.output.statusCode).json(error.data)
+                res.status(error.output.statusCode).json(error.output.payload)
             } else {
                 console.error(error)
                 res.status(500).json(error)

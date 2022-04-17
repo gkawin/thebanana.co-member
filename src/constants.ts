@@ -5,7 +5,7 @@ export enum DatasetType {
 
 export enum BookingStatus {
     PAID = 'PAID',
-    CREATED = 'CREATED',
+    PENDING = 'PENDING',
     EXPIRED = 'EXPIRED',
     REJECTED = 'REJECTED',
     CANCELLED = 'CANCELLED',
@@ -56,8 +56,8 @@ export enum FailureCode {
 export const FailureMessage = new Map<FailureCode, string>([
     [FailureCode.insufficient_fund, 'ยอดเงินในบัตรเครดิตไม่เพียงพอ กรุณาติดต่อธนาคารเจ้าของบัตร'],
     [FailureCode.stolen_or_lost_card, 'ไม่สามารถทำรายการบนบัตรนี้ได้ กรุณาติดต่อธนาคารเจ้าของบัตร'],
-    [FailureCode.failed_processing, 'ไม่สามารถทำรายการบนบัตรนี้ได้ กรุณาติดต่อธนาคารเจ้าของบัตร'],
-    [FailureCode.payment_rejected, 'ไม่สามารถทำรายการบนบัตรนี้ได้ กรุณาติดต่อธนาคารเจ้าของบัตร'],
+    [FailureCode.failed_processing, 'ไม่สามารถทำรายการได้ กรุณาติดต่อธนาคาร'],
+    [FailureCode.payment_rejected, 'ไม่สามารถทำรายการได้ กรุณาติดต่อธนาคาร'],
     [FailureCode.failed_fraud_check, 'ไม่สามารถทำรายการบนบัตรนี้ได้ กรุณาติดต่อธนาคารเจ้าของบัตร'],
     [FailureCode.invalid_account_number, 'กรุณากรอกเลขบนบัตรเครดิตให้ถูกต้อง ครบถ้วน'],
     [FailureCode.invalid_security_code, 'กรุณากรอกเลขบนบัตรเครดิตให้ถูกต้อง ครบถ้วน'],

@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { BookingStatus, PaymentMethod, SourceOfFund } from '@/constants'
+import { BookingStatus, FailureCode, PaymentMethod, SourceOfFund } from '@/constants'
 import { AdminSDK } from '@/libs/adminSDK'
 import runsWithMethods from '@/middleware/runsWithMethods'
 import runWithAuthorization from '@/middleware/runWithAuthorization'
@@ -40,33 +40,16 @@ class HookPaymentBooking {
 
             switch (status) {
                 case 'successful': {
-                    await this.createNewBooking(body, BookingStatus.PAID)
+                    await this.setBookingRow(body, BookingStatus.PAID)
+                    break
+                }
+                case 'pending': {
+                    await this.setBookingRow(body, BookingStatus.PENDING)
                     break
                 }
                 case 'failed': {
-                    break
                 }
             }
-
-            // let bookingCode = null
-            // switch (body.key) {
-            //     case OmiseHookEvent.CREATE: {
-            //         if ()
-            //         bookingCode = await this.handleChargeCreated(body)
-            //         break
-            //     }
-
-            //     case OmiseHookEvent.COMPLETE: {
-            //         if (body.data.status === 'failed') {
-            //             bookingCode = await this.handleChargeFailure(body)
-            //         } else {
-            //             bookingCode = await this.handleChargeCompleted(body)
-            //         }
-            //         break
-            //     }
-            //     default:
-            //         break
-            // }
 
             res.status(200).json({ status: 'success' })
         } catch (error) {
@@ -92,7 +75,11 @@ class HookPaymentBooking {
         if (!shippingAddressId) throw badRequest('required shippingAddressId')
     }
 
-    private async createNewBooking(body: PaymentEventBodyModel, status: BookingStatus): Promise<string | null> {
+    private async setBookingRow(
+        body: PaymentEventBodyModel,
+        status: BookingStatus,
+        failureCode: FailureCode = null
+    ): Promise<string | null> {
         try {
             const { bookingCode, productId, shippingAddressId, userId, startDate, endDate, price } = body.data.metadata
 
@@ -103,7 +90,7 @@ class HookPaymentBooking {
                 .withConverter(Model.convert(UserAddressModel))
                 .doc(shippingAddressId)
 
-            const result = await this.#bookingRef.doc(bookingCode).create({
+            const result = await this.#bookingRef.doc(bookingCode).set({
                 billingId: body.id,
                 bookingCode: bookingCode,
                 sourceOfFund: SourceOfFund.OMISE,
@@ -116,41 +103,7 @@ class HookPaymentBooking {
                 startDate,
                 endDate,
                 price,
-            })
-            console.log(result)
-            return bookingCode
-        } catch (error) {
-            console.error(error)
-            return null
-        }
-    }
-
-    private async handleChargeCompleted(body: PaymentEventBodyModel) {
-        try {
-            const bookingCode = body.data.metadata.bookingCode
-            if (!bookingCode) throw badRequest('required bookingCode')
-
-            const result = await this.#bookingRef.doc(bookingCode).update({
-                status: BookingStatus.PAID,
-                updatedAt: new Date().toISOString(),
-            })
-            console.log(result)
-            return bookingCode
-        } catch (error) {
-            console.error(error)
-            return null
-        }
-    }
-
-    private async handleChargeFailure(body: PaymentEventBodyModel) {
-        try {
-            const bookingCode = body.data.metadata.bookingCode
-            if (!bookingCode) throw badRequest('required bookingCode')
-            const result = await this.#bookingRef.doc(bookingCode).update({
-                status: BookingStatus.REJECTED,
-                updatedAt: new Date().toISOString(),
-                failureMessage: body.data.failureMessage,
-                failureCode: body.data.failureCode,
+                failureCode,
             })
             console.log(result)
             return bookingCode
