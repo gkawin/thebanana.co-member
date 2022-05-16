@@ -1,4 +1,4 @@
-import { useUserInfoContext } from '@/core/RootContext'
+import { useUser } from '@/core/RootContext'
 import { useFormContext } from 'react-hook-form'
 import { NewAddressForm } from './NewAddressForm'
 
@@ -7,7 +7,7 @@ export const AddressListCard: React.FC = () => {
         register,
         formState: { errors },
     } = useFormContext()
-    const { addresses } = useUserInfoContext()
+    const { addresses } = useUser()
     return (
         <div className="p-4 rounded shadow-md border">
             <h2 className="text-sub-title font-semibold">ที่อยู่ในการจัดส่งเอกสาร</h2>

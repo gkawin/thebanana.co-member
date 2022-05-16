@@ -1,10 +1,10 @@
 import { DatasetType } from '@/constants'
-import { useUserInfoContext } from '@/core/RootContext'
+import { useUser } from '@/core/RootContext'
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 export const BookingInfoCard: React.VFC = () => {
-    const { personal, schools } = useUserInfoContext()
+    const { personal, schools } = useUser()
     const {
         register,
         watch,

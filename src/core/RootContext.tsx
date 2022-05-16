@@ -8,17 +8,17 @@ import { logEvent, getAnalytics } from 'firebase/analytics'
 import { SpinLoading } from '@/components/portal/SpinLoading'
 import { UserModel } from '@/models/UserModel'
 import Script from 'next/script'
+import { useRouter } from 'next/router'
 
 const liffId = '1653826193-QbmamAo0'
 const firebaseConfig = {
-    apiKey: 'AIzaSyDbAU9whhvBggCPsVScnZAe5HDpk7N1UVs',
-    authDomain: 'thebanana-d9286.firebaseapp.com',
-    databaseURL: 'https://thebanana-d9286.firebaseio.com',
-    projectId: 'thebanana-d9286',
-    storageBucket: 'thebanana-d9286.appspot.com',
-    messagingSenderId: '652607083295',
-    appId: '1:652607083295:web:4b660c65ebc8ceeaa9d62a',
-    measurementId: 'G-KQ0RJ6ZTG5',
+    apiKey: 'AIzaSyA0jgSwsfOagPehdRrzbposqkYIn2mHnF8',
+    authDomain: 'thebanana-member.firebaseapp.com',
+    projectId: 'thebanana-member',
+    storageBucket: 'thebanana-member.appspot.com',
+    messagingSenderId: '696744791245',
+    appId: '1:696744791245:web:c46ca8c522c7f8b301ad84',
+    measurementId: 'G-8BXSYMCMDH',
 }
 
 export type AppContext = {
@@ -44,12 +44,12 @@ export const useFirebase = () =>
         }
     }, [])
 
-export const useUserInfoContext = () => {
+export const useUser = () => {
     const ctx = useContext(appContext)
     return useMemo(() => ctx.$userInfo, [ctx.$userInfo])
 }
 
-export const useLoading = (init?: boolean) => {
+export const useLoading = () => {
     const loadingCtx = useContext(loadingContext)
 
     if (!loadingCtx) {
@@ -61,7 +61,9 @@ export const useLoading = (init?: boolean) => {
 
 const RootContext: React.FC = ({ children }) => {
     const [context, setContext] = useState<AppContext>(null)
-    const [loading, setLoading] = useState<boolean>(false)
+    const [loading, setLoading] = useState<boolean>(true)
+    const [shouldSignUp, setShouldSignUp] = useState(false)
+    const route = useRouter()
 
     const createLiff = useCallback(async () => {
         await window.liff.init({ liffId })
@@ -73,27 +75,24 @@ const RootContext: React.FC = ({ children }) => {
 
     const createAxios = useCallback(async () => {
         const token = window.liff.getAccessToken()
-        return Axios.create({
+        const instance = Axios.create({
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
             timeout: 10000,
         })
+        return instance
     }, [])
 
     const createAuthorization = useCallback(async () => {
         const axios = await createAxios()
         const decodedToken = window.liff.getDecodedIDToken()
-        const memberResult = await axios.post<{ isMember: boolean }>('/api/auth/member', {
+
+        const { data } = await axios.post<{ authenticationCode: string; alreadyMember: boolean }>('/api/auth/token', {
             connectId: decodedToken?.sub,
         })
-        if (memberResult) {
-            const authenResult = await axios.post<{ authenticationCode: string }>('/api/auth/token', {
-                connectId: decodedToken?.sub,
-            })
-            await signInWithCustomToken(getAuth(), authenResult.data.authenticationCode)
-        }
+        return data
     }, [createAxios])
 
     const createdFetchingUserInfo = useCallback(async (uid: string) => {
@@ -122,15 +121,23 @@ const RootContext: React.FC = ({ children }) => {
             createLiff().then(createAxios)
 
             unsubscribe = getAuth().onAuthStateChanged(async (user) => {
-                if (!user) {
-                    await createAuthorization()
-                } else {
-                    console.log(user)
-                    const $axios = await createAxios()
-                    const $userInfo = await createdFetchingUserInfo(user.uid)
-                    setContext({ $axios, $userInfo })
-                    setLoading(false)
+                console.log(user)
+                const $axios = await createAxios()
+                const { alreadyMember, authenticationCode } = await createAuthorization()
+
+                let $userInfo = null
+
+                if (alreadyMember && !user) {
+                    await signInWithCustomToken(getAuth(), authenticationCode)
+                    $userInfo = await createdFetchingUserInfo(user.uid)
                 }
+
+                if (!alreadyMember) {
+                    route.push('/signup')
+                }
+
+                setContext({ $axios, $userInfo })
+                setLoading(false)
             })
         }
         return () => {

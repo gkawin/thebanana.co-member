@@ -1,31 +1,58 @@
 import runsWithMethods from '@/middleware/runsWithMethods'
-import { badRequest, Boom, forbidden } from '@hapi/boom'
+import { badRequest, Boom, boomify, forbidden, unauthorized } from '@hapi/boom'
 import { NextApiHandler } from 'next'
 import { ok } from 'assert'
-import adminSDK from '@/libs/adminSDK'
+import { AdminSDK } from '@/libs/adminSDK'
+import { injectable } from 'tsyringe'
+import resolver from '@/services/resolver'
+import runWithAuthorization from '@/middleware/runWithAuthorization'
+import { SocialConnectModel } from '@/models/social-connect/SocialConnect.model'
+import Model from '@/models/Model'
 
-const handleToken: NextApiHandler = async (req, res) => {
-    await runsWithMethods(req, res, { methods: ['POST'] })
-    const { db, auth } = adminSDK()
+@injectable()
+class TokenApi {
+    #userConnectCol: FirebaseFirestore.CollectionReference<SocialConnectModel>
+    constructor(private admin: AdminSDK) {
+        this.#userConnectCol = this.admin.db.collection('user_connect').withConverter(Model.convert(SocialConnectModel))
+    }
 
-    try {
-        const { connectId } = req.body
-        ok(connectId !== null, badRequest())
+    main: NextApiHandler = async (req, res) => {
+        await runWithAuthorization(req, res, {})
+        await runsWithMethods(req, res, { methods: ['POST'] })
 
-        const connectInfo = await db.collection('user_connect').doc(connectId).get()
-        ok(connectInfo.exists, forbidden())
+        try {
+            const { connectId } = req.body
+            ok(connectId !== null, badRequest())
 
-        const uid = connectInfo.data().user.id
-        const authenticationCode = await auth.createCustomToken(uid)
+            const connectInfo = await this.#userConnectCol.doc(connectId).get()
+            let payload = {
+                authenticationCode: null as string,
+                alreadyMember: false,
+            }
 
-        res.status(200).json({ authenticationCode })
-    } catch (error) {
-        if (error instanceof Boom) {
-            res.status(error.output.statusCode).json(error.output.payload)
-        } else {
-            res.status(500).json({})
+            if (connectInfo.exists) {
+                const authenticationCode = await this.getCustomToken(connectInfo)
+                payload.alreadyMember = true
+                payload.authenticationCode = authenticationCode
+            }
+
+            res.status(200).json(payload)
+        } catch (error) {
+            if (error instanceof Boom) {
+                res.status(error.output.statusCode).json(error.output.payload)
+            } else {
+                res.status(500).json({})
+            }
         }
+    }
+
+    private async getCustomToken(connectInfo: FirebaseFirestore.DocumentSnapshot<SocialConnectModel>): Promise<string> {
+        const uid = connectInfo.data().user.id
+        const authenticationCode = await this.admin.auth.createCustomToken(uid)
+
+        return authenticationCode
     }
 }
 
-export default handleToken
+const handler = resolver.resolve(TokenApi)
+export default handler.main
