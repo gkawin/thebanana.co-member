@@ -1,5 +1,5 @@
+import { useRecaptchaContext } from '@/core/RecaptchaContext'
 import { useAxios } from '@/core/RootContext'
-import { useRecaptchaContext } from '@/pages/signup'
 import { SubmitHandler, useForm } from 'react-hook-form'
 
 export const OTPForm: React.VFC = () => {

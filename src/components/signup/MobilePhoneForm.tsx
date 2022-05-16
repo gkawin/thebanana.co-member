@@ -1,4 +1,4 @@
-import { useRecaptchaContext } from '@/pages/signup'
+import { useRecaptchaContext } from '@/core/RecaptchaContext'
 import { mobileToThaiNumber } from '@/utils/phone-number'
 import { SubmitHandler, useForm } from 'react-hook-form'
 
