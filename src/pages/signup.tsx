@@ -1,14 +1,12 @@
 import { MobilePhoneForm } from '@/components/signup/MobilePhoneForm'
 import { OTPForm } from '@/components/signup/OTPForm'
 import { useRecaptchaForm } from '@/concerns/use-recaptcha-form'
-import { getApp } from 'firebase/app'
 import { ConfirmationResult, getAuth, signInWithPhoneNumber } from 'firebase/auth'
 // import { useRecaptchaForm } from '@/concerns/use-recaptcha-form'
 // import { useFirebase, useUser } from '@/core/RootContext'
 
 import { NextPage } from 'next'
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { FormProvider, useForm } from 'react-hook-form'
+import React, { createContext, useContext, useMemo, useState } from 'react'
 
 export type SignInPageForm = {
     phoneNumber: string

@@ -1,18 +1,16 @@
 import { useAxios } from '@/core/RootContext'
 import { useRecaptchaContext } from '@/pages/signup'
-import { useRouter } from 'next/router'
 import { SubmitHandler, useForm } from 'react-hook-form'
 
 export const OTPForm: React.VFC = () => {
     const { confirmationResult } = useRecaptchaContext()
     const { register, handleSubmit } = useForm()
     const axios = useAxios()
-    const router = useRouter()
 
     const onSubmit: SubmitHandler<{ otp: string }> = async ({ otp }) => {
         try {
             await confirmationResult.confirm(otp)
-            axios.post('/')
+            axios.post('/user')
         } catch (error) {
             console.error('cannot sent SMS')
         }

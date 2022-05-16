@@ -1,7 +1,6 @@
 import useMyBooking, { BookingInfo } from '@/concerns/use-my-booking'
-import { BookingGroup, BookingStatus, PaymentMethod } from '@/constants'
+import { BookingGroup, PaymentMethod } from '@/constants'
 import Image from 'next/image'
-import Link from 'next/link'
 
 export type ObservationPaymentStatusContentProps = {
     bookingCode: string
@@ -34,15 +33,15 @@ export const ObservationPaymentStatusContent: React.VFC<ObservationPaymentStatus
         bookingInfo = haltItems[0]
     }
 
-    const renderMyBookingLink = () => {
-        return (
-            <Link href="/my/booking">
-                <a type="button" className="p-2 text-center bg-indigo-700 text-white w-full rounded text-sm">
-                    ไปหน้าคอร์สเรียนของฉัน
-                </a>
-            </Link>
-        )
-    }
+    // const renderMyBookingLink = () => {
+    //     return (
+    //         <Link href="/my/booking">
+    //             <a type="button" className="p-2 text-center bg-indigo-700 text-white w-full rounded text-sm">
+    //                 ไปหน้าคอร์สเรียนของฉัน
+    //             </a>
+    //         </Link>
+    //     )
+    // }
 
     return (
         <div>
@@ -50,6 +49,7 @@ export const ObservationPaymentStatusContent: React.VFC<ObservationPaymentStatus
                 <div className="relative">
                     <span className="font-thin block">กรุณาทำรายการผ่าน app ธนาคาร</span>
                     <Image unoptimized src={imageUri} alt="qr_code" layout="intrinsic" width={300} height={300} />
+                    {JSON.stringify(bookingInfo)}
                 </div>
             )}
         </div>

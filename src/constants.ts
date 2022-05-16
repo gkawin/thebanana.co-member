@@ -9,6 +9,7 @@ export enum BookingStatus {
     EXPIRED = 'EXPIRED',
     REJECTED = 'REJECTED',
     CANCELLED = 'CANCELLED',
+    CREATED = 'CREATED',
 }
 
 export enum BookingGroup {

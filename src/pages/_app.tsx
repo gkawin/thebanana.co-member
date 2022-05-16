@@ -1,6 +1,5 @@
 import '../styles/globals.css'
 import RootContext from '@/core/RootContext'
-import type { AppProps } from 'next/app'
 
 import Head from 'next/head'
 
@@ -8,7 +7,7 @@ import ReactModal from 'react-modal'
 
 ReactModal.setAppElement('#__next')
 
-function MyApp({ Component, pageProps }: AppProps) {
+function MyApp({ Component, pageProps }: any) {
     return (
         <>
             <Head>

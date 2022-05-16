@@ -62,7 +62,6 @@ export const useLoading = () => {
 const RootContext: React.FC = ({ children }) => {
     const [context, setContext] = useState<AppContext>(null)
     const [loading, setLoading] = useState<boolean>(true)
-    const [shouldSignUp, setShouldSignUp] = useState(false)
     const route = useRouter()
 
     const createLiff = useCallback(async () => {
