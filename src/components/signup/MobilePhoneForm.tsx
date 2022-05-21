@@ -1,4 +1,4 @@
-import { useRecaptchaContext } from '@/core/RecaptchaContext'
+import { useSignUp } from '@/core/SignupContext'
 import { mobileToThaiNumber } from '@/utils/phone-number'
 import { SubmitHandler, useForm } from 'react-hook-form'
 
@@ -9,7 +9,7 @@ export const MobilePhoneForm: React.VFC = () => {
         formState: { errors },
     } = useForm()
 
-    const { requestOtp } = useRecaptchaContext()
+    const { requestOtp } = useSignUp()
 
     const onSubmit: SubmitHandler<{ mobileNumber: string }> = async ({ mobileNumber }) => {
         requestOtp(mobileToThaiNumber(mobileNumber))

@@ -1,23 +1,20 @@
-import { useRecaptchaContext } from '@/core/RecaptchaContext'
-import { useAxios } from '@/core/RootContext'
+import { useSignUp } from '@/core/SignupContext'
 import { SubmitHandler, useForm } from 'react-hook-form'
 
 export const OTPForm: React.VFC = () => {
-    const { confirmationResult } = useRecaptchaContext()
+    const { sentOtp, confirmOtp } = useSignUp()
     const { register, handleSubmit } = useForm()
-    const axios = useAxios()
 
     const onSubmit: SubmitHandler<{ otp: string }> = async ({ otp }) => {
         try {
-            await confirmationResult.confirm(otp)
-            axios.post('/user')
+            await confirmOtp(otp)
         } catch (error) {
             console.error('cannot sent SMS')
         }
     }
 
     return (
-        confirmationResult && (
+        sentOtp && (
             <form onSubmit={handleSubmit(onSubmit)}>
                 <label htmlFor="otp">กรุณากรอกรหัส 6 หลักที่ได้รับจาก SMS</label>
                 <input

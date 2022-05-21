@@ -3,7 +3,7 @@ import { getAuth, RecaptchaVerifier } from 'firebase/auth'
 import { useCallback, useEffect, useState } from 'react'
 
 export const useRecaptchaForm = (el: { containerId: string }) => {
-    const [sentOtp, setSendOtp] = useState(false)
+    const [sentOtp, setSentOtp] = useState(false)
     const [loading, setLoading] = useState(true)
 
     const initRecaptcha = useCallback(async (containerId: string) => {
@@ -14,16 +14,23 @@ export const useRecaptchaForm = (el: { containerId: string }) => {
                 {
                     size: 'invisible',
                     'expired-callback': () => {
-                        setSendOtp(false)
+                        setSentOtp(false)
                         window.grecaptcha.reset(window.recaptchaWidgetId)
                     },
                     callback: (response: any) => {
-                        setSendOtp(true)
+                        setSentOtp(true)
                     },
                 },
                 auth
             )
         }
+    }, [])
+
+    const resetRecaptcha = useCallback(async () => {
+        if (window.grecaptcha && !window.recaptchaWidgetId) {
+            window.grecaptcha.reset(window.recaptchaWidgetId)
+        }
+        setSentOtp(false)
     }, [])
 
     const renderRecaptcha = useCallback(async () => {
@@ -52,5 +59,6 @@ export const useRecaptchaForm = (el: { containerId: string }) => {
     return {
         loading,
         sentOtp,
+        resetRecaptcha,
     }
 }

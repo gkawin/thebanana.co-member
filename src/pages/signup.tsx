@@ -1,6 +1,6 @@
 import { MobilePhoneForm } from '@/components/signup/MobilePhoneForm'
 import { OTPForm } from '@/components/signup/OTPForm'
-import { RecaptchaContext } from '@/core/RecaptchaContext'
+import { SignupContext } from '@/core/SignupContext'
 
 import { NextPage } from 'next'
 
@@ -11,12 +11,12 @@ export type SignInPageForm = {
 
 const SignUpPage: NextPage = () => {
     return (
-        <RecaptchaContext>
+        <SignupContext>
             <div className="container m-auto">
                 <MobilePhoneForm />
                 <OTPForm />
             </div>
-        </RecaptchaContext>
+        </SignupContext>
     )
 }
 
