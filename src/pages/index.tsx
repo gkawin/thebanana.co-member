@@ -1,9 +1,9 @@
 import { BrowseProductsNav } from '@/components/products/BrowseProductsNav'
-import useProductsList from '@/concerns/use-products-list'
 import { ProductCard } from '@/components/products/ProductCard'
+import useCourses from '@/concerns/use-courses'
 
 export default function Home() {
-    const products = useProductsList()
+    const products = useCourses()
 
     return (
         <section className="container mx-auto">
