@@ -14,6 +14,7 @@ import { PaymentChargesButton } from '@/components/checkout/PaymentChargesButton
 import { useEffect } from 'react'
 import { useFirebase } from '@/core/RootContext'
 import { PaymentStatusModal } from '@/components/checkout/PaymentStatusModal'
+import { CourseModel } from '@/models/course/course.model'
 
 export type CheckoutPageProps = {
     product: ProductModel
@@ -78,8 +79,8 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const { db } = adminSDK()
     const slug = String(params.slug)
     const productCol = await db
-        .collection('products')
-        .withConverter(Model.convert(ProductModel))
+        .collection('courses')
+        .withConverter(Model.convert(CourseModel))
         .orderBy('slug')
         .startAt(slug)
         .endAt(`${slug}\uf8ff`)

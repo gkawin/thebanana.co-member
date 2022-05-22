@@ -25,4 +25,7 @@ export class UserAddressModel {
 
     @JsonProperty()
     subdistrict: string
+
+    @JsonProperty()
+    id: string
 }

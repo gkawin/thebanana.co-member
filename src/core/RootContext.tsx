@@ -10,6 +10,7 @@ import Script from 'next/script'
 import { useRouter } from 'next/router'
 import { UserModelV2 } from '@/models/user/user.model'
 import { addrCollection, schoolCollection, userDoc } from '@/concerns/query'
+import { UserAddressModel } from '@/models/UserAddressModel'
 
 const liffId = '1653826193-QbmamAo0'
 const firebaseConfig = {
@@ -24,7 +25,7 @@ const firebaseConfig = {
 
 export type AppContext = {
     $axios?: AxiosInstance
-    $userInfo: { addresses: any[]; schools: any[]; personal: UserModelV2 }
+    $userInfo: { addresses: UserAddressModel[]; schools: any[]; personal: UserModelV2 }
     initilized: boolean
 } & AuthenticationResponse
 
@@ -139,7 +140,11 @@ const RootContext: React.FC = ({ children }) => {
             console.log(user)
             if (user) {
                 const db = getFirestore()
-                const addresses = (await getDocs(addrCollection(db, user.uid))).docs.map((doc) => doc.data())
+
+                const addresses = (await getDocs(addrCollection(db, user.uid))).docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }))
                 const personal = (await getDoc(userDoc(db, user.uid))).data()
                 const schools = (await getDocs(schoolCollection(db, user.uid))).docs.map((doc) => doc.data())
 

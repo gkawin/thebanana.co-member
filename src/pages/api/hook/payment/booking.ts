@@ -7,7 +7,7 @@ import { BookingModel } from '@/models/BookingModel'
 import Model from '@/models/Model'
 import { PaymentEventBodyModel } from '@/models/payment/PaymentEventBody.model'
 import { PaymentMetadataModel } from '@/models/payment/PaymentMetadata.model'
-import { ProductModel } from '@/models/ProductModel'
+
 import { UserAddressModel } from '@/models/UserAddressModel'
 import { UserModel } from '@/models/UserModel'
 import resolver from '@/services/resolver'
@@ -15,16 +15,17 @@ import { badRequest, Boom } from '@hapi/boom'
 import { NextApiHandler } from 'next'
 import { injectable } from 'tsyringe'
 import { deserialize } from 'typescript-json-serializer'
+import { CourseModel } from '@/models/course/course.model'
 
 @injectable()
 class HookPaymentBooking {
     #bookingRef: FirebaseFirestore.CollectionReference<BookingModel>
-    #productRef: FirebaseFirestore.CollectionReference<ProductModel>
+    #courseRef: FirebaseFirestore.CollectionReference<CourseModel>
     #userRef: FirebaseFirestore.CollectionReference<UserModel>
 
     constructor(private sdk: AdminSDK) {
         this.#bookingRef = this.sdk.db.collection('booking').withConverter(Model.convert(BookingModel))
-        this.#productRef = this.sdk.db.collection('products').withConverter(Model.convert(ProductModel))
+        this.#courseRef = this.sdk.db.collection('courses').withConverter(Model.convert(CourseModel))
         this.#userRef = this.sdk.db.collection('users').withConverter(Model.convert(UserModel))
     }
 
@@ -83,7 +84,7 @@ class HookPaymentBooking {
         try {
             const { bookingCode, productId, shippingAddressId, userId, startDate, endDate, price } = body.data.metadata
 
-            const product = this.#productRef.doc(productId)
+            const course = this.#courseRef.doc(productId)
             const user = this.#userRef.doc(userId)
             const shippingAddress = user
                 .collection('address')
@@ -97,7 +98,7 @@ class HookPaymentBooking {
                 shippingAddress,
                 paymentMethod: body.data.card ? PaymentMethod.CREDIT_CARD : PaymentMethod.PROMPT_PAY,
                 createdOn: new Date(),
-                product,
+                course,
                 status,
                 user,
                 startDate,

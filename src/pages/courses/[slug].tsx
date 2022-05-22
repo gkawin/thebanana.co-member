@@ -7,6 +7,7 @@ import adminSDK from '@/libs/adminSDK'
 import Model from '@/models/Model'
 import { serialize } from 'typescript-json-serializer'
 import Link from 'next/link'
+import { CourseModel } from '@/models/course/course.model'
 
 export type CourseInfoProps = { slug: string; product: ProductModel }
 
@@ -42,8 +43,8 @@ export const getServerSideProps: GetServerSideProps<CourseInfoProps> = async ({ 
     const { db } = adminSDK()
     const slug = String(params.slug)
     const productCol = await db
-        .collection('products')
-        .withConverter(Model.convert(ProductModel))
+        .collection('courses')
+        .withConverter(Model.convert(CourseModel))
         .orderBy('slug')
         .startAt(slug)
         .endAt(`${slug}\uf8ff`)
