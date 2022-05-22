@@ -1,14 +1,17 @@
-import { useContext, useEffect, useMemo, useState, createContext, useCallback } from 'react'
+import { useContext, useEffect, useMemo, useState, createContext } from 'react'
 import { initializeApp, getApp, getApps } from 'firebase/app'
 
 import Axios, { AxiosInstance } from 'axios'
-import { collection, doc, getDoc, getDocs, getFirestore, orderBy, query } from 'firebase/firestore'
+import { collection, doc, getDoc, getDocs, getFirestore, query } from 'firebase/firestore'
 import { getAuth, signInWithCustomToken } from 'firebase/auth'
 import { logEvent, getAnalytics } from 'firebase/analytics'
 import { SpinLoading } from '@/components/portal/SpinLoading'
 import { UserModel } from '@/models/UserModel'
 import Script from 'next/script'
 import { useRouter } from 'next/router'
+import Model from '@/models/Model'
+import { UserAddressModel } from '@/models/UserAddressModel'
+import { UserModelV2 } from '@/models/user/user.model'
 
 const liffId = '1653826193-QbmamAo0'
 const firebaseConfig = {
@@ -23,7 +26,7 @@ const firebaseConfig = {
 
 export type AppContext = {
     $axios?: AxiosInstance
-    $userInfo: { addresses: any[]; schools: any[]; personal: UserModel }
+    $userInfo: { addresses: any[]; schools: any[]; personal: UserModelV2 }
     initilized: boolean
 } & AuthenticationResponse
 
@@ -52,7 +55,7 @@ export const useFirebase = () =>
 
 export const useUser = () => {
     const ctx = useContext(appContext)
-    return useMemo(() => ctx.$userInfo, [ctx.$userInfo])
+    return ctx.$userInfo
 }
 
 export const useLoading = () => {
@@ -90,7 +93,7 @@ const createAxios = async () => {
 
 const RootContext: React.FC = ({ children }) => {
     const [context, setContext] = useState<AppContext>({
-        $userInfo: null,
+        $userInfo: { addresses: [], personal: null, schools: [] },
         alreadyMember: false,
         $axios: null,
         authenticationCode: null,
@@ -137,7 +140,16 @@ const RootContext: React.FC = ({ children }) => {
         return getAuth().onAuthStateChanged(async (user) => {
             console.log(user)
             if (user) {
-                setContext((state) => ({ ...state, $userInfo: { personal: null, addresses: [], schools: [] } }))
+                const db = getFirestore()
+                const queryAddr = query(collection(db, 'users', user.uid, 'address')).withConverter(
+                    Model.convert(UserAddressModel)
+                )
+                const queryUser = doc(db, 'users', user.uid).withConverter(Model.convert(UserModelV2))
+
+                const addresses = (await getDocs(queryAddr)).docs.map((doc) => doc.data())
+                const personal = (await getDoc(queryUser)).data()
+
+                setContext((state) => ({ ...state, $userInfo: { personal, addresses, schools: [] } }))
             }
         })()
         // eslint-disable-next-line react-hooks/exhaustive-deps

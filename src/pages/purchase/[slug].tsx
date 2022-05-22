@@ -36,7 +36,7 @@ const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
     const { auth } = useFirebase()
 
     useEffect(() => {
-        if (auth.currentUser.uid) {
+        if (auth?.currentUser?.uid) {
             methods.register('userId', { value: auth.currentUser.uid })
             methods.register('productId', { value: props.product.id })
         }

@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 import { useEffect, useMemo, useState } from 'react'
 import Model from '@/models/Model'
 
-export default function useProductsList() {
+export default function useCourses() {
     const [productsList, setProductsList] = useState<ProductModel[]>([])
     const { db } = useFirebase()
 

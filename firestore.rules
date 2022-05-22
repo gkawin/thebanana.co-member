@@ -1,12 +1,26 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{userId}/{document=**} {
-      allow read, write, update: if request.auth != null && request.auth.uid == userId;
+
+    function signedIn() {
+      return request.auth != null;
     }
+      
+    match /users/{userId}/{document=**} {
+      allow read, write, update: if signedIn() && request.auth.uid == userId;
+    }
+
     // Should be public
-    match /products/{document=**} {
-      allow read: if false;
+    match /courses/{document=**} {
+      allow read: if true;
+    }
+
+    match /subjects/{document=**} {
+      allow read: if true;
+    }
+
+    match /booking/{document=**} {
+      allow read, write, create, delete: if false;
     }
   }
 }

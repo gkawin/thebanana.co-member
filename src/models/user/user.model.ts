@@ -32,4 +32,8 @@ export class UserModelV2 {
 
     @JsonProperty()
     nickname?: string
+
+    get fullname() {
+        return this.firstname + ' ' + this.lastname
+    }
 }

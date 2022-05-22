@@ -2,7 +2,7 @@ import { QueryDocumentSnapshot } from 'firebase-admin/firestore'
 import type { QueryDocumentSnapshot as ClientQuerySS, DocumentData, PartialWithFieldValue } from 'firebase/firestore'
 import { deserialize, serialize } from 'typescript-json-serializer'
 
-interface ClassType<T> {
+export interface ClassInstance<T> {
     new (...args: any[]): T
 }
 
@@ -11,7 +11,7 @@ type ExcludedToJson<K> = K extends 'toJSON' ? never : K
 type ExcludedModel<M> = { [K in ExcludedToJson<keyof M>]?: any }
 
 export default class Model {
-    static convert<T>(target: ClassType<T>) {
+    static convert<T>(target: ClassInstance<T>) {
         return {
             toFirestore: (o: PartialWithFieldValue<T> | Partial<T>) => {
                 return serialize(o)
