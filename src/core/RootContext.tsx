@@ -2,16 +2,14 @@ import { useContext, useEffect, useMemo, useState, createContext } from 'react'
 import { initializeApp, getApp, getApps } from 'firebase/app'
 
 import Axios, { AxiosInstance } from 'axios'
-import { collection, doc, getDoc, getDocs, getFirestore, query } from 'firebase/firestore'
+import { getDoc, getDocs, getFirestore } from 'firebase/firestore'
 import { getAuth, signInWithCustomToken } from 'firebase/auth'
 import { logEvent, getAnalytics } from 'firebase/analytics'
 import { SpinLoading } from '@/components/portal/SpinLoading'
-import { UserModel } from '@/models/UserModel'
 import Script from 'next/script'
 import { useRouter } from 'next/router'
-import Model from '@/models/Model'
-import { UserAddressModel } from '@/models/UserAddressModel'
 import { UserModelV2 } from '@/models/user/user.model'
+import { addrCollection, schoolCollection, userDoc } from '@/concerns/query'
 
 const liffId = '1653826193-QbmamAo0'
 const firebaseConfig = {
@@ -55,7 +53,7 @@ export const useFirebase = () =>
 
 export const useUser = () => {
     const ctx = useContext(appContext)
-    return ctx.$userInfo
+    return useMemo(() => ctx.$userInfo, [ctx.$userInfo])
 }
 
 export const useLoading = () => {
@@ -141,15 +139,11 @@ const RootContext: React.FC = ({ children }) => {
             console.log(user)
             if (user) {
                 const db = getFirestore()
-                const queryAddr = query(collection(db, 'users', user.uid, 'address')).withConverter(
-                    Model.convert(UserAddressModel)
-                )
-                const queryUser = doc(db, 'users', user.uid).withConverter(Model.convert(UserModelV2))
+                const addresses = (await getDocs(addrCollection(db, user.uid))).docs.map((doc) => doc.data())
+                const personal = (await getDoc(userDoc(db, user.uid))).data()
+                const schools = (await getDocs(schoolCollection(db, user.uid))).docs.map((doc) => doc.data())
 
-                const addresses = (await getDocs(queryAddr)).docs.map((doc) => doc.data())
-                const personal = (await getDoc(queryUser)).data()
-
-                setContext((state) => ({ ...state, $userInfo: { personal, addresses, schools: [] } }))
+                setContext((state) => ({ ...state, $userInfo: { addresses, personal, schools } }))
             }
         })()
         // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,9 +1,13 @@
 import { BrowseProductsNav } from '@/components/products/BrowseProductsNav'
 import { ProductCard } from '@/components/products/ProductCard'
 import useCourses from '@/concerns/use-courses'
+import { useUser } from '@/core/RootContext'
 
 export default function Home() {
     const products = useCourses()
+    const user = useUser()
+
+    console.log(user)
 
     return (
         <section className="container mx-auto">
