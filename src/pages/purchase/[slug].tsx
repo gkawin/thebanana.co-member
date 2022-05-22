@@ -40,7 +40,7 @@ const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
             methods.register('userId', { value: auth.currentUser.uid })
             methods.register('productId', { value: props.product.id })
         }
-    }, [auth.currentUser.uid, methods, props.product.id])
+    }, [auth?.currentUser?.uid, methods, props.product.id])
 
     const isBookingNotExist = !props.product
     return (

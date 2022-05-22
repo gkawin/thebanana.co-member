@@ -4,5 +4,9 @@ service cloud.firestore {
     match /users/{userId}/{document=**} {
       allow read, write, update: if request.auth != null && request.auth.uid == userId;
     }
+    // Should be public
+    match /products/{document=**} {
+      allow read: if false;
+    }
   }
 }

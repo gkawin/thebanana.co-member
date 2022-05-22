@@ -24,8 +24,8 @@ const firebaseConfig = {
 export type AppContext = {
     $axios?: AxiosInstance
     $userInfo: { addresses: any[]; schools: any[]; personal: UserModel }
-    alreadyMember: boolean
-}
+    initilized: boolean
+} & AuthenticationResponse
 
 export type AuthenticationResponse = { authenticationCode: string; alreadyMember: boolean }
 
@@ -89,22 +89,15 @@ const createAxios = async () => {
 }
 
 const RootContext: React.FC = ({ children }) => {
-    const [context, setContext] = useState<AppContext>({ $userInfo: null, alreadyMember: false, $axios: null })
+    const [context, setContext] = useState<AppContext>({
+        $userInfo: null,
+        alreadyMember: false,
+        $axios: null,
+        authenticationCode: null,
+        initilized: false,
+    })
     const [loading, setLoading] = useState<boolean>(true)
-
-    const createdFetchingUserInfo = useCallback(async (uid: string) => {
-        const db = getFirestore()
-        const schoolsRef = getDocs(query(collection(db, 'users', uid, 'school'), orderBy('createdOn', 'desc')))
-        const addressesRef = getDocs(query(collection(db, 'users', uid, 'address'), orderBy('createdOn', 'desc')))
-        const personalRef = getDoc(doc(db, 'users', uid))
-
-        const [addresses, schools, personal] = await Promise.all([addressesRef, schoolsRef, personalRef])
-        return {
-            addresses: addresses.empty ? [] : addresses.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
-            personal: personal.data() as UserModel,
-            schools: schools.empty ? [] : schools.docs.map((doc_1) => ({ id: doc_1.id, ...doc_1.data() })),
-        }
-    }, [])
+    const router = useRouter()
 
     useEffect(() => {
         if (getApps().length === 0 && window.liff) {
@@ -125,9 +118,11 @@ const RootContext: React.FC = ({ children }) => {
                     return { authentication: data, axios }
                 })
                 .then(async ({ authentication: { alreadyMember, authenticationCode }, axios }) => {
-                    setContext((state) => ({ ...state, $axios: axios, alreadyMember }))
+                    setContext((state) => ({ ...state, $axios: axios, alreadyMember, initilized: true }))
                     if (alreadyMember) {
                         await signInWithCustomToken(auth, authenticationCode)
+                    } else {
+                        router.push('/signup')
                     }
                     return { alreadyMember, authenticationCode }
                 })
@@ -135,21 +130,18 @@ const RootContext: React.FC = ({ children }) => {
                     setLoading(false)
                 })
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {
-        if (context.alreadyMember && !loading) {
-            return getAuth().onAuthStateChanged(async (user) => {
-                console.log(user)
-                if (user) {
-                    const userInfo = await createdFetchingUserInfo(user.uid)
-                    setContext((state) => ({ ...state, $userInfo: userInfo }))
-                }
-            })
-        }
-        return () => {}
+        return getAuth().onAuthStateChanged(async (user) => {
+            console.log(user)
+            if (user) {
+                setContext((state) => ({ ...state, $userInfo: { personal: null, addresses: [], schools: [] } }))
+            }
+        })()
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [context.alreadyMember, loading])
+    }, [])
 
     return (
         <>
@@ -161,7 +153,7 @@ const RootContext: React.FC = ({ children }) => {
             <loadingContext.Provider value={{ loading, setLoading }}>
                 <appContext.Provider value={context}>
                     <SpinLoading global />
-                    {!!context && children}
+                    {context.initilized && children}
                 </appContext.Provider>
             </loadingContext.Provider>
         </>
