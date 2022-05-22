@@ -1,3 +1,4 @@
+import { BookingModel } from '@/models/BookingModel'
 import { CourseModel } from '@/models/course/course.model'
 import { SubjectModel } from '@/models/course/subject.model'
 import Model, { ClassInstance } from '@/models/Model'
@@ -28,3 +29,5 @@ export const addrCollection = (db: Firestore, userId: string) =>
 
 export const schoolCollection = (db: Firestore, userId: string) =>
     queryCollection('users', UserSchoolModel)(db, userId, 'school')
+
+export const bookingCollection = queryCollection('booking', BookingModel)
