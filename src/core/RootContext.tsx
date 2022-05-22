@@ -25,7 +25,7 @@ const firebaseConfig = {
 
 export type AppContext = {
     $axios?: AxiosInstance
-    $userInfo: { addresses: UserAddressModel[]; schools: any[]; personal: UserModelV2 }
+    $userInfo: { addresses: UserAddressModel[]; schools: any[]; personal: UserModelV2; uid: string }
     initilized: boolean
 } & AuthenticationResponse
 
@@ -92,7 +92,7 @@ const createAxios = async () => {
 
 const RootContext: React.FC = ({ children }) => {
     const [context, setContext] = useState<AppContext>({
-        $userInfo: { addresses: [], personal: null, schools: [] },
+        $userInfo: { addresses: [], personal: null, schools: [], uid: null },
         alreadyMember: false,
         $axios: null,
         authenticationCode: null,
@@ -148,7 +148,7 @@ const RootContext: React.FC = ({ children }) => {
                 const personal = (await getDoc(userDoc(db, user.uid))).data()
                 const schools = (await getDocs(schoolCollection(db, user.uid))).docs.map((doc) => doc.data())
 
-                setContext((state) => ({ ...state, $userInfo: { addresses, personal, schools } }))
+                setContext((state) => ({ ...state, $userInfo: { addresses, personal, schools, uid: user.uid } }))
             }
         })()
         // eslint-disable-next-line react-hooks/exhaustive-deps
