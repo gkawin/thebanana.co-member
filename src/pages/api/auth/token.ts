@@ -6,14 +6,15 @@ import { AdminSDK } from '@/libs/adminSDK'
 import { injectable } from 'tsyringe'
 import resolver from '@/services/resolver'
 import runWithAuthorization from '@/middleware/runWithAuthorization'
-import { SocialConnectModel } from '@/models/social-connect/SocialConnect.model'
+
 import Model from '@/models/Model'
+import { UserModelV2 } from '@/models/user/user.model'
 
 @injectable()
 class TokenApi {
-    #userConnectCol: FirebaseFirestore.CollectionReference<SocialConnectModel>
+    #user: FirebaseFirestore.CollectionReference<UserModelV2>
     constructor(private admin: AdminSDK) {
-        this.#userConnectCol = this.admin.db.collection('user_connect').withConverter(Model.convert(SocialConnectModel))
+        this.#user = this.admin.db.collection('users').withConverter(Model.convert(UserModelV2))
     }
 
     main: NextApiHandler = async (req, res) => {
@@ -21,17 +22,17 @@ class TokenApi {
         await runsWithMethods(req, res, { methods: ['POST'] })
 
         try {
-            const { connectId } = req.body
-            ok(connectId !== null, badRequest())
+            const { socialId } = req.body
+            ok(socialId !== null, badRequest())
 
-            const connectInfo = await this.#userConnectCol.doc(connectId).get()
+            const user = await this.#user.where('socialId', '==', socialId).limit(1).get()
             let payload = {
                 authenticationCode: null as string,
                 alreadyMember: false,
             }
 
-            if (connectInfo.exists) {
-                const authenticationCode = await this.getCustomToken(connectInfo)
+            if (!user.empty) {
+                const authenticationCode = await this.admin.auth.createCustomToken(user.docs[0].id)
                 payload.alreadyMember = true
                 payload.authenticationCode = authenticationCode
             }
@@ -44,13 +45,6 @@ class TokenApi {
                 res.status(500).json({})
             }
         }
-    }
-
-    private async getCustomToken(connectInfo: FirebaseFirestore.DocumentSnapshot<SocialConnectModel>): Promise<string> {
-        const uid = connectInfo.data().user.id
-        const authenticationCode = await this.admin.auth.createCustomToken(uid)
-
-        return authenticationCode
     }
 }
 

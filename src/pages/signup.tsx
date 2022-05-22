@@ -12,7 +12,7 @@ export type SignInPageForm = {
 const SignUpPage: NextPage = () => {
     return (
         <SignupContext>
-            <div className="container m-auto">
+            <div className="container pt-4">
                 <MobilePhoneForm />
                 <OTPForm />
             </div>

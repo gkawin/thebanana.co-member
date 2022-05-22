@@ -1,13 +1,16 @@
 import { useSignUp } from '@/core/SignupContext'
+import { useRouter } from 'next/router'
 import { SubmitHandler, useForm } from 'react-hook-form'
 
 export const OTPForm: React.VFC = () => {
     const { sentOtp, confirmOtp } = useSignUp()
     const { register, handleSubmit } = useForm()
+    const router = useRouter()
 
     const onSubmit: SubmitHandler<{ otp: string }> = async ({ otp }) => {
         try {
             await confirmOtp(otp)
+            router.replace('/')
         } catch (error) {
             console.error('cannot sent SMS')
         }

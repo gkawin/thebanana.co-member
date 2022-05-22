@@ -1,4 +1,4 @@
-import { getApp } from 'firebase/app'
+import { getApps } from 'firebase/app'
 import { getAuth, RecaptchaVerifier } from 'firebase/auth'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -45,10 +45,8 @@ export const useRecaptchaForm = (el: { containerId: string }) => {
         await renderRecaptcha()
     }, [el.containerId, initRecaptcha, renderRecaptcha])
 
-    const app = getApp()
-
     useEffect(() => {
-        if (app && !window.recaptchaWidgetId) {
+        if (getApps().length > 0 && !window.recaptchaWidgetId) {
             _initializeRecaptcha().finally(() => {
                 setLoading(false)
             })

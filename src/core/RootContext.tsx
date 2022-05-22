@@ -24,7 +24,11 @@ const firebaseConfig = {
 export type AppContext = {
     $axios?: AxiosInstance
     $userInfo: { addresses: any[]; schools: any[]; personal: UserModel }
+    alreadyMember: boolean
 }
+
+export type AuthenticationResponse = { authenticationCode: string; alreadyMember: boolean }
+
 const appContext = createContext<AppContext>(null)
 const loadingContext = createContext<{ loading: boolean; setLoading: (val: boolean) => void }>(null)
 
@@ -35,8 +39,10 @@ export const useAxios = () => {
 
 export const useFirebase = () =>
     useMemo(() => {
+        const apps = getApps()
+        if (apps.length === 0) return null
+
         const app = getApp()
-        if (!app) return null
 
         return {
             db: getFirestore(app),
@@ -59,40 +65,32 @@ export const useLoading = () => {
     return loadingCtx
 }
 
-const RootContext: React.FC = ({ children }) => {
-    const [context, setContext] = useState<AppContext>(null)
-    const [loading, setLoading] = useState<boolean>(true)
-    const route = useRouter()
-
-    const createLiff = useCallback(async () => {
+const createLiff = async () => {
+    if (window.liff) {
         await window.liff.init({ liffId })
         await window.liff.ready
         if (!window.liff.isLoggedIn()) {
             window.liff.login()
         }
-    }, [])
+    }
+}
 
-    const createAxios = useCallback(async () => {
-        const token = window.liff.getAccessToken()
-        const instance = Axios.create({
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            timeout: 10000,
-        })
-        return instance
-    }, [])
+const createAxios = async () => {
+    if (!window.liff) return null
+    const token = window.liff.getAccessToken()
+    const instance = Axios.create({
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        timeout: 10000,
+    })
+    return instance
+}
 
-    const createAuthorization = useCallback(async () => {
-        const axios = await createAxios()
-        const decodedToken = window.liff.getDecodedIDToken()
-
-        const { data } = await axios.post<{ authenticationCode: string; alreadyMember: boolean }>('/api/auth/token', {
-            connectId: decodedToken?.sub,
-        })
-        return data
-    }, [createAxios])
+const RootContext: React.FC = ({ children }) => {
+    const [context, setContext] = useState<AppContext>({ $userInfo: null, alreadyMember: false, $axios: null })
+    const [loading, setLoading] = useState<boolean>(true)
 
     const createdFetchingUserInfo = useCallback(async (uid: string) => {
         const db = getFirestore()
@@ -109,41 +107,49 @@ const RootContext: React.FC = ({ children }) => {
     }, [])
 
     useEffect(() => {
-        let unsubscribe = () => {}
-        if (getApps().length === 0) {
+        if (getApps().length === 0 && window.liff) {
             initializeApp(firebaseConfig)
 
             const analytic = getAnalytics()
+            const auth = getAuth()
             logEvent(analytic, 'notification_received')
             console.log('firebase initilized')
 
-            createLiff().then(createAxios)
+            createLiff()
+                .then(createAxios)
+                .then(async (axios) => {
+                    const decodedToken = window.liff.getDecodedIDToken()
+                    const { data } = await axios.post<AuthenticationResponse>('/api/auth/token', {
+                        socialId: decodedToken?.sub,
+                    })
+                    return { authentication: data, axios }
+                })
+                .then(async ({ authentication: { alreadyMember, authenticationCode }, axios }) => {
+                    setContext((state) => ({ ...state, $axios: axios, alreadyMember }))
+                    if (alreadyMember) {
+                        await signInWithCustomToken(auth, authenticationCode)
+                    }
+                    return { alreadyMember, authenticationCode }
+                })
+                .finally(() => {
+                    setLoading(false)
+                })
+        }
+    }, [])
 
-            unsubscribe = getAuth().onAuthStateChanged(async (user) => {
+    useEffect(() => {
+        if (context.alreadyMember && !loading) {
+            return getAuth().onAuthStateChanged(async (user) => {
                 console.log(user)
-                const $axios = await createAxios()
-                const { alreadyMember, authenticationCode } = await createAuthorization()
-
-                let $userInfo = null
-
-                if (alreadyMember && !user) {
-                    await signInWithCustomToken(getAuth(), authenticationCode)
-                    $userInfo = await createdFetchingUserInfo(user.uid)
+                if (user) {
+                    const userInfo = await createdFetchingUserInfo(user.uid)
+                    setContext((state) => ({ ...state, $userInfo: userInfo }))
                 }
-
-                if (!alreadyMember) {
-                    route.push('/signup')
-                }
-
-                setContext({ $axios, $userInfo })
-                setLoading(false)
             })
         }
-        return () => {
-            unsubscribe()
-        }
+        return () => {}
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [context.alreadyMember, loading])
 
     return (
         <>

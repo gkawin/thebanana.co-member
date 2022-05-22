@@ -29,7 +29,10 @@ export const MobilePhoneForm: React.VFC = () => {
                 <small className="text-red-500">{errors?.mobileNumber?.message}</small>
             </div>
 
-            <button className={`${true ? 'bg-yellow-500 opacity-20' : 'bg-yellow-500'} rounded p-4 my-2`} type="submit">
+            <button
+                className={`${false ? 'bg-yellow-500 opacity-20' : 'bg-yellow-500'} rounded p-2 my-2`}
+                type="submit"
+            >
                 ขอรหัส OTP
             </button>
         </form>
