@@ -19,8 +19,8 @@ service cloud.firestore {
       allow read: if true;
     }
 
-    match /booking/{document=**} {
-      allow read, write, create, delete: if false;
+    match /booking/{bookingId} {
+    	allow read: if signedIn() && resource.data.user == get(/databases/$(database)/documents/users/$(request.auth.uid));
     }
   }
 }
