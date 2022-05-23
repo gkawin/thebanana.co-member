@@ -1,4 +1,4 @@
-import { useAxios, useFirebase } from '@/core/RootContext'
+import { useAxios, useFirebase, useUser } from '@/core/RootContext'
 import { addDoc, collection } from 'firebase/firestore'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -43,7 +43,8 @@ export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ enabled = true 
         reset,
     } = useForm<NewAddressFormFields>()
     const $axios = useAxios()
-    const { db, auth } = useFirebase()
+    const { db } = useFirebase()
+    const { uid } = useUser()
     const [isOpen, setIsOpen] = useState(false)
     const [addrOptions, setAddrOptions] = useState<NewAddressFormFields[]>([])
     const [isLoading, setIsLoading] = useState(false)
@@ -51,7 +52,6 @@ export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ enabled = true 
     const handleSubmitNewAddress = async (data: NewAddressFormFields) => {
         if (!enabled) return
 
-        const uid = auth.currentUser.uid
         try {
             setIsLoading(true)
             const newAddr = {

@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faReceipt, faArrowLeft, faQrcode } from '@fortawesome/free-solid-svg-icons'
 
 import { GetServerSideProps, NextPage } from 'next'
-import { useUserInfoContext } from '@/core/RootContext'
+import { useUser } from '@/core/RootContext'
 import { BookingStatus, PaymentMethod, PaymentMethodLabel } from '@/constants'
 import Link from 'next/link'
 import { withThaiDateFormat } from '@/utils/date'
@@ -13,7 +13,7 @@ export type MyEditBookingProps = {
 }
 
 const MyEditBooking: NextPage<MyEditBookingProps> = ({ bookingCode }) => {
-    const { personal, schools } = useUserInfoContext()
+    const { personal, schools } = useUser()
     const { items } = useMyBooking({ bookingCode })
     const bookingInfo = items[0]
 

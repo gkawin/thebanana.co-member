@@ -1,11 +1,11 @@
 import { PaymentStep } from '@/constants'
 import { usePaymentContext } from '@/core/PaymentContext'
-import { ProductModel } from '@/models/ProductModel'
+import { CourseModel } from '@/models/course/course.model'
 import type { CheckoutFormField } from '@/pages/purchase/[slug]'
 import { withPricing } from '@/utils/payment'
 import { useFormContext } from 'react-hook-form'
 
-export type PaymentChargesButtonProps = { product: ProductModel }
+export type PaymentChargesButtonProps = { product: CourseModel }
 
 export const PaymentChargesButton: React.VFC<PaymentChargesButtonProps> = ({ product }) => {
     const { step, setPaymentStep, createOmiseCharges } = usePaymentContext()

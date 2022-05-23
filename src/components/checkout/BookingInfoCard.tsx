@@ -1,10 +1,10 @@
 import { DatasetType } from '@/constants'
-import { useUserInfoContext } from '@/core/RootContext'
+import { useUser } from '@/core/RootContext'
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 export const BookingInfoCard: React.VFC = () => {
-    const { personal, schools } = useUserInfoContext()
+    const { personal, schools } = useUser()
     const {
         register,
         watch,
@@ -15,15 +15,9 @@ export const BookingInfoCard: React.VFC = () => {
 
     const datasetType = watch('datasetType', DatasetType.EXISITING)
     useEffect(() => {
-        if (datasetType === DatasetType.EXISITING) {
-            setValue('studentName', personal?.fullname ?? '')
-            setValue('nickname', personal?.nickname ?? '')
-            setValue('school', schools[0]?.school)
-        } else {
-            resetField('studentName')
-            resetField('nickname')
-            resetField('school')
-        }
+        setValue('studentName', personal?.fullname ?? '')
+        setValue('nickname', personal?.nickname ?? '')
+        setValue('school', schools[0]?.school)
     }, [datasetType, personal, resetField, schools, setValue])
 
     const isReadonly = datasetType === DatasetType.EXISITING

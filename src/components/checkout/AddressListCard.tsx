@@ -1,4 +1,8 @@
-import { useUserInfoContext } from '@/core/RootContext'
+import { addrCollection } from '@/concerns/query'
+import { useFirebase, useUser } from '@/core/RootContext'
+import { UserAddressModel } from '@/models/UserAddressModel'
+import { onSnapshot } from 'firebase/firestore'
+import { useEffect, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { NewAddressForm } from './NewAddressForm'
 
@@ -7,7 +11,22 @@ export const AddressListCard: React.FC = () => {
         register,
         formState: { errors },
     } = useFormContext()
-    const { addresses } = useUserInfoContext()
+    const { db } = useFirebase()
+    const { uid } = useUser()
+    const [addresses, setAddresses] = useState<UserAddressModel[]>([])
+
+    useEffect(() => {
+        if (uid) {
+            const unsubscribe = onSnapshot(addrCollection(db, uid), (addr) => {
+                const addresses = addr.docs.map((doc) => doc.data())
+                setAddresses(addresses)
+            })
+            return () => unsubscribe()
+        }
+        return () => {}
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [uid])
+
     return (
         <div className="p-4 rounded shadow-md border">
             <h2 className="text-sub-title font-semibold">ที่อยู่ในการจัดส่งเอกสาร</h2>

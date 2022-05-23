@@ -25,4 +25,8 @@ export class OmiseService {
     get charges() {
         return this.#instance.charges
     }
+
+    get customers() {
+        return this.#instance.customers
+    }
 }

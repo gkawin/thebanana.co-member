@@ -1,53 +1,39 @@
-import { useRecaptchaForm } from '@/concerns/use-recaptcha-form'
+import { useSignUp } from '@/core/SignupContext'
 import { mobileToThaiNumber } from '@/utils/phone-number'
-import { useState } from 'react'
-import IMask from 'imask'
-import { useEffect } from 'react'
-import { useRef } from 'react'
+import { SubmitHandler, useForm } from 'react-hook-form'
 
-export type IMobilePhoneFromProps = {
-    onConfirmedChange: (val: firebase.default.auth.ConfirmationResult) => void
-}
+export const MobilePhoneForm: React.VFC = () => {
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm()
 
-export const MobilePhoneForm: React.VFC<IMobilePhoneFromProps> = ({ onConfirmedChange }) => {
-    const recaptcha = useRecaptchaForm({ containerId: 'recaptcha-container' })
-    const [mask, setMask] = useState<IMask.InputMask<any>>(null)
-    const inputRef = useRef()
+    const { requestOtp } = useSignUp()
 
-    useEffect(() => {
-        if (!mask) {
-            const mask = IMask(inputRef.current, {
-                mask: '(000)000-0000',
-            })
-            setMask(mask)
-        }
-    }, [mask])
-
-    useEffect(() => {
-        if (recaptcha.confirmationResult) {
-            onConfirmedChange(recaptcha.confirmationResult)
-        }
-    }, [onConfirmedChange, recaptcha.confirmationResult])
-
-    const handleClick = () => {
-        const unmasked = mask.unmaskedValue
-        recaptcha.triggerSubmitHandler({
-            mobileNumber: mobileToThaiNumber(mobileToThaiNumber(unmasked)),
-        })
+    const onSubmit: SubmitHandler<{ mobileNumber: string }> = async ({ mobileNumber }) => {
+        requestOtp(mobileToThaiNumber(mobileNumber))
     }
 
     return (
-        <form>
-            <label htmlFor="mobile-phone">เบอร์โทรศัพท์</label>
-            <input
-                type="text"
-                name="mobileNumber"
-                id="mobile-phone"
-                readOnly={Boolean(recaptcha.confirmationResult)}
-            ></input>
-            <div id="recaptcha-container"></div>
-            <button style={{ marginTop: '1em' }} color="primary" type="submit" onClick={handleClick}>
-                รอรับ SMS
+        <form className="flex flex-col justify-center " onSubmit={handleSubmit(onSubmit)}>
+            <div className="flex flex-col">
+                <label htmlFor="mobile-phone">เบอร์โทรศัพท์</label>
+                <input
+                    className={`form-input rounded ${errors?.mobileNumber ? 'border border-red-500' : ''}`}
+                    type="text"
+                    pattern="[0-9]*"
+                    maxLength={10}
+                    {...register('mobileNumber', { maxLength: 10, required: 'กรุณาระบุ' })}
+                />
+                <small className="text-red-500">{errors?.mobileNumber?.message}</small>
+            </div>
+
+            <button
+                className={`${false ? 'bg-yellow-500 opacity-20' : 'bg-yellow-500'} rounded p-2 my-2`}
+                type="submit"
+            >
+                ขอรหัส OTP
             </button>
         </form>
     )

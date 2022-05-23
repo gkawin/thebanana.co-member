@@ -1,21 +1,37 @@
-import { mobileToThaiNumber } from '@/utils/phone-number'
-import firebase from 'firebase/compat/app'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useLoading } from '@/core/RootContext'
+import { getApps } from 'firebase/app'
+import { getAuth, RecaptchaVerifier } from 'firebase/auth'
+import { useCallback, useEffect, useState } from 'react'
 
-export const useRecaptchaForm = <T extends { mobileNumber: string; [k: string]: any }>(el: { containerId: string }) => {
-    const [loading, setLoading] = useState(false)
-    const [confirmationResult, setConfirmationResult] = useState<firebase.auth.ConfirmationResult>()
-    const [mobileNumber, setMobileNumber] = useState(null)
+export const useRecaptchaForm = (el: { containerId: string }) => {
+    const [sentOtp, setSentOtp] = useState(false)
+    const { setLoading } = useLoading()
 
     const initRecaptcha = useCallback(async (containerId: string) => {
         if (!window.recaptchaVerifier) {
-            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(containerId, {
-                size: 'invisible',
-                'expired-callback': () => {
-                    window.grecaptcha.reset(window.recaptchaWidgetId)
+            const auth = getAuth()
+            window.recaptchaVerifier = new RecaptchaVerifier(
+                containerId,
+                {
+                    size: 'invisible',
+                    'expired-callback': () => {
+                        setSentOtp(false)
+                        window.grecaptcha.reset(window.recaptchaWidgetId)
+                    },
+                    callback: (response: any) => {
+                        setSentOtp(true)
+                    },
                 },
-            })
+                auth
+            )
         }
+    }, [])
+
+    const resetRecaptcha = useCallback(async () => {
+        if (window.grecaptcha && !window.recaptchaWidgetId) {
+            window.grecaptcha.reset(window.recaptchaWidgetId)
+        }
+        setSentOtp(false)
     }, [])
 
     const renderRecaptcha = useCallback(async () => {
@@ -25,54 +41,23 @@ export const useRecaptchaForm = <T extends { mobileNumber: string; [k: string]: 
         }
     }, [])
 
-    const methods = useMemo(
-        () => ({
-            confirmationResult,
-            mobileNumber,
-            loading,
-            onSignInWithPhoneNumber: async (data: T) => {
-                setMobileNumber(data.mobileNumber as any)
-                const appVerifier = window.recaptchaVerifier
-                firebase
-                    .auth()
-                    .signInWithPhoneNumber(mobileToThaiNumber(data.mobileNumber), appVerifier)
-                    .then((result) => {
-                        setConfirmationResult(result)
-                    })
-                    .catch((error) => {
-                        console.error(error)
-                        window.grecaptcha.reset(window.recaptchaWidgetId)
-                    })
-            },
-
-            triggerSubmitHandler: async (data: T) => {
-                const widgetId = window.recaptchaWidgetId
-                try {
-                    setLoading(true)
-                    await window.grecaptcha.execute(widgetId, { action: 'submit' })
-                    await methods.onSignInWithPhoneNumber(data)
-                } catch (error) {
-                    console.error(error)
-                } finally {
-                    setLoading(false)
-                }
-            },
-        }),
-        [confirmationResult, loading, mobileNumber]
-    )
-
     const _initializeRecaptcha = useCallback(async () => {
         await initRecaptcha(el.containerId)
         await renderRecaptcha()
-        setLoading(false)
     }, [el.containerId, initRecaptcha, renderRecaptcha])
 
     useEffect(() => {
-        if (firebase.apps.length > 0 && !window.recaptchaWidgetId) {
-            _initializeRecaptcha()
+        if (getApps().length > 0 && !window.recaptchaWidgetId) {
+            console.log('init')
+            _initializeRecaptcha().finally(() => {
+                setLoading(false)
+            })
         }
-        setLoading(true)
-    }, [_initializeRecaptcha])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [getApps().length])
 
-    return methods
+    return {
+        sentOtp,
+        resetRecaptcha,
+    }
 }

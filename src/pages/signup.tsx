@@ -1,30 +1,23 @@
 import { MobilePhoneForm } from '@/components/signup/MobilePhoneForm'
 import { OTPForm } from '@/components/signup/OTPForm'
+import { SignupContext } from '@/core/SignupContext'
 
 import { NextPage } from 'next'
-
-import React, { useState, useEffect } from 'react'
 
 export type SignInPageForm = {
     phoneNumber: string
     acceptedTC: boolean
 }
 
-const SignInPage: NextPage = () => {
-    const [confirmationResult, setConfirmationResult] = useState<firebase.default.auth.ConfirmationResult>(null)
-
-    useEffect(() => {
-        if (confirmationResult) {
-            setConfirmationResult(confirmationResult)
-        }
-    }, [confirmationResult])
-
+const SignUpPage: NextPage = () => {
     return (
-        <div style={{ minHeight: '100vh' }}>
-            <MobilePhoneForm onConfirmedChange={setConfirmationResult} />
-            {confirmationResult && <OTPForm confirmationResult={confirmationResult} />}
-        </div>
+        <SignupContext>
+            <div className="container pt-4">
+                <MobilePhoneForm />
+                <OTPForm />
+            </div>
+        </SignupContext>
     )
 }
 
-export default SignInPage
+export default SignUpPage

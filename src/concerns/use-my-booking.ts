@@ -1,21 +1,13 @@
 import { BookingGroup, BookingStatus, FailureCode, PaymentMethod } from '@/constants'
-import { useFirebase } from '@/core/RootContext'
+import { useFirebase, useUser } from '@/core/RootContext'
 import { BookingModel } from '@/models/BookingModel'
+import { CourseModel } from '@/models/course/course.model'
 import Model from '@/models/Model'
-import { ProductModel } from '@/models/ProductModel'
 import { UserAddressModel } from '@/models/UserAddressModel'
 import { withPricing } from '@/utils/payment'
-import {
-    collection,
-    doc,
-    DocumentReference,
-    getDoc,
-    onSnapshot,
-    query,
-    QueryConstraint,
-    where,
-} from 'firebase/firestore'
+import { doc, DocumentReference, getDoc, onSnapshot, query, QueryConstraint, where } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
+import { bookingCollection } from './query'
 
 export type BookingInfo = {
     billingId: string
@@ -33,7 +25,8 @@ export type BookingInfo = {
 
 export default function useMyBooking(options?: { bookingCode?: string; bookingGroup?: BookingGroup }) {
     const [items, setItems] = useState<BookingInfo[]>([])
-    const { db, auth } = useFirebase()
+    const { db } = useFirebase()
+    const { uid } = useUser()
     const [bookingGroup, setBookingGroup] = useState<BookingGroup>(options?.bookingGroup ?? BookingGroup.UpComming)
 
     const queryBooinkGroupCondition = () => {
@@ -64,11 +57,11 @@ export default function useMyBooking(options?: { bookingCode?: string; bookingGr
     }
 
     useEffect(() => {
-        if (!auth.currentUser.uid) return () => {}
+        if (!uid) return () => {}
 
         const q = query(
-            collection(db, 'booking'),
-            ...[where('user', '==', doc(db, 'users', auth.currentUser.uid)), ...queryBooinkGroupCondition()]
+            bookingCollection(db),
+            ...[where('user', '==', doc(db, 'users', uid)), ...queryBooinkGroupCondition()]
         ).withConverter(Model.convert(BookingModel))
 
         const unsubscribe = onSnapshot(q, async (ss) => {
@@ -77,7 +70,7 @@ export default function useMyBooking(options?: { bookingCode?: string; bookingGr
                     .map<Promise<any>>(async (doc) => {
                         if (!doc.exists()) return null
                         const props = doc.data()
-                        const product = (await getDoc(props.product as DocumentReference<ProductModel>)).data()
+                        const product = (await getDoc(props.course as DocumentReference<CourseModel>)).data()
                         const address = (
                             await getDoc(props.shippingAddress as DocumentReference<UserAddressModel>)
                         ).data()
@@ -90,7 +83,7 @@ export default function useMyBooking(options?: { bookingCode?: string; bookingGr
                             pricing: withPricing(props.price),
                             status: props.status,
                             userId: props.user.id,
-                            productName: product.name,
+                            productName: product.title,
                             shippingAddress: address && address.address,
                             paymentMethod: props.paymentMethod,
                             failureCode: props.failureCode,
@@ -107,7 +100,7 @@ export default function useMyBooking(options?: { bookingCode?: string; bookingGr
         }
         // NOTE: only booking Group has been changed.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [bookingGroup])
+    }, [bookingGroup, uid])
 
     return { setBookingGroup, items, bookingGroup }
 }

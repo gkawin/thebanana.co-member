@@ -9,6 +9,7 @@ export enum BookingStatus {
     EXPIRED = 'EXPIRED',
     REJECTED = 'REJECTED',
     CANCELLED = 'CANCELLED',
+    CREATED = 'CREATED',
 }
 
 export enum BookingGroup {
@@ -62,3 +63,14 @@ export const FailureMessage = new Map<FailureCode, string>([
     [FailureCode.invalid_account_number, 'กรุณากรอกเลขบนบัตรเครดิตให้ถูกต้อง ครบถ้วน'],
     [FailureCode.invalid_security_code, 'กรุณากรอกเลขบนบัตรเครดิตให้ถูกต้อง ครบถ้วน'],
 ])
+
+export enum UserStatus {
+    UNVERIFIED,
+    ACTIVE,
+    SUSPENDED,
+    HALT,
+}
+
+export enum SocialPlatform {
+    LINE = 'line',
+}

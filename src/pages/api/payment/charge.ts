@@ -1,9 +1,8 @@
 import 'reflect-metadata'
 import runsWithMethods from '@/middleware/runsWithMethods'
-import { ProductModel } from '@/models/ProductModel'
 import { OmiseService } from '@/services/omise.service'
 import resolver from '@/services/resolver'
-import { badData, badRequest, Boom } from '@hapi/boom'
+import { badRequest, Boom } from '@hapi/boom'
 import { NextApiHandler } from 'next'
 import { injectable } from 'tsyringe'
 import { validate } from 'class-validator'
@@ -18,12 +17,13 @@ import { PaymentOmiseDataModel } from '@/models/payment/PaymentOmiseData.model'
 import { FailureCode, FailureMessage, PaymentMethod } from '@/constants'
 import { ChargeResultModel } from '@/models/payment/ChargeResult.model'
 import { BookingModel } from '@/models/BookingModel'
+import { CourseModel } from '@/models/course/course.model'
 
 @injectable()
 class PaymentChargeApi {
-    #productRef: FirebaseFirestore.CollectionReference<ProductModel>
+    #course: FirebaseFirestore.CollectionReference<CourseModel>
     constructor(private omise: OmiseService, private sdk: AdminSDK) {
-        this.#productRef = this.sdk.db.collection('products').withConverter(Model.convert(ProductModel))
+        this.#course = this.sdk.db.collection('courses').withConverter(Model.convert(CourseModel))
     }
 
     main: NextApiHandler = async (req, res) => {
@@ -38,7 +38,7 @@ class PaymentChargeApi {
                 throw badRequest(hasErrors.toString())
             }
 
-            const productRef = this.#productRef.doc(payload.productId).withConverter(Model.convert(ProductModel))
+            const productRef = this.#course.doc(payload.productId).withConverter(Model.convert(CourseModel))
             const product = (await productRef.get()).data()
             const today = dayjs()
             const expiredDate = today.add(7, 'day')
@@ -50,7 +50,7 @@ class PaymentChargeApi {
                     currency: 'thb',
                     card: payload?.token ?? null,
                     source: payload?.source ?? null,
-                    description: product.name,
+                    description: product.title,
                     customer: payload.token ? null : `${payload.studentName} (${payload.nickname})`,
                     metadata: {
                         bookingCode,
