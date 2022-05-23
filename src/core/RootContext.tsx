@@ -11,6 +11,7 @@ import { useRouter } from 'next/router'
 import { UserModelV2 } from '@/models/user/user.model'
 import { addrCollection, schoolCollection, userDoc } from '@/concerns/query'
 import { UserAddressModel } from '@/models/UserAddressModel'
+import { Liff } from '@liff/liff-types'
 
 const liffId = '1653826193-QbmamAo0'
 const firebaseConfig = {
@@ -25,7 +26,13 @@ const firebaseConfig = {
 
 export type AppContext = {
     $axios?: AxiosInstance
-    $userInfo: { addresses: UserAddressModel[]; schools: any[]; personal: UserModelV2; uid: string }
+    $userInfo: {
+        addresses: UserAddressModel[]
+        schools: any[]
+        personal: UserModelV2
+        uid: string
+        lineProfile: Unpromise<ReturnType<Liff['getProfile']>>
+    }
     initilized: boolean
 } & AuthenticationResponse
 
@@ -92,7 +99,7 @@ const createAxios = async () => {
 
 const RootContext: React.FC = ({ children }) => {
     const [context, setContext] = useState<AppContext>({
-        $userInfo: { addresses: [], personal: null, schools: [], uid: null },
+        $userInfo: { addresses: [], personal: null, schools: [], uid: null, lineProfile: null },
         alreadyMember: false,
         $axios: null,
         authenticationCode: null,
@@ -120,12 +127,13 @@ const RootContext: React.FC = ({ children }) => {
                     return { authentication: data, axios }
                 })
                 .then(async ({ authentication: { alreadyMember, authenticationCode }, axios }) => {
-                    setContext((state) => ({ ...state, $axios: axios, alreadyMember, initilized: true }))
                     if (alreadyMember) {
                         await signInWithCustomToken(auth, authenticationCode)
                     } else {
                         router.push('/signup')
                     }
+
+                    setContext((state) => ({ ...state, $axios: axios, alreadyMember, initilized: true }))
                     return { alreadyMember, authenticationCode }
                 })
                 .finally(() => {
@@ -147,8 +155,20 @@ const RootContext: React.FC = ({ children }) => {
                 }))
                 const personal = (await getDoc(userDoc(db, user.uid))).data()
                 const schools = (await getDocs(schoolCollection(db, user.uid))).docs.map((doc) => doc.data())
+                const lineProfile = await window.liff.getProfile()
 
-                setContext((state) => ({ ...state, $userInfo: { addresses, personal, schools, uid: user.uid } }))
+                console.log(lineProfile)
+
+                setContext((state) => ({
+                    ...state,
+                    $userInfo: {
+                        addresses,
+                        personal,
+                        schools,
+                        uid: user.uid,
+                        lineProfile,
+                    },
+                }))
             }
         })()
         // eslint-disable-next-line react-hooks/exhaustive-deps
