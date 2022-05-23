@@ -1,8 +1,8 @@
 import { BookingGroup, BookingStatus, FailureCode, PaymentMethod } from '@/constants'
 import { useFirebase } from '@/core/RootContext'
 import { BookingModel } from '@/models/BookingModel'
+import { CourseModel } from '@/models/course/course.model'
 import Model from '@/models/Model'
-import { ProductModel } from '@/models/ProductModel'
 import { UserAddressModel } from '@/models/UserAddressModel'
 import { withPricing } from '@/utils/payment'
 import {
@@ -77,7 +77,7 @@ export default function useMyBooking(options?: { bookingCode?: string; bookingGr
                     .map<Promise<any>>(async (doc) => {
                         if (!doc.exists()) return null
                         const props = doc.data()
-                        const product = (await getDoc(props.product as DocumentReference<ProductModel>)).data()
+                        const product = (await getDoc(props.course as DocumentReference<CourseModel>)).data()
                         const address = (
                             await getDoc(props.shippingAddress as DocumentReference<UserAddressModel>)
                         ).data()
@@ -90,7 +90,7 @@ export default function useMyBooking(options?: { bookingCode?: string; bookingGr
                             pricing: withPricing(props.price),
                             status: props.status,
                             userId: props.user.id,
-                            productName: product.name,
+                            productName: product.title,
                             shippingAddress: address && address.address,
                             paymentMethod: props.paymentMethod,
                             failureCode: props.failureCode,

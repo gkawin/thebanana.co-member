@@ -3,7 +3,6 @@ import Head from 'next/head'
 import adminSDK from '@/libs/adminSDK'
 import Model from '@/models/Model'
 import { serialize } from 'typescript-json-serializer'
-import { ProductModel } from '@/models/ProductModel'
 import { FormProvider, useForm } from 'react-hook-form'
 import Link from 'next/link'
 import { BookingStatus, DatasetType, PaymentMethod } from '@/constants'
@@ -12,12 +11,12 @@ import { PaymentProvider } from '@/core/PaymentContext'
 import { SelectPaymentMethod } from '@/components/checkout-flow/SelectPaymentMethod'
 import { PaymentChargesButton } from '@/components/checkout/PaymentChargesButton'
 import { useEffect } from 'react'
-import { useFirebase } from '@/core/RootContext'
+import { useUser } from '@/core/RootContext'
 import { PaymentStatusModal } from '@/components/checkout/PaymentStatusModal'
 import { CourseModel } from '@/models/course/course.model'
 
 export type CheckoutPageProps = {
-    product: ProductModel
+    product: CourseModel
     bookingStatus: BookingStatus
 }
 
@@ -34,14 +33,15 @@ export type CheckoutFormField = {
 
 const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
     const methods = useForm<CheckoutFormField>()
-    const { auth } = useFirebase()
+    const { uid } = useUser()
 
     useEffect(() => {
-        if (auth?.currentUser?.uid) {
-            methods.register('userId', { value: auth.currentUser.uid })
+        if (uid) {
+            methods.register('userId', { value: uid })
             methods.register('productId', { value: props.product.id })
         }
-    }, [auth?.currentUser?.uid, methods, props.product.id])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [uid, props.product.id])
 
     const isBookingNotExist = !props.product
     return (
