@@ -68,7 +68,6 @@ export default function useMyBooking(options?: { bookingCode?: string; bookingGr
             const results = await Promise.all(
                 ss.docs
                     .map<Promise<any>>(async (doc) => {
-                        console.log(doc)
                         if (!doc.exists()) return null
                         const props = doc.data()
                         const product = (await getDoc(props.course as DocumentReference<CourseModel>)).data()
