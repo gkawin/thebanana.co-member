@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faReceipt, faArrowLeft, faQrcode } from '@fortawesome/free-solid-svg-icons'
 
 import { GetServerSideProps, NextPage } from 'next'
-import { useUser } from '@/core/RootContext'
+import { useAxios, useUser } from '@/core/RootContext'
 import { BookingStatus, PaymentMethod, PaymentMethodLabel } from '@/constants'
 import Link from 'next/link'
 import { withThaiDateFormat } from '@/utils/date'
@@ -16,6 +16,13 @@ const MyEditBooking: NextPage<MyEditBookingProps> = ({ bookingCode }) => {
     const { personal, schools } = useUser()
     const { items } = useMyBooking({ bookingCode })
     const bookingInfo = items[0]
+    const { post } = useAxios()
+
+    const handleClickGenerateReciept = () => {
+        try {
+            post('/')
+        } catch (error) {}
+    }
 
     const renderPaymentAlert = () => {
         return (
@@ -36,7 +43,11 @@ const MyEditBooking: NextPage<MyEditBookingProps> = ({ bookingCode }) => {
                 </div>
                 {[BookingStatus.PAID, BookingStatus.EXPIRED].includes(bookingInfo.status) && (
                     <div className="py-4">
-                        <button type="button" className="text-indigo-500 font-semibold">
+                        <button
+                            type="button"
+                            className="text-indigo-500 font-semibold"
+                            onClick={handleClickGenerateReciept}
+                        >
                             <FontAwesomeIcon icon={faReceipt} />
                             <span> ออกใบเสร็จ/ใบกำกับภาษี</span>
                         </button>

@@ -61,6 +61,7 @@ export const useFirebase = () =>
 
 export const useUser = () => {
     const ctx = useContext(appContext)
+    if (!ctx.alreadyMember) throw Error('Please Login')
     return useMemo(() => ctx.$userInfo, [ctx.$userInfo])
 }
 
@@ -121,16 +122,16 @@ const RootContext: React.FC = ({ children }) => {
                     const { data } = await axios.post<AuthenticationResponse>('/api/auth/token', {
                         socialId: decodedToken?.sub,
                     })
-                    return { authentication: data, axios }
+                    return { authentication: data }
                 })
-                .then(async ({ authentication: { alreadyMember, authenticationCode }, axios }) => {
+                .then(async ({ authentication: { alreadyMember, authenticationCode } }) => {
                     if (alreadyMember) {
                         await signInWithCustomToken(auth, authenticationCode)
                     } else {
                         router.push('/signup')
                     }
 
-                    setContext((state) => ({ ...state, alreadyMember, initilized: true }))
+                    setContext((state) => ({ ...state, alreadyMember, initilized: true, $axios: axios.create() }))
                     return { alreadyMember, authenticationCode }
                 })
                 .finally(() => {
