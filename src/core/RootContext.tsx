@@ -1,7 +1,7 @@
 import { useContext, useEffect, useMemo, useState, createContext } from 'react'
 import { initializeApp, getApp, getApps } from 'firebase/app'
 
-import Axios, { AxiosInstance } from 'axios'
+import axios, { AxiosInstance } from 'axios'
 import { getDoc, getDocs, getFirestore } from 'firebase/firestore'
 import { getAuth, signInWithCustomToken } from 'firebase/auth'
 import { logEvent, getAnalytics } from 'firebase/analytics'
@@ -84,10 +84,8 @@ const createLiff = async () => {
     }
 }
 
-const createAxios = async () => {
-    if (!window.liff) return null
-    const token = window.liff.getAccessToken()
-    const instance = Axios.create({
+const createAxios = (token: string) => {
+    const instance = axios.create({
         headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -118,8 +116,7 @@ const RootContext: React.FC = ({ children }) => {
             console.log('firebase initilized')
 
             createLiff()
-                .then(createAxios)
-                .then(async (axios) => {
+                .then(async () => {
                     const decodedToken = window.liff.getDecodedIDToken()
                     const { data } = await axios.post<AuthenticationResponse>('/api/auth/token', {
                         socialId: decodedToken?.sub,
@@ -133,7 +130,7 @@ const RootContext: React.FC = ({ children }) => {
                         router.push('/signup')
                     }
 
-                    setContext((state) => ({ ...state, $axios: axios, alreadyMember, initilized: true }))
+                    setContext((state) => ({ ...state, alreadyMember, initilized: true }))
                     return { alreadyMember, authenticationCode }
                 })
                 .finally(() => {
@@ -148,6 +145,8 @@ const RootContext: React.FC = ({ children }) => {
             console.log(user)
             if (user) {
                 const db = getFirestore()
+                const token = await user.getIdToken()
+                const axiosInstance = createAxios(token)
 
                 const addresses = (await getDocs(addrCollection(db, user.uid))).docs.map((doc) => ({
                     id: doc.id,
@@ -157,10 +156,10 @@ const RootContext: React.FC = ({ children }) => {
                 const schools = (await getDocs(schoolCollection(db, user.uid))).docs.map((doc) => doc.data())
                 const lineProfile = await window.liff.getProfile()
 
-                console.log(lineProfile)
-
                 setContext((state) => ({
                     ...state,
+                    $axios: axiosInstance,
+                    alreadyMember: true,
                     $userInfo: {
                         addresses,
                         personal,
