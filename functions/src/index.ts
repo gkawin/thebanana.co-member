@@ -1,17 +1,41 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import puppeteer from 'puppeteer'
+import { PassThrough } from 'stream'
+import { ok } from 'assert'
+import { HttpsError } from 'firebase-functions/v1/auth'
 
 admin.initializeApp()
 
 const func = functions.region('asia-southeast1')
-const storage = admin.storage().bucket('thebanana-member.appspot.com')
+const storage = admin.storage().bucket()
+const db = admin.firestore()
 
-export const receipt = func
-    .runWith({
-        ingressSettings: 'ALLOW_INTERNAL_ONLY',
-    })
-    .https.onRequest((req, res) => {
+export const receipt = func.https.onRequest(async (req, res) => {
+    try {
+        ok(req.method === 'GET', new HttpsError('unimplemented', 'method not found'))
+        ok(req.query?.bookingId, new HttpsError('not-found', 'bookingId not found.'))
+        ok(req.headers?.authorization, new HttpsError('unauthenticated', 'token not found'))
+
+        const { authorization } = req.headers
+        ok(authorization.startsWith('Basic '), new HttpsError('unauthenticated', 'token not found'))
+
+        const token = authorization.trim().split(' ').pop() ?? ''
+        const user = await admin.auth().getUser(token)
+
+        ok(!!user, new HttpsError('not-found', 'user not found'))
+
+        const { bookingCode } = req.query
+        const booking = await db
+            .collection('booking')
+            .where('bookingCode', '==', bookingCode)
+            .where('user', '==', db.collection('users').doc(user.uid))
+            .get()
+
+        ok(!booking.empty, new HttpsError('not-found', 'bookingId not found.'))
+
+        console.log(booking.docs.map((doc) => doc.data()))
+
         const template = `
     <!DOCTYPE html>
 <html lang="th">
@@ -80,19 +104,26 @@ export const receipt = func
     `
         res.setHeader('Content-Type', 'text/html; charset=utf-8')
         res.status(200).send(template)
-    })
+    } catch (error) {
+        if (error instanceof HttpsError) {
+            res.status(error.httpErrorCode.status).send(error.message)
+        }
+
+        res.status(parseInt((error as HttpsError).message))
+    }
+})
 
 export const generateReceipt = func
     .runWith({ memory: '1GB', timeoutSeconds: 540 })
-    .firestore.document('/booking/{bookingId}')
+    .firestore.document('/booking/{bookingCode}')
     .onWrite(async (change, context) => {
-        const bookingId = context.params.bookingId
+        const bookingCode = context.params.bookingCode
         const userRef = change.after.data()?.user as FirebaseFirestore.DocumentReference
 
         if (!userRef) return
 
-        const receiptId = `rcpt_${bookingId}`
-        const userId = 'testId'
+        const receiptId = `rcpt_${bookingCode}`
+        const userId = (await userRef.get()).id
 
         const browser = await puppeteer.launch({
             args: ['--no-sandbox'],
@@ -101,8 +132,12 @@ export const generateReceipt = func
         })
         const page = await browser.newPage()
 
+        page.setExtraHTTPHeaders({
+            Authorization: `Basic ${userId}`,
+        })
+
         await page.goto(
-            `https://asia-southeast1-thebanana-member.cloudfunctions.net/receipt?date=${new Date().getTime()}`,
+            `https://asia-southeast1-thebanana-member.cloudfunctions.net/receipt?bookingCode=${bookingCode}date=${new Date().getTime()}`,
             {
                 waitUntil: 'networkidle2',
                 timeout: 10000,
@@ -115,13 +150,35 @@ export const generateReceipt = func
         })
         await browser.close()
 
-        const filepath = `/users/${userId}/receipts/${receiptId}.pdf`
+        const filepath = `users/${userId}/receipts/${receiptId}.pdf`
 
         console.time(`saving pdf file ${filepath}`)
-        const saveResult = await storage.file(filepath).save(pdf, { contentType: 'application/pdf' })
-        console.timeEnd(`saving pdf file ${filepath}`)
-        // console.time('update ready to download content')
-        // const updateResult = await db.collection('transactions').doc(invoiceId).update({ downloadable: true })
-        // console.timeEnd('update ready to download content')
-        console.log('result:: ', saveResult)
+
+        const file = storage.file(filepath)
+
+        const passthroughStream = new PassThrough()
+        passthroughStream.write(pdf)
+        passthroughStream.end()
+
+        async function streamFileUpload() {
+            passthroughStream
+                .pipe(file.createWriteStream({ contentType: 'application/pdf' }))
+                .on('finish', async () => {
+                    const updateResult = await db
+                        .collection('booking')
+                        .doc(bookingCode)
+                        .update({
+                            receipt: {
+                                receiptId,
+                                downloadable: true,
+                                filepath,
+                                createdAt: new Date(),
+                            },
+                        })
+                    console.timeEnd('update ready to download content')
+                    console.log('update Booking Result ', updateResult)
+                })
+        }
+
+        streamFileUpload().catch(console.error)
     })
