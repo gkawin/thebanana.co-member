@@ -1,11 +1,11 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
-import chromium from 'chrome-aws-lambda'
+import puppeteer from 'puppeteer'
 
 admin.initializeApp()
 
 const func = functions.region('asia-southeast1')
-const storage = admin.storage().bucket()
+const storage = admin.storage().bucket('thebanana-member.appspot.com')
 
 export const receipt = func
     .runWith({
@@ -88,14 +88,15 @@ export const generateReceipt = func
     .onWrite(async (change, context) => {
         const bookingId = context.params.bookingId
         const userRef = change.after.data()?.user as FirebaseFirestore.DocumentReference
-        const receiptId = `rcpt_${bookingId}`
-        const userId = (await userRef.get()).id
 
-        const browser = await chromium.puppeteer.launch({
-            args: chromium.args,
-            defaultViewport: chromium.defaultViewport,
-            executablePath: await chromium.executablePath,
-            headless: chromium.headless,
+        if (!userRef) return
+
+        const receiptId = `rcpt_${bookingId}`
+        const userId = 'testId'
+
+        const browser = await puppeteer.launch({
+            args: ['--no-sandbox'],
+            headless: true,
             ignoreHTTPSErrors: true,
         })
         const page = await browser.newPage()
@@ -114,10 +115,10 @@ export const generateReceipt = func
         })
         await browser.close()
 
-        const filepath = `/users/${userId}/receipts/${receiptId}`
+        const filepath = `/users/${userId}/receipts/${receiptId}.pdf`
 
         console.time(`saving pdf file ${filepath}`)
-        const saveResult = await storage.file(filepath).save(pdf)
+        const saveResult = await storage.file(filepath).save(pdf, { contentType: 'application/pdf' })
         console.timeEnd(`saving pdf file ${filepath}`)
         // console.time('update ready to download content')
         // const updateResult = await db.collection('transactions').doc(invoiceId).update({ downloadable: true })
