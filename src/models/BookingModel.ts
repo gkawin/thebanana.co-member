@@ -8,6 +8,18 @@ import { UserAddressModel } from './UserAddressModel'
 import { CourseModel } from './course/course.model'
 
 @Serializable()
+export class ReceiptModel {
+    @JsonProperty()
+    receiptId: string
+    @JsonProperty()
+    downloadable: boolean
+    @JsonProperty()
+    filepath: string
+    @JsonProperty({ beforeDeserialize: withTimeToDate, afterSerialize: withISOToServerTimestamp })
+    createdAt: Date
+}
+
+@Serializable()
 export class BookingModel {
     static generateBookingCode = () => {
         const day = parseInt(dayjs().format('YYMMDD'), 10)
@@ -55,4 +67,7 @@ export class BookingModel {
 
     @JsonProperty({ beforeDeserialize: withTimeToDate, afterSerialize: withISOToServerTimestamp })
     endDate: Date
+
+    @JsonProperty()
+    receipt?: ReceiptModel
 }
