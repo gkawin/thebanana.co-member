@@ -62,7 +62,10 @@ export const generateReceipt = func
                 taxId: '111111',
                 totalPricing: '1111',
                 courses: [],
-            })
+            }),
+            {
+                waitUntil: 'networkidle2',
+            }
         )
 
         const pdf = await page.pdf({
