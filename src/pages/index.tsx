@@ -52,7 +52,7 @@ export default function Home() {
                         slug={`/courses/${product.slug}`}
                         disabled={false}
                         onClick={() => {}}
-                        product={product}
+                        course={product}
                         key={product.code}
                     />
                 ))}

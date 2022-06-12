@@ -1,7 +1,7 @@
 import { useContext, useEffect, useMemo, useState, createContext } from 'react'
-import { initializeApp, getApp, getApps } from 'firebase/app'
+import { initializeApp, getApps } from 'firebase/app'
 
-import Axios, { AxiosInstance } from 'axios'
+import axios, { AxiosInstance } from 'axios'
 import { getDoc, getDocs, getFirestore } from 'firebase/firestore'
 import { getAuth, signInWithCustomToken } from 'firebase/auth'
 import { logEvent, getAnalytics } from 'firebase/analytics'
@@ -46,21 +46,9 @@ export const useAxios = () => {
     return useMemo(() => $axios, [$axios])
 }
 
-export const useFirebase = () =>
-    useMemo(() => {
-        const apps = getApps()
-        if (apps.length === 0) return null
-
-        const app = getApp()
-
-        return {
-            db: getFirestore(app),
-            auth: getAuth(app),
-        }
-    }, [])
-
 export const useUser = () => {
     const ctx = useContext(appContext)
+    if (!ctx.alreadyMember) throw Error('Please Login')
     return useMemo(() => ctx.$userInfo, [ctx.$userInfo])
 }
 
@@ -84,10 +72,8 @@ const createLiff = async () => {
     }
 }
 
-const createAxios = async () => {
-    if (!window.liff) return null
-    const token = window.liff.getAccessToken()
-    const instance = Axios.create({
+const createAxios = (token: string) => {
+    const instance = axios.create({
         headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -118,22 +104,21 @@ const RootContext: React.FC = ({ children }) => {
             console.log('firebase initilized')
 
             createLiff()
-                .then(createAxios)
-                .then(async (axios) => {
+                .then(async () => {
                     const decodedToken = window.liff.getDecodedIDToken()
                     const { data } = await axios.post<AuthenticationResponse>('/api/auth/token', {
                         socialId: decodedToken?.sub,
                     })
-                    return { authentication: data, axios }
+                    return { authentication: data }
                 })
-                .then(async ({ authentication: { alreadyMember, authenticationCode }, axios }) => {
+                .then(async ({ authentication: { alreadyMember, authenticationCode } }) => {
                     if (alreadyMember) {
                         await signInWithCustomToken(auth, authenticationCode)
                     } else {
                         router.push('/signup')
                     }
 
-                    setContext((state) => ({ ...state, $axios: axios, alreadyMember, initilized: true }))
+                    setContext((state) => ({ ...state, alreadyMember, initilized: true, $axios: axios.create() }))
                     return { alreadyMember, authenticationCode }
                 })
                 .finally(() => {
@@ -144,10 +129,14 @@ const RootContext: React.FC = ({ children }) => {
     }, [])
 
     useEffect(() => {
-        return getAuth().onAuthStateChanged(async (user) => {
+        if (!context.alreadyMember) return () => {}
+
+        const unsubcriber = getAuth().onAuthStateChanged(async (user) => {
             console.log(user)
             if (user) {
                 const db = getFirestore()
+                const token = await user.getIdToken()
+                const axiosInstance = createAxios(token)
 
                 const addresses = (await getDocs(addrCollection(db, user.uid))).docs.map((doc) => ({
                     id: doc.id,
@@ -157,10 +146,10 @@ const RootContext: React.FC = ({ children }) => {
                 const schools = (await getDocs(schoolCollection(db, user.uid))).docs.map((doc) => doc.data())
                 const lineProfile = await window.liff.getProfile()
 
-                console.log(lineProfile)
-
                 setContext((state) => ({
                     ...state,
+                    $axios: axiosInstance,
+                    alreadyMember: true,
                     $userInfo: {
                         addresses,
                         personal,
@@ -170,9 +159,13 @@ const RootContext: React.FC = ({ children }) => {
                     },
                 }))
             }
-        })()
+        })
+        return () => {
+            unsubcriber()
+        }
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [context.alreadyMember])
 
     return (
         <>

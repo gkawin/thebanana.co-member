@@ -1,5 +1,5 @@
 import { ProductModel } from '@/models/ProductModel'
-import { useAxios, useFirebase } from '@/core/RootContext'
+import { useAxios, useUser } from '@/core/RootContext'
 import React from 'react'
 import { useRouter } from 'next/dist/client/router'
 
@@ -8,13 +8,13 @@ export type ConfirmedProductFormProps = {
 }
 
 export const ConfirmedProductForm: React.VFC<ConfirmedProductFormProps> = ({ productInfo }) => {
-    const { auth } = useFirebase()
+    const { uid } = useUser()
     const axios = useAxios()
     const router = useRouter()
 
     const handleOnSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault()
-        await axios.post('/api/enrollment', { productId: productInfo.id, userId: auth.currentUser.uid })
+        await axios.post('/api/enrollment', { productId: productInfo.id, userId: uid })
         router.push('/checkout')
     }
 

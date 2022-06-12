@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="robots" content="noindex" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ใบเสร็จรับเงิน {{receiptId}}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;600&display=swap" rel="stylesheet" />
+  <style>
+    html,
+    body {
+      font-family: 'Kanit', sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="invoice" class="font-light text-lg container m-auto">
+    <div class="flex flex-row flex-wrap w-full justify-between py-2">
+      <figure class="content-center max-w-xs">
+        <img src="https://www.thebanana.co/images/logo.png" alt="stamped" />
+      </figure>
+      <div class="max-w-xs text-right">
+        <div class="text-2xl font-semibold">ใบเสร็จรับเงิน</div>
+        <p class="text-gray-700">
+          บริษัท วันบุ๊ค จำกัด <br />
+          89/91 หมู่ 10 หมู่บ้านทาวน์ อเวนิว เมิร์จ <br />
+          ต.บางรักใหญ่ อ.บางบัวทอง จ.นนทบุรี 11110 <br />
+          เลขประจำตัวผู้เสียภาษี: 0125563000591
+        </p>
+      </div>
+    </div>
+    <div class="flex flex-row justify-between space-x-4">
+      <div class="box-border w-full p-4 border border-gray-900 text-gray-700">
+        <div class="font-semibold text-black">รายละเอียดลูกค้า</div>
+        <div>{{parentName}}</div>
+        <div>{{address}}</div>
+        <div>ชื่อนักเรียน : {{studentName}} ({{nickname}})</div>
+        {{#if isShownBuyerTaxId}}
+          <div>เลขประจำตัวผู้เสียภาษี: {{buyerTaxId}}</div>
+        {{/if}}
+      </div>
+      <div class="box-border w-full p-4 border border-gray-900 text-gray-700">
+        <div class="font-semibold text-black">รายละเอียดใบเสร็จ</div>
+        <div>เลขที่ใบเสร็จ: {{receiptId}}</div>
+        <div>วันที่: {{createdAt}}</div>
+      </div>
+    </div>
+
+    <table class="table-fixed my-4 border border-gray-900">
+      <thead>
+        <tr>
+          <th class="w-1/12 p-2">
+            <strong>ลำดับที่</strong>
+          </th>
+          <th class="w-1/2 p-2">
+            <strong>วิชาที่ลงทะเบียน</strong>
+          </th>
+          <th class="w-1/2 p-2">
+            <strong>รอบ</strong>
+          </th>
+          <th class="w-1/12 p-2">
+            <strong>จำนวน</strong>
+          </th>
+        </tr>
+      </thead>
+      <tbody class="text-center text-gray-700">
+        {{#each listCoursesEnrolled}}
+          <tr>
+            <td class="p-2">{{math @index "+" 1}}</td>
+            <td class="text-left p-2">{{this.course}}</td>
+            <td class="p-2">{{this.session}}</td>
+            <td class="p-2">1</td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <div class="border-black border my-3">
+      <div class="grid grid-cols-2 p-4">
+        <div class="text-gray-700">{{totalPricingThai}}</div>
+        <div class="grid grid-cols-2 text-right gap-y-2">
+          <div class="font-semibold">จำนวนเงินรวมทั้งสิ้น</div>
+          <div class="text-gray-700">{{totalPricing}}</div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 text-center">
+        <div class="flex flex-col justify-center">
+
+          <div class="text-gray-700 text-sm">บริษัท วันบุ๊ค จำกัด</div>
+
+          <div class="font-semibold text-gray-700">ผู้รับเงิน</div>
+        </div>
+        <div class="self-end">
+          <div>{{createdAt}}</div>
+          <div class="font-semibold">วันที่รับเงิน</div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <span class="text-sm text-gray-500">เอกสารฉบับนี้มีการลงรายมืออิเล็กทรอนิกส์ กรุณารักษาเอกสารฉบับนี้เอาไว้เพื่อการอ้างอิง</span>
+  </div>
+</body>
+
+</html>

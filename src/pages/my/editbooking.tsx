@@ -1,12 +1,14 @@
 import useMyBooking from '@/concerns/use-my-booking'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faReceipt, faArrowLeft, faQrcode } from '@fortawesome/free-solid-svg-icons'
+import { faArrowLeft, faQrcode, faDownload } from '@fortawesome/free-solid-svg-icons'
+import { getDownloadURL, getStorage, ref } from 'firebase/storage'
 
 import { GetServerSideProps, NextPage } from 'next'
 import { useUser } from '@/core/RootContext'
 import { BookingStatus, PaymentMethod, PaymentMethodLabel } from '@/constants'
 import Link from 'next/link'
 import { withThaiDateFormat } from '@/utils/date'
+import { useEffect, useState } from 'react'
 
 export type MyEditBookingProps = {
     bookingCode: string
@@ -16,6 +18,20 @@ const MyEditBooking: NextPage<MyEditBookingProps> = ({ bookingCode }) => {
     const { personal, schools } = useUser()
     const { items } = useMyBooking({ bookingCode })
     const bookingInfo = items[0]
+    const [receiptUrl, setReceiptUrl] = useState<string>('')
+
+    useEffect(() => {
+        if (bookingInfo?.receipt) {
+            const generateDownloadableReceiptLink = async (filePath: string) => {
+                const storage = getStorage()
+                const receiptRef = ref(storage, filePath)
+                const downloadURL = await getDownloadURL(receiptRef)
+                console.log(downloadURL)
+                setReceiptUrl(downloadURL)
+            }
+            generateDownloadableReceiptLink(bookingInfo?.receipt.filepath)
+        }
+    }, [bookingInfo?.receipt])
 
     const renderPaymentAlert = () => {
         return (
@@ -36,10 +52,16 @@ const MyEditBooking: NextPage<MyEditBookingProps> = ({ bookingCode }) => {
                 </div>
                 {[BookingStatus.PAID, BookingStatus.EXPIRED].includes(bookingInfo.status) && (
                     <div className="py-4">
-                        <button type="button" className="text-indigo-500 font-semibold">
-                            <FontAwesomeIcon icon={faReceipt} />
-                            <span> ออกใบเสร็จ/ใบกำกับภาษี</span>
-                        </button>
+                        <div>ใบเสร็จ/ใบกำกับภาษี</div>
+                        {!bookingInfo.receipt && <div>ไม่มีรายการใบเสร็จ/ใบกำกับภาษี</div>}
+                        {bookingInfo.receipt && (
+                            <Link href={receiptUrl}>
+                                <a target="_blank" className="text-sm text-gray-500 flex justify-between">
+                                    <span className="underline">{bookingInfo.receipt.receiptId}</span>
+                                    <FontAwesomeIcon icon={faDownload} />
+                                </a>
+                            </Link>
+                        )}
                     </div>
                 )}
                 {[BookingStatus.CREATED].includes(bookingInfo.status) &&

@@ -1,6 +1,5 @@
 import { ProductDescription } from '@/components/products/ProductDescription'
 import { ProductCoverImage } from '@/components/products/ProductCoverImage'
-import { ProductModel } from '@/models/ProductModel'
 import { GetServerSideProps, NextPage } from 'next'
 import React from 'react'
 import adminSDK from '@/libs/adminSDK'
@@ -9,7 +8,7 @@ import { serialize } from 'typescript-json-serializer'
 import Link from 'next/link'
 import { CourseModel } from '@/models/course/course.model'
 
-export type CourseInfoProps = { slug: string; product: ProductModel }
+export type CourseInfoProps = { slug: string; product: CourseModel }
 
 const CourseInfo: NextPage<CourseInfoProps> = ({ product, slug }) => {
     if (!product) return <div>Loading</div>
@@ -21,13 +20,18 @@ const CourseInfo: NextPage<CourseInfoProps> = ({ product, slug }) => {
                     <ProductCoverImage
                         className="rounded-b-xl"
                         src={product.coverImage}
-                        alt={product.name}
+                        alt={product.title}
                         layout="responsive"
                     />
                 </div>
             </figure>
             <div className="container grid gap-y-4">
-                <ProductDescription className="py-4" description={product.description} name={product.name} />
+                <ProductDescription
+                    className="py-4"
+                    description={product.description}
+                    session={product.session}
+                    title={product.title}
+                />
                 <div className="text-xl font-semibold">{product.pricing}</div>
                 <Link href={`/purchase/${slug}`}>
                     <a type="button" className="bg-indigo-700 text-white rounded p-2 text-center">

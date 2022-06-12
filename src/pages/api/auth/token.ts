@@ -13,8 +13,8 @@ import { UserModelV2 } from '@/models/user/user.model'
 @injectable()
 class TokenApi {
     #user: FirebaseFirestore.CollectionReference<UserModelV2>
-    constructor(private admin: AdminSDK) {
-        this.#user = this.admin.db.collection('users').withConverter(Model.convert(UserModelV2))
+    constructor(private sdk: AdminSDK) {
+        this.#user = this.sdk.db.collection('users').withConverter(Model.convert(UserModelV2))
     }
 
     main: NextApiHandler = async (req, res) => {
@@ -32,7 +32,7 @@ class TokenApi {
             }
 
             if (!user.empty) {
-                const authenticationCode = await this.admin.auth.createCustomToken(user.docs[0].id)
+                const authenticationCode = await this.sdk.auth.createCustomToken(user.docs[0].id)
                 payload.alreadyMember = true
                 payload.authenticationCode = authenticationCode
             }
