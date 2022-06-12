@@ -6,7 +6,8 @@ import Handlebars from 'handlebars'
 import fs from 'fs'
 import path from 'path'
 
-import { withPricing } from '../../src/utils/payment'
+import { withThaiDateFormat } from '../../src/utils/date'
+import thaiBath from '../../src/utils/thai-bath'
 
 admin.initializeApp()
 
@@ -17,12 +18,13 @@ const db = admin.firestore()
 type ReceiptTemplateProps = {
     parentName: string
     address: string
-    taxId: string
+    buyerTaxId?: string
     receiptId: string
     createdAt: string
-    pricing: string
     totalPricing: string
-    courses: any[]
+    totalPricingThai: string
+    listCoursesEnrolled: { uid: string; course: string; session: string; pricing: number }[]
+    isShownBuyerTaxId: boolean
 }
 
 export const generateReceipt = func
@@ -50,18 +52,16 @@ export const generateReceipt = func
         })
         const page = await browser.newPage()
 
-        const pricing = `${withPricing(bookingData?.price ?? 0)} บาท`
-
         await page.setContent(
             template({
                 address: 'test',
-                pricing,
-                createdAt: ' test',
+                isShownBuyerTaxId: false,
+                createdAt: withThaiDateFormat(new Date().toISOString()),
                 parentName: 'test',
                 receiptId,
-                taxId: '111111',
                 totalPricing: '1111',
-                courses: [],
+                listCoursesEnrolled: [{ course: 'test', session: 'topfop', uid: '1', pricing: 11900 }],
+                totalPricingThai: thaiBath(bookingData?.price),
             }),
             {
                 waitUntil: 'networkidle2',

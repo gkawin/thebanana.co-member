@@ -4,10 +4,12 @@
         <meta charset="UTF-8" />
         <meta name="robots" content="noindex" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>ใบเสร็จรับเงิน</title>
+        <title>ใบเสร็จรับเงิน {{receiptId}}</title>
         <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;600&display=swap" rel="stylesheet" />
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Kanit&display=swap');
             html,
             body {
                 font-family: 'Kanit', sans-serif;
@@ -16,55 +18,91 @@
     </head>
 
     <body>
-        <div id="invoice" class="text-sm font-light font-invoice container m-auto">
+        <div id="invoice" class="font-light text-lg container m-auto">
             <div class="flex flex-row flex-wrap w-full justify-between py-2">
                 <figure class="content-center max-w-xs">
                     <img src="https://www.thebanana.co/images/logo.png" alt="stamped" />
                 </figure>
                 <div class="max-w-xs text-right">
-                    <div class="text-lg font-medium">ใบเสร็จรับเงิน</div>
-                    <div class="text-xs">
+                    <div class="text-2xl font-semibold">ใบเสร็จรับเงิน</div>
+                    <p>
                         บริษัท วันบุ๊ค จำกัด <br />
                         89/91 หมู่ 10 หมู่บ้านทาวน์ อเวนิว เมิร์จ <br />
-                        ต. บางรักใหญ่ อ.บางบัวทอง จ.นนทบุรี 11110
-                    </div>
-                    <div class="text-xs">เลขประจำตัวผู้เสียภาษี: 0125563000591</div>
+                        ต.บางรักใหญ่ อ.บางบัวทอง จ.นนทบุรี 11110 <br />
+                        เลขประจำตัวผู้เสียภาษี: 0125563000591
+                    </p>
                 </div>
             </div>
-            <div class="flex flex-row justify-between">
-                <div class="box-border w-full mr-2 p-2 border border-gray-900">
-                    <div class="font-semibold text-lg">รายละเอียดลูกค้า</div>
+            <div class="flex flex-row justify-between space-x-4">
+                <div class="box-border w-full p-4 border border-gray-900">
+                    <div class="font-semibold">รายละเอียดลูกค้า</div>
                     <div>{{parentName}}</div>
                     <div>{{address}}</div>
-                    <div>เลขประจำตัวผู้เสียภาษี: {{taxId}}</div>
-                    }
+                    {{#if isShownBuyerTaxId}}
+                    <div>เลขประจำตัวผู้เสียภาษี: {{buyerTaxId}}</div>
+                    {{/if}}
                 </div>
-                <div class="box-border w-full p-2 border border-gray-900">
+                <div class="box-border w-full p-4 border border-gray-900">
+                    <div class="font-semibold">รายละเอียดใบเสร็จ</div>
                     <div>เลขที่ใบเสร็จ: {{receiptId}}</div>
                     <div>วันที่: {{createdAt}}</div>
+                    <div></div>
                 </div>
             </div>
-            <div class="border-black border my-3" />
-            <div class="grid grid-cols-2">
-                <div>{{pricing}}</div>
-                <div class="grid grid-cols-2 text-right gap-y-2">
-                    <div class="font-semibold">จำนวนเงินรวมทั้งสิ้น</div>
-                    <div>{{totalPricing}}</div>
+
+            <table class="table-fixed my-4 border border-gray-900">
+                <thead>
+                    <tr>
+                        <th class="w-1/12 py-2">
+                            <strong>ลำดับที่</strong>
+                        </th>
+                        <th class="w-1/2 py-2">
+                            <strong>วิชาที่ลงทะเบียน</strong>
+                        </th>
+                        <th class="w-1/2 py-2">
+                            <strong>รอบ</strong>
+                        </th>
+                        <th class="w-1/12 py-2">
+                            <strong>จำนวน</strong>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    {{#each listCoursesEnrolled}}
+                    <tr key="{{this.uid}}-{{this.course}}-{{this.session}}">
+                        <td>{{@index+1}}</td>
+                        <td class="text-left">{{this.course}}</td>
+                        <td>{{this.session}}</td>
+                        <td>1</td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+
+            <div class="border-black border my-3">
+                <div class="grid grid-cols-2 p-4">
+                    <div>{{totalPricingThai}}</div>
+                    <div class="grid grid-cols-2 text-right gap-y-2">
+                        <div class="font-semibold">จำนวนเงินรวมทั้งสิ้น</div>
+                        <div>{{totalPricing}}</div>
+                    </div>
                 </div>
+                <div class="grid grid-cols-2 text-center">
+                    <div class="flex flex-col justify-center">
+                        <div>......วัชรีพร แก้วบุตรดี......</div>
+                        <div class="font-semibold">ผู้รับเงิน</div>
+                    </div>
+                    <div class="self-end">
+                        <div>{{createdAt}}</div>
+                        <div class="font-semibold">วันที่รับเงิน</div>
+                    </div>
+                </div>
+                <div></div>
             </div>
-            <div class="mt-4 grid grid-cols-2 text-center">
-                <div class="flex flex-col justify-center">
-                    <div>......วัชรีพร แก้วบุตรดี......</div>
-                    <div class="font-semibold">ผู้รับเงิน</div>
-                </div>
-                <div class="self-end">
-                    <div>{{createdAt}}</div>
-                    <div class="font-semibold">วันที่รับเงิน</div>
-                </div>
-            </div>
-            <div className="text-xs mt-16">
+
+            <span class="text-sm">
                 (เอกสารฉบับนี้มีการลงรายมืออิเล็กทรอนิกส์ กรุณารักษาเอกสารฉบับนี้เอาไว้เพื่อการอ้างอิง)
-            </div>
+            </span>
         </div>
     </body>
 </html>
