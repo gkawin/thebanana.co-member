@@ -142,7 +142,9 @@ const RootContext: React.FC = ({ children }) => {
     }, [])
 
     useEffect(() => {
-        return getAuth().onAuthStateChanged(async (user) => {
+        if (!context.alreadyMember) return () => {}
+
+        const unsubcriber = getAuth().onAuthStateChanged(async (user) => {
             console.log(user)
             if (user) {
                 const db = getFirestore()
@@ -170,9 +172,13 @@ const RootContext: React.FC = ({ children }) => {
                     },
                 }))
             }
-        })()
+        })
+        return () => {
+            unsubcriber()
+        }
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [context.alreadyMember])
 
     return (
         <>

@@ -2,12 +2,14 @@ import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import puppeteer from 'puppeteer'
 import Handlebars from 'handlebars'
+import dayjs from 'dayjs'
 
 import fs from 'fs'
 import path from 'path'
 
 import { withThaiDateFormat } from '../../src/utils/date'
 import thaiBath from '../../src/utils/thai-bath'
+import { withPricing } from '../../src/utils/payment'
 
 admin.initializeApp()
 
@@ -23,27 +25,32 @@ type ReceiptTemplateProps = {
     createdAt: string
     totalPricing: string
     totalPricingThai: string
-    listCoursesEnrolled: { uid: string; course: string; session: string; pricing: number }[]
+    listCoursesEnrolled: { uid?: string; course: string; session: string; pricing: number }[]
     isShownBuyerTaxId: boolean
+    studentName: string
+    nickname: string
 }
 
 export const generateReceipt = func
     .runWith({ memory: '1GB', timeoutSeconds: 540 })
     .firestore.document('/booking/{bookingCode}')
     .onCreate(async (change, context) => {
-        const bufferString = fs.readFileSync(path.resolve(__dirname, './html/receipt-template.html'))
+        const bufferString = fs.readFileSync(path.resolve(__dirname, './html/receipt-template.handlebars'))
         const template = Handlebars.compile<ReceiptTemplateProps>(bufferString.toString('utf-8'))
 
         const bookingCode = context.params.bookingCode
-        const bookingData = change.data()
-        const userRef = bookingData?.user as FirebaseFirestore.DocumentReference
+        const info = change.data()
+        const userRef = info?.user as FirebaseFirestore.DocumentReference
 
         if (!userRef) {
             console.error(`User ${userRef} not exist.`)
         }
 
         const receiptId = `rcpt_${bookingCode}`
+        const courseRef = info?.course as FirebaseFirestore.DocumentReference
+        const { title: courseTitle = '', session: courseSession = '' } = (await courseRef.get()).data()
         const userId = (await userRef.get()).id
+        const { nickname = '', firstname = '', lastname = '' } = (await userRef.get()).data()
 
         const browser = await puppeteer.launch({
             args: ['--no-sandbox'],
@@ -59,9 +66,11 @@ export const generateReceipt = func
                 createdAt: withThaiDateFormat(new Date().toISOString()),
                 parentName: 'test',
                 receiptId,
-                totalPricing: '1111',
-                listCoursesEnrolled: [{ course: 'test', session: 'topfop', uid: '1', pricing: 11900 }],
-                totalPricingThai: thaiBath(bookingData?.price),
+                totalPricing: withPricing(info?.price ?? 0),
+                listCoursesEnrolled: [{ course: courseTitle, session: courseSession, pricing: info?.price }],
+                totalPricingThai: thaiBath(info?.price ?? 0),
+                nickname,
+                studentName: `${firstname} ${lastname}`,
             }),
             {
                 waitUntil: 'networkidle2',
@@ -75,7 +84,8 @@ export const generateReceipt = func
         })
         await browser.close()
 
-        const filepath = `users/${userId}/receipts/${receiptId}.pdf`
+        const today = dayjs().format('DD-MM-YYYY')
+        const filepath = `receipts/${today}/${userId}/${receiptId}.pdf`
 
         console.time(`saving pdf file ${filepath}`)
 
