@@ -1,5 +1,5 @@
 import { useContext, useEffect, useMemo, useState, createContext } from 'react'
-import { initializeApp, getApp, getApps } from 'firebase/app'
+import { initializeApp, getApps } from 'firebase/app'
 
 import axios, { AxiosInstance } from 'axios'
 import { getDoc, getDocs, getFirestore } from 'firebase/firestore'

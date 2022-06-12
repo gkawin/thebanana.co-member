@@ -1,28 +1,33 @@
-import type { ProductModel } from '@/models/ProductModel'
+import { CourseModel } from '@/models/course/course.model'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ProductCoverImage } from './ProductCoverImage'
 import { ProductDescription } from './ProductDescription'
 
 export type ProductCardProps = {
-    product: ProductModel
+    course: CourseModel
     disabled: boolean
-    onClick: (val: ProductModel) => void
+    onClick: (val: CourseModel) => void
     slug: string
 }
 
-export const ProductCard: React.VFC<ProductCardProps> = ({ product, onClick, slug, disabled = false }) => {
+export const ProductCard: React.VFC<ProductCardProps> = ({ course, onClick, slug, disabled = false }) => {
     return (
         <Link href={slug}>
             <a
                 className={`product-card rounded border-2 border-yellow-700 relative transform hover:-translate-y-2 transition-all duration-200 ease-linear hover:shadow-2xl shadow-black${
                     disabled ? 'filter grayscale bg-opacity-20' : ''
                 } `}
-                onClick={() => onClick(product)}
+                onClick={() => onClick(course)}
                 style={{ display: 'grid', gridTemplateRows: 'auto minmax(0, 1fr)' }}
             >
-                <ProductCoverImage alt={product.name} layout="responsive" src={product.coverImage} />
-                <ProductDescription className="p-2" description={product.description} name={product.name} />
+                <ProductCoverImage alt={course.title} layout="responsive" src={course.coverImage} />
+                <ProductDescription
+                    className="p-2"
+                    description={course.description}
+                    session={course.session}
+                    title={course.title}
+                />
 
                 <figure className="p-2 row-span-2">
                     <div></div>

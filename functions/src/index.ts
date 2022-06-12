@@ -2,7 +2,6 @@ import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import puppeteer from 'puppeteer'
 import Handlebars from 'handlebars'
-import dayjs from 'dayjs'
 
 import fs from 'fs'
 import path from 'path'
@@ -17,7 +16,7 @@ const func = functions.region('asia-southeast1')
 const storage = admin.storage().bucket()
 const db = admin.firestore()
 
-Handlebars.registerHelper('math', function (lvalue, operator, rvalue, options) {
+Handlebars.registerHelper('math', function (lvalue, operator, rvalue): any {
     lvalue = parseFloat(lvalue)
     rvalue = parseFloat(rvalue)
 
