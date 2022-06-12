@@ -1,11 +1,20 @@
 import { BookingGroup, BookingStatus, FailureCode, PaymentMethod } from '@/constants'
-import { useFirebase, useUser } from '@/core/RootContext'
+import { useUser } from '@/core/RootContext'
 import { BookingModel } from '@/models/BookingModel'
 import { CourseModel } from '@/models/course/course.model'
 import Model from '@/models/Model'
 import { UserAddressModel } from '@/models/UserAddressModel'
 import { withPricing } from '@/utils/payment'
-import { doc, DocumentReference, getDoc, onSnapshot, query, QueryConstraint, where } from 'firebase/firestore'
+import {
+    doc,
+    DocumentReference,
+    getDoc,
+    onSnapshot,
+    query,
+    QueryConstraint,
+    where,
+    getFirestore,
+} from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { bookingCollection } from './query'
 
@@ -25,7 +34,7 @@ export type BookingInfo = {
 
 export default function useMyBooking(options?: { bookingCode?: string; bookingGroup?: BookingGroup }) {
     const [items, setItems] = useState<BookingInfo[]>([])
-    const { db } = useFirebase()
+    const db = getFirestore()
     const { uid } = useUser()
     const [bookingGroup, setBookingGroup] = useState<BookingGroup>(options?.bookingGroup ?? BookingGroup.UpComming)
 

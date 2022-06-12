@@ -1,13 +1,12 @@
-import { useFirebase } from '@/core/RootContext'
 import { ProductModel } from '@/models/ProductModel'
-import { getDocs, query, where } from 'firebase/firestore'
+import { getDocs, getFirestore, query, where } from 'firebase/firestore'
 import dayjs from 'dayjs'
 import { useEffect, useMemo, useState } from 'react'
 import { courseCollection } from './query'
 
 export default function useCourses() {
     const [productsList, setProductsList] = useState<ProductModel[]>([])
-    const { db } = useFirebase()
+    const db = getFirestore()
 
     useEffect(() => {
         const productsRef = query(courseCollection(db), where('effectiveDate', '<=', new Date()))

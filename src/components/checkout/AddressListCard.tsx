@@ -1,7 +1,7 @@
 import { addrCollection } from '@/concerns/query'
-import { useFirebase, useUser } from '@/core/RootContext'
+import { useUser } from '@/core/RootContext'
 import { UserAddressModel } from '@/models/UserAddressModel'
-import { onSnapshot } from 'firebase/firestore'
+import { getFirestore, onSnapshot } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { NewAddressForm } from './NewAddressForm'
@@ -11,7 +11,7 @@ export const AddressListCard: React.FC = () => {
         register,
         formState: { errors },
     } = useFormContext()
-    const { db } = useFirebase()
+    const db = getFirestore()
     const { uid } = useUser()
     const [addresses, setAddresses] = useState<UserAddressModel[]>([])
 

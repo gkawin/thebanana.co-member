@@ -46,19 +46,6 @@ export const useAxios = () => {
     return useMemo(() => $axios, [$axios])
 }
 
-export const useFirebase = () =>
-    useMemo(() => {
-        const apps = getApps()
-        if (apps.length === 0) return null
-
-        const app = getApp()
-
-        return {
-            db: getFirestore(app),
-            auth: getAuth(app),
-        }
-    }, [])
-
 export const useUser = () => {
     const ctx = useContext(appContext)
     if (!ctx.alreadyMember) throw Error('Please Login')
