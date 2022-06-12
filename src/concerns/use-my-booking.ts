@@ -1,6 +1,6 @@
 import { BookingGroup, BookingStatus, FailureCode, PaymentMethod } from '@/constants'
 import { useUser } from '@/core/RootContext'
-import { BookingModel } from '@/models/BookingModel'
+import { BookingModel, ReceiptModel } from '@/models/BookingModel'
 import { CourseModel } from '@/models/course/course.model'
 import Model from '@/models/Model'
 import { UserAddressModel } from '@/models/UserAddressModel'
@@ -30,6 +30,7 @@ export type BookingInfo = {
     shippingAddress: string
     paymentMethod: PaymentMethod
     failureCode: FailureCode
+    receipt?: ReceiptModel
 }
 
 export default function useMyBooking(options?: { bookingCode?: string; bookingGroup?: BookingGroup }) {
@@ -96,6 +97,7 @@ export default function useMyBooking(options?: { bookingCode?: string; bookingGr
                             shippingAddress: address && address.address,
                             paymentMethod: props.paymentMethod,
                             failureCode: props.failureCode,
+                            receipt: props.receipt,
                         }
                     })
                     .filter(Boolean)
