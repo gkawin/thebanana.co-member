@@ -71,7 +71,7 @@
       <tbody class="text-center text-gray-700">
         {{#each listCoursesEnrolled}}
           <tr>
-            <td class="p-2">{{@index+1}}</td>
+            <td class="p-2">{{math @index "+" 1}}</td>
             <td class="text-left p-2">{{this.course}}</td>
             <td class="p-2">{{this.session}}</td>
             <td class="p-2">1</td>

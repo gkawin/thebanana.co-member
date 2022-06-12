@@ -17,6 +17,19 @@ const func = functions.region('asia-southeast1')
 const storage = admin.storage().bucket()
 const db = admin.firestore()
 
+Handlebars.registerHelper('math', function (lvalue, operator, rvalue, options) {
+    lvalue = parseFloat(lvalue)
+    rvalue = parseFloat(rvalue)
+
+    return {
+        '+': lvalue + rvalue,
+        '-': lvalue - rvalue,
+        '*': lvalue * rvalue,
+        '/': lvalue / rvalue,
+        '%': lvalue % rvalue,
+    }[operator]
+})
+
 type ReceiptTemplateProps = {
     parentName: string
     address: string
@@ -52,6 +65,9 @@ export const generateReceipt = func
         const userId = (await userRef.get()).id
         const { nickname = '', firstname = '', lastname = '' } = (await userRef.get()).data()
 
+        const shippingAddressRef = info?.shippingAddress as FirebaseFirestore.DocumentReference
+        const address = (await shippingAddressRef.get()).data()?.address ?? ''
+
         const browser = await puppeteer.launch({
             args: ['--no-sandbox'],
             headless: true,
@@ -61,7 +77,7 @@ export const generateReceipt = func
 
         await page.setContent(
             template({
-                address: 'test',
+                address,
                 isShownBuyerTaxId: false,
                 createdAt: withThaiDateFormat(new Date().toISOString()),
                 parentName: 'test',
@@ -84,14 +100,19 @@ export const generateReceipt = func
         })
         await browser.close()
 
-        const today = dayjs().format('DD-MM-YYYY')
-        const filepath = `receipts/${today}/${userId}/${receiptId}.pdf`
+        const filepath = `receipts/${userId}/${receiptId}.pdf`
 
         console.time(`saving pdf file ${filepath}`)
 
         const file = storage.file(filepath)
 
-        await file.save(pdf, { contentType: 'application/pdf' })
+        await file.save(pdf, {
+            contentType: 'application/pdf',
+            metadata: {
+                createdAt: new Date(),
+                userId,
+            },
+        })
 
         db.collection('booking')
             .doc(bookingCode)
