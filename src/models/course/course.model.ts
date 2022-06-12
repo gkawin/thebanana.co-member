@@ -50,4 +50,7 @@ export class CourseModel {
 
     @JsonProperty()
     isActive: boolean
+
+    @JsonProperty()
+    session: string
 }
