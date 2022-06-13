@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState, createContext, useLayoutEffect } from 'react'
+import { useContext, useEffect, useMemo, useState, createContext } from 'react'
 import { initializeApp, getApps } from 'firebase/app'
 
 import axios, { AxiosInstance } from 'axios'
