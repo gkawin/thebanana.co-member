@@ -1,17 +1,17 @@
-import { useContext, useEffect, useMemo, useState, createContext } from 'react'
+import { useContext, useEffect, useMemo, useState, createContext, useLayoutEffect } from 'react'
 import { initializeApp, getApps } from 'firebase/app'
 
 import axios, { AxiosInstance } from 'axios'
 import { getDoc, getDocs, getFirestore } from 'firebase/firestore'
 import { getAuth, signInWithCustomToken } from 'firebase/auth'
 import { logEvent, getAnalytics } from 'firebase/analytics'
-import { SpinLoading } from '@/components/portal/SpinLoading'
 import Script from 'next/script'
 import { useRouter } from 'next/router'
 import { UserModelV2 } from '@/models/user/user.model'
 import { addrCollection, schoolCollection, userDoc } from '@/concerns/query'
 import { UserAddressModel } from '@/models/UserAddressModel'
 import { Liff } from '@liff/liff-types'
+import { useLoading } from './LoadingContext'
 
 const liffId = '1653826193-QbmamAo0'
 const firebaseConfig = {
@@ -39,7 +39,6 @@ export type AppContext = {
 export type AuthenticationResponse = { authenticationCode: string; alreadyMember: boolean }
 
 const appContext = createContext<AppContext>(null)
-const loadingContext = createContext<{ loading: boolean; setLoading: (val: boolean) => void }>(null)
 
 export const useAxios = () => {
     const { $axios } = useContext(appContext)
@@ -48,18 +47,8 @@ export const useAxios = () => {
 
 export const useUser = () => {
     const ctx = useContext(appContext)
-    if (!ctx.alreadyMember) throw Error('Please Login')
-    return useMemo(() => ctx.$userInfo, [ctx.$userInfo])
-}
-
-export const useLoading = () => {
-    const loadingCtx = useContext(loadingContext)
-
-    if (!loadingCtx) {
-        throw new Error('no context')
-    }
-
-    return loadingCtx
+    if (!ctx.alreadyMember && !ctx.initilized) throw Error('Please Login')
+    return useMemo(() => ({ ...ctx.$userInfo, alreadyMember: ctx.alreadyMember }), [ctx.$userInfo, ctx.alreadyMember])
 }
 
 const createLiff = async () => {
@@ -84,6 +73,7 @@ const createAxios = (token: string) => {
 }
 
 const RootContext: React.FC = ({ children }) => {
+    const { loaded, loading } = useLoading()
     const [context, setContext] = useState<AppContext>({
         $userInfo: { addresses: [], personal: null, schools: [], uid: null, lineProfile: null },
         alreadyMember: false,
@@ -91,7 +81,6 @@ const RootContext: React.FC = ({ children }) => {
         authenticationCode: null,
         initilized: false,
     })
-    const [loading, setLoading] = useState<boolean>(true)
     const router = useRouter()
 
     useEffect(() => {
@@ -102,6 +91,8 @@ const RootContext: React.FC = ({ children }) => {
             const auth = getAuth()
             logEvent(analytic, 'notification_received')
             console.log('firebase initilized')
+
+            loading()
 
             createLiff()
                 .then(async () => {
@@ -117,20 +108,15 @@ const RootContext: React.FC = ({ children }) => {
                     } else {
                         router.push('/signup')
                     }
-
-                    setContext((state) => ({ ...state, alreadyMember, initilized: true, $axios: axios.create() }))
+                    setContext((state) => ({ ...state, alreadyMember, initilized: true }))
                     return { alreadyMember, authenticationCode }
                 })
-                .finally(() => {
-                    setLoading(false)
-                })
+                .finally(() => loaded())
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {
-        if (!context.alreadyMember) return () => {}
-
         const unsubcriber = getAuth().onAuthStateChanged(async (user) => {
             console.log(user)
             if (user) {
@@ -165,7 +151,7 @@ const RootContext: React.FC = ({ children }) => {
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [context.alreadyMember])
+    }, [])
 
     return (
         <>
@@ -174,12 +160,7 @@ const RootContext: React.FC = ({ children }) => {
                 src="https://static.line-scdn.net/liff/edge/2/sdk.js"
                 strategy="beforeInteractive"
             ></Script>
-            <loadingContext.Provider value={{ loading, setLoading }}>
-                <appContext.Provider value={context}>
-                    <SpinLoading global />
-                    {context.initilized && children}
-                </appContext.Provider>
-            </loadingContext.Provider>
+            <appContext.Provider value={context}>{context.initilized && children}</appContext.Provider>
         </>
     )
 }

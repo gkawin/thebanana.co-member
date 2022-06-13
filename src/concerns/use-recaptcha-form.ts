@@ -1,11 +1,9 @@
-import { useLoading } from '@/core/RootContext'
 import { getApps } from 'firebase/app'
 import { getAuth, RecaptchaVerifier } from 'firebase/auth'
 import { useCallback, useEffect, useState } from 'react'
 
 export const useRecaptchaForm = (el: { containerId: string }) => {
     const [sentOtp, setSentOtp] = useState(false)
-    const { setLoading } = useLoading()
 
     const initRecaptcha = useCallback(async (containerId: string) => {
         if (!window.recaptchaVerifier) {
@@ -49,9 +47,8 @@ export const useRecaptchaForm = (el: { containerId: string }) => {
     useEffect(() => {
         if (getApps().length > 0 && !window.recaptchaWidgetId) {
             console.log('init')
-            _initializeRecaptcha().finally(() => {
-                setLoading(false)
-            })
+
+            _initializeRecaptcha()
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [getApps().length])

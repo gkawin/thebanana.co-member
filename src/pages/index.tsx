@@ -9,9 +9,9 @@ import Link from 'next/link'
 
 export default function Home() {
     const products = useCourses()
-    const { lineProfile } = useUser()
+    const { lineProfile, alreadyMember } = useUser()
 
-    return (
+    return !alreadyMember ? null : (
         <section className="container mx-auto">
             <div className="py-4 grid grid-cols-[64px_1fr] gap-x-4">
                 <div>

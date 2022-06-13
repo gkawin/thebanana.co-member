@@ -2,9 +2,9 @@ import { useRecaptchaForm } from '@/concerns/use-recaptcha-form'
 import { SocialPlatform, UserStatus } from '@/constants'
 import { withModel } from '@/models/Model'
 import { UserModelV2 } from '@/models/user/user.model'
+import axios from 'axios'
 import { ConfirmationResult, getAuth, signInWithPhoneNumber, updateProfile } from 'firebase/auth'
 import { createContext, useContext, useMemo, useState } from 'react'
-import { useAxios } from './RootContext'
 
 export type SignupContextProps = {
     sentOtp: boolean
@@ -17,7 +17,6 @@ const context = createContext<SignupContextProps>(null)
 export const SignupContext: React.FC = ({ children }) => {
     const { sentOtp, resetRecaptcha } = useRecaptchaForm({ containerId: 'recaptcha-container' })
     const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult>(null)
-    const $axios = useAxios()
 
     const methods: SignupContextProps = {
         sentOtp,
@@ -57,7 +56,11 @@ export const SignupContext: React.FC = ({ children }) => {
                     nickname: '',
                 })
 
-                await $axios.post(`/api/users/${user.uid}/create`, payload)
+                const token = await user.getIdToken()
+
+                await axios.post(`/api/users/${user.uid}/create`, payload, {
+                    headers: { Authorization: `Bearer ${token}` },
+                })
 
                 resetRecaptcha()
             } catch (error) {

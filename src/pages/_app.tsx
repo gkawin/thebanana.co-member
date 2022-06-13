@@ -1,13 +1,14 @@
 import '../styles/globals.css'
 import RootContext from '@/core/RootContext'
-
 import Head from 'next/head'
-
+import App, { AppContext, AppProps } from 'next/app'
+import { createElement } from 'react'
 import ReactModal from 'react-modal'
+import LoadingContext from '@/core/LoadingContext'
 
 ReactModal.setAppElement('#__next')
 
-function MyApp({ Component, pageProps }: any) {
+export default function MyApp({ Component, pageProps }: AppProps) {
     return (
         <>
             <Head>
@@ -16,11 +17,15 @@ function MyApp({ Component, pageProps }: any) {
                 <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
                 <title>หน้าสมาชิก</title>
             </Head>
-            <RootContext>
-                <Component {...pageProps} />
-            </RootContext>
+            <LoadingContext>
+                <RootContext>{createElement(Component, pageProps)}</RootContext>
+            </LoadingContext>
         </>
     )
 }
 
-export default MyApp
+MyApp.getInitialProps = async (context: AppContext) => {
+    const pageProps = await App.getInitialProps(context)
+
+    return pageProps
+}

@@ -1,4 +1,4 @@
-import { useLoading } from '@/core/RootContext'
+import { useLoading } from '@/core/LoadingContext'
 import React from 'react'
 import Lottie, { LottieProps } from 'react-lottie'
 import { Curtain } from './Curtain'
@@ -6,9 +6,9 @@ import { Curtain } from './Curtain'
 export type SpinLoadingProps = { global: boolean } & Partial<LottieProps>
 
 export const SpinLoading: React.VFC<SpinLoadingProps> = ({ global = false, ...lottieProps }) => {
-    const { loading } = useLoading()
+    const { isLoading } = useLoading()
 
-    return !loading
+    return !isLoading
         ? null
         : React.createElement(
               global ? Curtain : 'span',
