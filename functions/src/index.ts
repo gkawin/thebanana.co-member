@@ -9,6 +9,7 @@ import path from 'path'
 import { withThaiDateFormat } from '../../src/utils/date'
 import thaiBath from '../../src/utils/thai-bath'
 import { withPricing } from '../../src/utils/payment'
+import { PaymentMethodLabel } from '../../src/constants'
 
 admin.initializeApp()
 
@@ -41,6 +42,7 @@ type ReceiptTemplateProps = {
     isShownBuyerTaxId: boolean
     studentName: string
     nickname: string
+    paymentMethodLabel: string
 }
 
 export const generateReceipt = func
@@ -86,6 +88,7 @@ export const generateReceipt = func
                 totalPricingThai: thaiBath(info?.price ?? 0),
                 nickname,
                 studentName: `${firstname} ${lastname}`,
+                paymentMethodLabel: PaymentMethodLabel.get(info?.paymentMethod),
             }),
             {
                 waitUntil: 'networkidle2',

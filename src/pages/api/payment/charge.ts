@@ -22,7 +22,7 @@ import { CourseModel } from '@/models/course/course.model'
 @injectable()
 class PaymentChargeApi {
     #course: FirebaseFirestore.CollectionReference<CourseModel>
-    constructor(private omise: OmiseService, private sdk: AdminSDK) {
+    constructor(private readonly omise: OmiseService, private readonly sdk: AdminSDK) {
         this.#course = this.sdk.db.collection('courses').withConverter(Model.convert(CourseModel))
     }
 

@@ -1,8 +1,7 @@
-import 'reflect-metadata'
 import omise from 'omise'
-import { singleton } from 'tsyringe'
+import { injectable } from 'tsyringe'
 
-@singleton()
+@injectable()
 export class OmiseService {
     static _instance: OmiseService
 
