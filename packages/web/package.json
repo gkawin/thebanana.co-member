@@ -1,18 +1,12 @@
 {
-    "name": "thebanana-members",
+    "name": "thebanana-members-website",
     "version": "0.1.0",
     "private": true,
-    "workspaces": {
-        "packages": [
-            "packages/*"
-        ],
-        "nohoist": [
-            "**/firebase-monorepo-core"
-        ]
-    },
     "scripts": {
-        "dev:web": "yarn workspace thebanana-members-website dev",
-        "dev:functions": "yarn workspace thebanana-members-website serve"
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint"
     },
     "dependencies": {
         "@fortawesome/fontawesome-svg-core": "^6.1.1",

@@ -1,0 +1,38 @@
+import { PaymentStep } from 'packages/web/src/constants'
+import { usePaymentContext } from 'packages/web/src/core/PaymentContext'
+import { CourseModel } from 'packages/web/src/models/course/course.model'
+import type { CheckoutFormField } from 'packages/web/src/pages/purchase/[slug]'
+import { withPricing } from 'packages/web/src/utils/payment'
+import { useFormContext } from 'react-hook-form'
+
+export type PaymentChargesButtonProps = { product: CourseModel }
+
+export const PaymentChargesButton: React.VFC<PaymentChargesButtonProps> = ({ product }) => {
+    const { step, setPaymentStep, createOmiseCharges } = usePaymentContext()
+    const { handleSubmit } = useFormContext<CheckoutFormField>()
+
+    const onClick = async (data: CheckoutFormField) => {
+        if (step === PaymentStep.INIT) {
+            setPaymentStep(PaymentStep.SELECT_PAYMENT_METHOD)
+        } else {
+            createOmiseCharges(data, data.paymentMethod)
+        }
+    }
+
+    return (
+        <>
+            <button className="bg-indigo-700 rounded p-2 text-white" type="button" onClick={handleSubmit(onClick)}>
+                {step === PaymentStep.INIT && 'เลือกวิธีการชำระ'}
+                {step === PaymentStep.SELECT_PAYMENT_METHOD && `ชำระ ${withPricing(product.price)}`}
+            </button>
+            {step !== PaymentStep.INIT && (
+                <button
+                    className="bg-transparent rounded p-2  block w-full text-indigo-500"
+                    onClick={() => setPaymentStep(PaymentStep.INIT)}
+                >
+                    {`< ย้อนกลับ`}
+                </button>
+            )}
+        </>
+    )
+}
