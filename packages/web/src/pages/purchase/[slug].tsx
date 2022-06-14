@@ -1,19 +1,21 @@
 import { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
-import adminSDK from 'packages/web/src/libs/adminSDK'
-import Model from 'packages/web/src/models/Model'
+
 import { serialize } from 'typescript-json-serializer'
 import { FormProvider, useForm } from 'react-hook-form'
 import Link from 'next/link'
-import { BookingStatus, DatasetType, PaymentMethod } from 'packages/web/src/constants'
-import { CheckoutSummary } from 'packages/web/src/components/checkout-flow/CheckoutSummary'
-import { PaymentProvider } from 'packages/web/src/core/PaymentContext'
-import { SelectPaymentMethod } from 'packages/web/src/components/checkout-flow/SelectPaymentMethod'
-import { PaymentChargesButton } from 'packages/web/src/components/checkout/PaymentChargesButton'
+
 import { useEffect } from 'react'
-import { useUser } from 'packages/web/src/core/RootContext'
-import { PaymentStatusModal } from 'packages/web/src/components/checkout/PaymentStatusModal'
-import { CourseModel } from 'packages/web/src/models/course/course.model'
+import { CourseModel } from '@thebanana-members/core/lib/models'
+import { BookingStatus, DatasetType, PaymentMethod } from '@/constants'
+import { useUser } from '@/core/RootContext'
+import { PaymentProvider } from '@/core/PaymentContext'
+import { PaymentStatusModal } from '@/components/checkout/PaymentStatusModal'
+import { CheckoutSummary } from '@/components/checkout-flow/CheckoutSummary'
+import { SelectPaymentMethod } from '@/components/checkout-flow/SelectPaymentMethod'
+import { PaymentChargesButton } from '@/components/checkout/PaymentChargesButton'
+import adminSDK from '@/libs/adminSDK'
+import Model from '@thebanana-members/core/lib/models/Model'
 
 export type CheckoutPageProps = {
     product: CourseModel

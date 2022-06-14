@@ -1,9 +1,9 @@
 import axios from 'axios'
 import { NextApiRequest, NextApiResponse } from 'next'
 
-import runsWithMethods from 'packages/web/src/middleware/runsWithMethods'
 import { ok } from 'assert'
 import { notFound } from '@hapi/boom'
+import runsWithMethods from '@/middleware/runsWithMethods'
 
 export type LongdoMapSearch = {
     id: string

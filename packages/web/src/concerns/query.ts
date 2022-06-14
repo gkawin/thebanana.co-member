@@ -1,10 +1,14 @@
-import { BookingModel } from 'packages/web/src/models/BookingModel'
-import { CourseModel } from 'packages/web/src/models/course/course.model'
-import { SubjectModel } from 'packages/web/src/models/course/subject.model'
-import Model, { ClassInstance } from 'packages/web/src/models/Model'
-import { UserModelV2 } from 'packages/web/src/models/user/user.model'
-import { UserAddressModel } from 'packages/web/src/models/UserAddressModel'
-import { UserSchoolModel } from 'packages/web/src/models/UserSchoolModel'
+import {
+    CourseModel,
+    UserModelV2,
+    ClassInstance,
+    SubjectModel,
+    UserAddressModel,
+    UserSchoolModel,
+    BookingModel,
+} from '@thebanana-members/core/lib/models'
+
+import Model from '@thebanana-members/core/lib/models/Model'
 import { collection, doc, Firestore, query } from 'firebase/firestore'
 
 const queryCollection =

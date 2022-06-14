@@ -1,14 +1,16 @@
 import 'reflect-metadata'
-import runsWithMethods from 'packages/web/src/middleware/runsWithMethods'
-import { AdminSDK } from 'packages/web/src/libs/adminSDK'
-import { injectable } from 'tsyringe'
-import runWithAuthorization from 'packages/web/src/middleware/runWithAuthorization'
+
 import { NextApiHandler } from 'next'
 import { badRequest, Boom, notFound } from '@hapi/boom'
-import resolver from 'packages/web/src/services/resolver'
-import { UserModelV2 } from 'packages/web/src/models/user/user.model'
-import Model from 'packages/web/src/models/Model'
+
 import { ok } from 'assert'
+import { injectable } from 'tsyringe'
+import { UserModelV2 } from '@thebanana-members/core/lib/models'
+import { AdminSDK } from '@/libs/adminSDK'
+import Model from '@thebanana-members/core/lib/models/Model'
+import runWithAuthorization from '@/middleware/runWithAuthorization'
+import runsWithMethods from '@/middleware/runsWithMethods'
+import resolver from '@/services/resolver'
 
 @injectable()
 class UserCreatedApi {

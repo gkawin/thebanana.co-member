@@ -7,11 +7,11 @@ import { getAuth, signInWithCustomToken } from 'firebase/auth'
 import { logEvent, getAnalytics } from 'firebase/analytics'
 import Script from 'next/script'
 import { useRouter } from 'next/router'
-import { UserModelV2 } from 'packages/web/src/models/user/user.model'
-import { addrCollection, schoolCollection, userDoc } from 'packages/web/src/concerns/query'
-import { UserAddressModel } from 'packages/web/src/models/UserAddressModel'
+
 import { Liff } from '@liff/liff-types'
 import { useLoading } from './LoadingContext'
+import { addrCollection, schoolCollection, userDoc } from '@/concerns/query'
+import { UserAddressModel, UserModelV2 } from '@thebanana-members/core/lib/models'
 
 const liffId = '1653826193-QbmamAo0'
 const firebaseConfig = {
@@ -132,8 +132,7 @@ const RootContext: React.FC = ({ children }) => {
                 const schools = (await getDocs(schoolCollection(db, user.uid))).docs.map((doc) => doc.data())
                 const lineProfile = await window.liff.getProfile()
 
-                setContext((state) => ({
-                    ...state,
+                setContext({
                     $axios: axiosInstance,
                     alreadyMember: true,
                     $userInfo: {
@@ -143,7 +142,9 @@ const RootContext: React.FC = ({ children }) => {
                         uid: user.uid,
                         lineProfile,
                     },
-                }))
+                    authenticationCode: null,
+                    initilized: true,
+                })
             }
         })
         return () => {

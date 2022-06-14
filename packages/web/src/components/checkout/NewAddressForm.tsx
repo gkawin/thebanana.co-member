@@ -1,4 +1,4 @@
-import { useAxios, useUser } from 'packages/web/src/core/RootContext'
+import { useAxios, useUser } from '@/core/RootContext'
 import { addDoc, collection, getFirestore } from 'firebase/firestore'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'

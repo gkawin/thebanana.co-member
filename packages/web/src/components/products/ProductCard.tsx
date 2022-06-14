@@ -1,4 +1,4 @@
-import { CourseModel } from 'packages/web/src/models/course/course.model'
+import { CourseModel } from '@thebanana-members/core/lib/models'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ProductCoverImage } from './ProductCoverImage'

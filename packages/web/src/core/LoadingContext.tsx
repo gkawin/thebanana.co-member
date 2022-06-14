@@ -1,4 +1,4 @@
-import { SpinLoading } from 'packages/web/src/components/portal/SpinLoading'
+import { SpinLoading } from '@/components/portal/SpinLoading'
 import { createContext, useContext, useState } from 'react'
 
 const loadingContext = createContext<{ isLoading: boolean; loaded: VoidFunction; loading: VoidFunction }>(null)

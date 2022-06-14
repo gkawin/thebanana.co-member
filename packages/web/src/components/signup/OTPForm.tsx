@@ -1,4 +1,4 @@
-import { useSignUp } from 'packages/web/src/core/SignupContext'
+import { useSignUp } from '@/core/SignupContext'
 import { useRouter } from 'next/router'
 import { SubmitHandler, useForm } from 'react-hook-form'
 

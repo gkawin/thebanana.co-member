@@ -1,8 +1,8 @@
-import runsWithMethods from 'packages/web/src/middleware/runsWithMethods'
 import { NextApiRequest, NextApiResponse } from 'next'
 import axios from 'axios'
 import { notFound } from '@hapi/boom'
 import { ok } from 'assert'
+import runsWithMethods from '@/middleware/runsWithMethods'
 
 export type LongdoMapSearchAddress = {
     address: {

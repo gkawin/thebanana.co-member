@@ -1,11 +1,11 @@
-import { PaymentMethod, PaymentMethodLabel, PaymentStep } from 'packages/web/src/constants'
-import { usePaymentContext } from 'packages/web/src/core/PaymentContext'
 import Image from 'next/image'
 import { useFormContext } from 'react-hook-form'
 import JCBImage from '@/public/jcb.png'
 import MasterCardImage from '@/public/mastercard.png'
 import VisaImage from '@/public/visa.png'
 import PromtPayLogo from '@/public/promt-pay-logo.png'
+import { usePaymentContext } from '@/core/PaymentContext'
+import { PaymentMethod, PaymentMethodLabel, PaymentStep } from '@/constants'
 
 export const SelectPaymentMethod: React.VFC = () => {
     const {

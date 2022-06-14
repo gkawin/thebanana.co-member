@@ -2,7 +2,7 @@ import { getDocs, getFirestore, query, where } from 'firebase/firestore'
 import dayjs from 'dayjs'
 import { useEffect, useMemo, useState } from 'react'
 import { courseCollection } from './query'
-import { CourseModel } from 'packages/web/src/models/course/course.model'
+import { CourseModel } from '@thebanana-members/core/lib/models'
 
 export default function useCourses() {
     const [productsList, setProductsList] = useState<CourseModel[]>([])

@@ -1,21 +1,23 @@
 import 'reflect-metadata'
-import { BookingStatus, FailureCode, PaymentMethod, SourceOfFund } from 'packages/web/src/constants'
-import { AdminSDK } from 'packages/web/src/libs/adminSDK'
-import runsWithMethods from 'packages/web/src/middleware/runsWithMethods'
-import runWithAuthorization from 'packages/web/src/middleware/runWithAuthorization'
-import { BookingModel } from 'packages/web/src/models/BookingModel'
-import Model from 'packages/web/src/models/Model'
-import { PaymentEventBodyModel } from 'packages/web/src/models/payment/PaymentEventBody.model'
-import { PaymentMetadataModel } from 'packages/web/src/models/payment/PaymentMetadata.model'
 
-import { UserAddressModel } from 'packages/web/src/models/UserAddressModel'
-import { UserModel } from 'packages/web/src/models/UserModel'
-import resolver from 'packages/web/src/services/resolver'
 import { badRequest, Boom } from '@hapi/boom'
 import { NextApiHandler } from 'next'
 import { injectable } from 'tsyringe'
 import { deserialize } from 'typescript-json-serializer'
-import { CourseModel } from 'packages/web/src/models/course/course.model'
+import {
+    BookingModel,
+    CourseModel,
+    PaymentEventBodyModel,
+    PaymentMetadataModel,
+    UserAddressModel,
+    UserModel,
+} from '@thebanana-members/core/lib/models'
+import { AdminSDK } from '@/libs/adminSDK'
+import Model from '@thebanana-members/core/lib/models/Model'
+import runWithAuthorization from '@/middleware/runWithAuthorization'
+import runsWithMethods from '@/middleware/runsWithMethods'
+import { BookingStatus, FailureCode, PaymentMethod, SourceOfFund } from '@/constants'
+import resolver from '@/services/resolver'
 
 @injectable()
 class HookPaymentBooking {

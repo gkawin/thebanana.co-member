@@ -1,9 +1,10 @@
 import 'reflect-metadata'
 import { NextApiHandler } from 'next'
-import resolver from 'packages/web/src/services/resolver'
+
 import { injectable } from 'tsyringe'
-import runsWithMethods from 'packages/web/src/middleware/runsWithMethods'
-import { OmiseService } from 'packages/web/src/services/omise.service'
+import { OmiseService } from '@/services/omise.service'
+import runsWithMethods from '@/middleware/runsWithMethods'
+import resolver from '@/services/resolver'
 
 @injectable()
 class PaymentHandler {

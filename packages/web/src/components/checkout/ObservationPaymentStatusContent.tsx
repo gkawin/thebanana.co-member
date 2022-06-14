@@ -1,5 +1,5 @@
-import useMyBooking, { BookingInfo } from 'packages/web/src/concerns/use-my-booking'
-import { BookingGroup, PaymentMethod } from 'packages/web/src/constants'
+import useMyBooking, { BookingInfo } from '@/concerns/use-my-booking'
+import { BookingGroup, PaymentMethod } from '@/constants'
 import Image from 'next/image'
 
 export type ObservationPaymentStatusContentProps = {

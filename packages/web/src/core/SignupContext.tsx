@@ -1,10 +1,9 @@
-import { useRecaptchaForm } from 'packages/web/src/concerns/use-recaptcha-form'
-import { SocialPlatform, UserStatus } from 'packages/web/src/constants'
-import { withModel } from 'packages/web/src/models/Model'
-import { UserModelV2 } from 'packages/web/src/models/user/user.model'
 import axios from 'axios'
 import { ConfirmationResult, getAuth, signInWithPhoneNumber, updateProfile } from 'firebase/auth'
 import { createContext, useContext, useMemo, useState } from 'react'
+import { useRecaptchaForm } from '@/concerns/use-recaptcha-form'
+import { withModel, UserModelV2 } from '@thebanana-members/core/lib/models'
+import { SocialPlatform, UserStatus } from '@/constants'
 
 export type SignupContextProps = {
     sentOtp: boolean

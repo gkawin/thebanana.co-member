@@ -4,12 +4,6 @@ import { DocumentReference as ClientDocRef } from 'firebase/firestore'
 import { DocumentReference } from 'firebase-admin/firestore'
 import { withDocumentReferenceToPath, withISOToServerTimestamp, withTimeToDate } from '../utils/firestore'
 
-export class CourseModel {
-    name: string
-    seats: number
-    semaster: string
-}
-
 @Serializable()
 export class ProductModel {
     @JsonProperty()
@@ -22,7 +16,16 @@ export class ProductModel {
     name: string
 
     @JsonProperty({ afterSerialize: withDocumentReferenceToPath })
-    courses: DocumentReference<CourseModel>[] & ClientDocRef<CourseModel>[]
+    courses: DocumentReference<{
+        name: string
+        seats: number
+        semaster: string
+    }>[] &
+        ClientDocRef<{
+            name: string
+            seats: number
+            semaster: string
+        }>[]
 
     @JsonProperty()
     description: string

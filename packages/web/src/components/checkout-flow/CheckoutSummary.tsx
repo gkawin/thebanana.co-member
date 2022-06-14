@@ -1,9 +1,9 @@
-import { AddressListCard } from 'packages/web/src/components/checkout/AddressListCard'
-import { BookingInfoCard } from 'packages/web/src/components/checkout/BookingInfoCard'
-import { RegistrationSummary } from 'packages/web/src/components/checkout/RegistrationSummary'
-import { usePaymentContext } from 'packages/web/src/core/PaymentContext'
-import { PaymentStep } from 'packages/web/src/constants'
-import { CourseModel } from 'packages/web/src/models/course/course.model'
+import { PaymentStep } from '@/constants'
+import { usePaymentContext } from '@/core/PaymentContext'
+import { CourseModel } from '@thebanana-members/core/lib/models'
+import { AddressListCard } from '../checkout/AddressListCard'
+import { BookingInfoCard } from '../checkout/BookingInfoCard'
+import { RegistrationSummary } from '../checkout/RegistrationSummary'
 
 export type CheckoutSummaryProps = { product: CourseModel }
 

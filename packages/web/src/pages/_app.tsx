@@ -1,10 +1,11 @@
 import '../styles/globals.css'
-import RootContext from 'packages/web/src/core/RootContext'
+
 import Head from 'next/head'
 import App, { AppContext, AppProps } from 'next/app'
 import { createElement } from 'react'
 import ReactModal from 'react-modal'
-import LoadingContext from 'packages/web/src/core/LoadingContext'
+import LoadingContext from '@/core/LoadingContext'
+import RootContext from '@/core/RootContext'
 
 ReactModal.setAppElement('#__next')
 

@@ -1,4 +1,4 @@
-import { useLoading } from 'packages/web/src/core/LoadingContext'
+import { useLoading } from '@/core/LoadingContext'
 import React from 'react'
 import Lottie, { LottieProps } from 'react-lottie'
 import { Curtain } from './Curtain'

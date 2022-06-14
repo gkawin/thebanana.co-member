@@ -1,14 +1,14 @@
-import runsWithMethods from 'packages/web/src/middleware/runsWithMethods'
 import { badRequest, Boom } from '@hapi/boom'
 import { NextApiHandler } from 'next'
 import { ok } from 'assert'
-import { AdminSDK } from 'packages/web/src/libs/adminSDK'
-import { injectable } from 'tsyringe'
-import resolver from 'packages/web/src/services/resolver'
-import runWithAuthorization from 'packages/web/src/middleware/runWithAuthorization'
 
-import Model from 'packages/web/src/models/Model'
-import { UserModelV2 } from 'packages/web/src/models/user/user.model'
+import { injectable } from 'tsyringe'
+import { UserModelV2 } from '@thebanana-members/core/lib/models'
+import { AdminSDK } from '@/libs/adminSDK'
+import Model from '@thebanana-members/core/lib/models/Model'
+import runWithAuthorization from '@/middleware/runWithAuthorization'
+import runsWithMethods from '@/middleware/runsWithMethods'
+import resolver from '@/services/resolver'
 
 @injectable()
 class TokenApi {

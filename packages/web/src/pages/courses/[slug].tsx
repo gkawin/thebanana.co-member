@@ -1,12 +1,13 @@
-import { ProductDescription } from 'packages/web/src/components/products/ProductDescription'
-import { ProductCoverImage } from 'packages/web/src/components/products/ProductCoverImage'
 import { GetServerSideProps, NextPage } from 'next'
 import React from 'react'
-import adminSDK from 'packages/web/src/libs/adminSDK'
-import Model from 'packages/web/src/models/Model'
+
 import { serialize } from 'typescript-json-serializer'
 import Link from 'next/link'
-import { CourseModel } from 'packages/web/src/models/course/course.model'
+import { CourseModel } from '@thebanana-members/core/lib/models'
+import { ProductCoverImage } from '@/components/products/ProductCoverImage'
+import { ProductDescription } from '@/components/products/ProductDescription'
+import adminSDK from '@/libs/adminSDK'
+import Model from '@thebanana-members/core/lib/models/Model'
 
 export type CourseInfoProps = { slug: string; product: CourseModel }
 

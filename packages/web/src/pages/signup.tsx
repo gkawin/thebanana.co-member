@@ -1,7 +1,6 @@
-import { MobilePhoneForm } from 'packages/web/src/components/signup/MobilePhoneForm'
-import { OTPForm } from 'packages/web/src/components/signup/OTPForm'
-import { SignupContext } from 'packages/web/src/core/SignupContext'
-
+import { MobilePhoneForm } from '@/components/signup/MobilePhoneForm'
+import { OTPForm } from '@/components/signup/OTPForm'
+import { SignupContext } from '@/core/SignupContext'
 import { NextPage } from 'next'
 
 export type SignInPageForm = {

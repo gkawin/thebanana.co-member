@@ -1,4 +1,4 @@
-import { useUser } from 'packages/web/src/core/RootContext'
+import { useUser } from '@/core/RootContext'
 
 export const UserCard: React.VFC = () => {
     const { lineProfile } = useUser()

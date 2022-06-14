@@ -1,4 +1,4 @@
-import { BookingGroup } from 'packages/web/src/constants'
+import { BookingGroup } from '@/constants'
 
 export type BookingFilterPanelProps = { setBookingGroup: (group: BookingGroup) => void; bookingGroup: BookingGroup }
 

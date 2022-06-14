@@ -1,4 +1,4 @@
-import { withPricing } from 'packages/web/src/utils/payment'
+import { withPricing } from '@thebanana-members/core/lib/utils'
 
 export type RegistrationSummaryProps = { name: string; price: number }
 
