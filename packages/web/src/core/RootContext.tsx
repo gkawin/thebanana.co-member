@@ -7,11 +7,11 @@ import { getAuth, signInWithCustomToken } from 'firebase/auth'
 import { logEvent, getAnalytics } from 'firebase/analytics'
 import Script from 'next/script'
 import { useRouter } from 'next/router'
-
+import { UserModelV2 } from 'packages/web/src/models/user/user.model'
 import { addrCollection, schoolCollection, userDoc } from 'packages/web/src/concerns/query'
 import { UserAddressModel } from 'packages/web/src/models/UserAddressModel'
+import { Liff } from '@liff/liff-types'
 import { useLoading } from './LoadingContext'
-import { UserModelV2 } from '@/models/user/user.model'
 
 const liffId = '1653826193-QbmamAo0'
 const firebaseConfig = {
@@ -31,7 +31,7 @@ export type AppContext = {
         schools: any[]
         personal: UserModelV2
         uid: string
-        lineProfile: any
+        lineProfile: Unpromise<ReturnType<Liff['getProfile']>>
     }
     initilized: boolean
 } & AuthenticationResponse

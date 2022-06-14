@@ -1,17 +1,9 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "module": "CommonJS",
-        "noImplicitReturns": true,
-        "noUnusedLocals": false,
+        "module": "commonjs",
         "outDir": "lib",
-        "sourceMap": true,
-        "strict": true,
         "target": "ES6",
-        "esModuleInterop": true,
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "resolveJsonModule": true,
         "declaration": true
     },
     "compileOnSave": true,

@@ -7,40 +7,26 @@
             "packages/*"
         ],
         "nohoist": [
-            "**/firebase-monorepo-core"
+            "**/@thebanana-members/core"
         ]
     },
     "scripts": {
-        "dev:web": "yarn workspace thebanana-members-website dev",
-        "dev:functions": "yarn workspace thebanana-members-website serve"
-    },
-    "dependencies": {
-        "@fortawesome/fontawesome-svg-core": "^6.1.1",
-        "@fortawesome/free-brands-svg-icons": "^6.1.1",
-        "@fortawesome/free-regular-svg-icons": "^6.1.1",
-        "@fortawesome/free-solid-svg-icons": "^6.1.1",
-        "@fortawesome/react-fontawesome": "^0.1.18",
-        "@google-cloud/pubsub": "^2.19.4",
-        "@hapi/boom": "^9.1.4",
-        "@tailwindcss/forms": "^0.5.0",
-        "ajv": "^8.9.0",
-        "axios": "^0.26.1",
-        "class-validator": "^0.13.2",
-        "dayjs": "^1.10.7",
-        "firebase": "^9.6.1",
-        "firebase-admin": "^10.0.0",
-        "firebase-functions": "^3.16.0",
-        "next": "^12.0.7",
-        "omise": "^0.8.5",
-        "react": "^18.0.0",
-        "react-dom": "^18.0.0",
-        "react-hook-form": "^7.21.2",
-        "react-imask": "^6.4.2",
-        "react-lottie": "^1.2.3",
-        "react-modal": "^3.14.4",
-        "reflect-metadata": "^0.1.13",
-        "tsyringe": "^4.6.0",
-        "typescript-json-serializer": "^3.4.5"
+        "workspace:build:core": "yarn workspace @thebanana-members/core build",
+        "workspace:pack:core": "yarn workspace @thebanana-members/core pack",
+        "workspace:build:functions": "yarn workspace firebase-monorepo-functions build",
+        "workspace:build:web": "yarn workspace firebase-monorepo-web build",
+        "workspace:start:core": "yarn workspace @thebanana-members/core start",
+        "workspace:start:functions": "yarn workspace firebase-monorepo-functions start",
+        "workspace:start:web": "yarn workspace firebase-monorepo-web start",
+        "build:core": "yarn workspace:build:core",
+        "pack:core": "yarn workspace:pack:core",
+        "build:functions": "run-s workspace:build:core workspace:build:functions",
+        "build:web": "run-s workspace:build:core workspace:build:web",
+        "start:core": "yarn workspace:build:core",
+        "start:functions": "run-s workspace:build:core workspace:start:functions",
+        "start:web": "run-s workspace:build:core workspace:start:web",
+        "deploy:functions": "firebase deploy --only functions",
+        "deploy:web": "firebase deploy --only hosting"
     },
     "devDependencies": {
         "@babel/core": "^7.16.0",
@@ -66,13 +52,6 @@
         "prettier": "^2.5.1",
         "tailwindcss": "^3.0.23",
         "tslib": "^2.3.1",
-        "typescript": "^4.5.3"
-    },
-    "browserslist": [
-        ">0.3%",
-        "not ie 11",
-        "not dead",
-        "not op_mini all"
-    ],
-    "packageManager": "yarn@3.1.1"
+        "typescript": "^4.7.3"
+    }
 }

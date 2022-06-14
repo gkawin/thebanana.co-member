@@ -1,20 +1,19 @@
 {
-    "compileOnSave": true,
     "compilerOptions": {
         "esModuleInterop": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
+        "allowSyntheticDefaultImports": true,
         "incremental": true,
-        "noEmit": true,
         "skipLibCheck": true,
-        "noUnusedLocals": true,
         "strict": false,
         "noImplicitAny": true,
         "noImplicitReturns": true,
-        "forceConsistentCasingInFileNames": true,
+        "noUnusedLocals": true,
         "resolveJsonModule": true,
-        "isolatedModules": true,
-        "skipDefaultLibCheck": true
+        "forceConsistentCasingInFileNames": true,
+        "noEmit": false,
+        "noEmitHelpers": true
     },
     "exclude": ["node_modules"]
 }
