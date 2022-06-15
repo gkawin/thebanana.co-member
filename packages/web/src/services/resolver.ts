@@ -2,7 +2,7 @@ import 'reflect-metadata'
 import { container, instanceCachingFactory } from 'tsyringe'
 import { OmiseService } from './omise.service'
 import { InMemoryCache } from './in-memory-cache'
-import { AdminSDK } from 'packages/web/src/libs/adminSDK'
+import { AdminSDK } from '@/libs/adminSDK'
 
 const resolver = container
     .registerSingleton(OmiseService)

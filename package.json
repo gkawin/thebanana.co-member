@@ -12,7 +12,12 @@
     },
     "scripts": {
         "build:core": "yarn workspace @thebanana/core build",
-        "dev": "concurrently -k \"yarn:build:*\""
+        "build:web": "yarn workspace web build",
+        "dev:web": "yarn workspace web dev",
+        "start:web": "yarn workspace web start",
+        "dev": "yarn build:core && yarn dev:web",
+        "build": "yarn build:core && yarn build:web",
+        "start": "yarn start:web"
     },
     "devDependencies": {
         "@babel/core": "^7.16.0",

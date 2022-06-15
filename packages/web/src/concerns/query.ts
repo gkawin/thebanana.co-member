@@ -1,14 +1,13 @@
 import {
+    BookingModel,
     CourseModel,
-    UserModelV2,
-    ClassInstance,
     SubjectModel,
     UserAddressModel,
+    UserModelV2,
     UserSchoolModel,
-    BookingModel,
 } from '@thebanana/core/lib/models'
+import Model, { ClassInstance } from '@thebanana/core/lib/models/Model'
 
-import Model from '@thebanana/core/lib/models/Model'
 import { collection, doc, Firestore, query } from 'firebase/firestore'
 
 const queryCollection =
