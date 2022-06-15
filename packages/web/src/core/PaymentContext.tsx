@@ -1,6 +1,6 @@
 import { PaymentMethod, PaymentStep } from '@/constants'
 import { CheckoutFormField } from '@/pages/purchase/[slug]'
-import { ChargeResultModel } from '@thebanana-members/core/lib/models'
+import { ChargeResultModel } from '@thebanana/core/lib/models'
 import Script from 'next/script'
 import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import { useAxios } from './RootContext'

@@ -3,11 +3,11 @@ import React from 'react'
 
 import { serialize } from 'typescript-json-serializer'
 import Link from 'next/link'
-import { CourseModel } from '@thebanana-members/core/lib/models'
+import { CourseModel } from '@thebanana/core/lib/models'
 import { ProductCoverImage } from '@/components/products/ProductCoverImage'
 import { ProductDescription } from '@/components/products/ProductDescription'
 import adminSDK from '@/libs/adminSDK'
-import Model from '@thebanana-members/core/lib/models/Model'
+import Model from '@thebanana/core/lib/models/Model'
 
 export type CourseInfoProps = { slug: string; product: CourseModel }
 

@@ -1,8 +1,8 @@
 import { BookingGroup, BookingStatus, FailureCode, PaymentMethod } from '@/constants'
 import { useUser } from '@/core/RootContext'
-import { BookingModel, CourseModel, ReceiptModel, UserAddressModel } from '@thebanana-members/core/lib/models'
-import Model from '@thebanana-members/core/lib/models/Model'
-import { withPricing } from '@thebanana-members/core/lib/utils'
+import { BookingModel, CourseModel, ReceiptModel, UserAddressModel } from '@thebanana/core/lib/models'
+import Model from '@thebanana/core/lib/models/Model'
+import { withPricing } from '@thebanana/core/lib/utils'
 import {
     doc,
     DocumentReference,

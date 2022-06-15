@@ -1,6 +1,6 @@
 import { addrCollection } from '@/concerns/query'
 import { useUser } from '@/core/RootContext'
-import { UserAddressModel } from '@thebanana-members/core/lib/models'
+import { UserAddressModel } from '@thebanana/core/lib/models'
 import { getFirestore, onSnapshot } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { useFormContext } from 'react-hook-form'

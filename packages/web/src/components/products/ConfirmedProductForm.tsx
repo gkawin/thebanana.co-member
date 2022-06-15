@@ -1,7 +1,7 @@
 import React from 'react'
 import { useRouter } from 'next/dist/client/router'
 import { useAxios, useUser } from '@/core/RootContext'
-import { ProductModel } from '@thebanana-members/core/lib/models'
+import { ProductModel } from '@thebanana/core/lib/models'
 
 export type ConfirmedProductFormProps = {
     productInfo: ProductModel

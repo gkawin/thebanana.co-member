@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react'
 import { useUser } from '@/core/RootContext'
 import useMyBooking from '@/concerns/use-my-booking'
 import { BookingStatus, PaymentMethod, PaymentMethodLabel } from '@/constants'
-import { withThaiDateFormat } from '@thebanana-members/core/lib/utils'
+import { withThaiDateFormat } from '@thebanana/core/lib/utils'
 
 export type MyEditBookingProps = {
     bookingCode: string

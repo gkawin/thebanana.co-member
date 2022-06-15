@@ -6,9 +6,9 @@ import {
     UserAddressModel,
     UserSchoolModel,
     BookingModel,
-} from '@thebanana-members/core/lib/models'
+} from '@thebanana/core/lib/models'
 
-import Model from '@thebanana-members/core/lib/models/Model'
+import Model from '@thebanana/core/lib/models/Model'
 import { collection, doc, Firestore, query } from 'firebase/firestore'
 
 const queryCollection =

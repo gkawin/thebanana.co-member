@@ -1,6 +1,6 @@
 import { BookingFilterPanel } from '@/components/my-booking/BookingFilterPanel'
 import useMyBooking from '@/concerns/use-my-booking'
-import { withThaiDateFormat } from '@thebanana-members/core/lib/utils'
+import { withThaiDateFormat } from '@thebanana/core/lib/utils'
 import { NextPage } from 'next'
 import Link from 'next/link'
 

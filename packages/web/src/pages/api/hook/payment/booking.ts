@@ -11,9 +11,9 @@ import {
     PaymentMetadataModel,
     UserAddressModel,
     UserModel,
-} from '@thebanana-members/core/lib/models'
+} from '@thebanana/core/lib/models'
 import { AdminSDK } from '@/libs/adminSDK'
-import Model from '@thebanana-members/core/lib/models/Model'
+import Model from '@thebanana/core/lib/models/Model'
 import runWithAuthorization from '@/middleware/runWithAuthorization'
 import runsWithMethods from '@/middleware/runsWithMethods'
 import { BookingStatus, FailureCode, PaymentMethod, SourceOfFund } from '@/constants'

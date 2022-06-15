@@ -6,7 +6,7 @@ import { FormProvider, useForm } from 'react-hook-form'
 import Link from 'next/link'
 
 import { useEffect } from 'react'
-import { CourseModel } from '@thebanana-members/core/lib/models'
+import { CourseModel } from '@thebanana/core/lib/models'
 import { BookingStatus, DatasetType, PaymentMethod } from '@/constants'
 import { useUser } from '@/core/RootContext'
 import { PaymentProvider } from '@/core/PaymentContext'
@@ -15,7 +15,7 @@ import { CheckoutSummary } from '@/components/checkout-flow/CheckoutSummary'
 import { SelectPaymentMethod } from '@/components/checkout-flow/SelectPaymentMethod'
 import { PaymentChargesButton } from '@/components/checkout/PaymentChargesButton'
 import adminSDK from '@/libs/adminSDK'
-import Model from '@thebanana-members/core/lib/models/Model'
+import Model from '@thebanana/core/lib/models/Model'
 
 export type CheckoutPageProps = {
     product: CourseModel

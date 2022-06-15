@@ -6,7 +6,7 @@ import { injectable } from 'tsyringe'
 import type { DocumentReference, CollectionReference, Firestore } from 'firebase-admin/firestore'
 import adminSDK from '@/libs/adminSDK'
 import runsWithMethods from '@/middleware/runsWithMethods'
-import { mobileThaiNumberToRegulary } from '@thebanana-members/core/lib/utils'
+import { mobileThaiNumberToRegulary } from '@thebanana/core/lib/utils'
 import resolver from '@/services/resolver'
 
 @injectable()

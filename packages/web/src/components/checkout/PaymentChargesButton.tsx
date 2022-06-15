@@ -1,8 +1,8 @@
 import { PaymentStep } from '@/constants'
 import { usePaymentContext } from '@/core/PaymentContext'
 import { CheckoutFormField } from '@/pages/purchase/[slug]'
-import { CourseModel } from '@thebanana-members/core/lib/models'
-import { withPricing } from '@thebanana-members/core/lib/utils'
+import { CourseModel } from '@thebanana/core/lib/models'
+import { withPricing } from '@thebanana/core/lib/utils'
 import { useFormContext } from 'react-hook-form'
 
 export type PaymentChargesButtonProps = { product: CourseModel }

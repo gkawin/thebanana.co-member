@@ -11,7 +11,7 @@ import { useRouter } from 'next/router'
 import { Liff } from '@liff/liff-types'
 import { useLoading } from './LoadingContext'
 import { addrCollection, schoolCollection, userDoc } from '@/concerns/query'
-import { UserAddressModel, UserModelV2 } from '@thebanana-members/core/lib/models'
+import { UserAddressModel, UserModelV2 } from '@thebanana/core/lib/models'
 
 const liffId = '1653826193-QbmamAo0'
 const firebaseConfig = {

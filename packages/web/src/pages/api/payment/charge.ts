@@ -14,10 +14,10 @@ import {
     PaymentChargeBodyModel,
     PaymentMetadataModel,
     PaymentOmiseDataModel,
-} from '@thebanana-members/core/lib/models'
+} from '@thebanana/core/lib/models'
 import { AdminSDK } from '@/libs/adminSDK'
 import { OmiseService } from '@/services/omise.service'
-import Model, { withModel } from '@thebanana-members/core/lib/models/Model'
+import Model, { withModel } from '@thebanana/core/lib/models/Model'
 import runWithAuthorization from '@/middleware/runWithAuthorization'
 import runsWithMethods from '@/middleware/runsWithMethods'
 import { FailureCode, FailureMessage, PaymentMethod } from '@/constants'

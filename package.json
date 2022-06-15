@@ -7,26 +7,12 @@
             "packages/*"
         ],
         "nohoist": [
-            "**/@thebanana-members/core"
+            "**/@thebanana/core"
         ]
     },
     "scripts": {
-        "workspace:build:core": "yarn workspace @thebanana-members/core build",
-        "workspace:pack:core": "yarn workspace @thebanana-members/core pack",
-        "workspace:build:functions": "yarn workspace functions build",
-        "workspace:build:web": "yarn workspace web build",
-        "workspace:start:core": "yarn workspace @thebanana-members/core start",
-        "workspace:start:functions": "yarn workspace functions start",
-        "workspace:start:web": "yarn workspace web start",
-        "build:core": "yarn workspace:build:core",
-        "pack:core": "yarn workspace:pack:core",
-        "build:functions": "run-s workspace:build:core workspace:build:functions",
-        "build:web": "run-s workspace:build:core workspace:build:web",
-        "start:core": "yarn workspace:build:core",
-        "start:functions": "run-s workspace:build:core workspace:start:functions",
-        "start:web": "run-s workspace:build:core workspace:start:web",
-        "deploy:functions": "firebase deploy --only functions",
-        "deploy:web": "firebase deploy --only hosting"
+        "build:core": "yarn workspace @thebanana/core build",
+        "dev": "concurrently -k \"yarn:build:*\""
     },
     "devDependencies": {
         "@babel/core": "^7.16.0",
@@ -41,6 +27,7 @@
         "autoprefixer": "^10.4.4",
         "babel-plugin-direct-import": "^1.0.0",
         "babel-plugin-transform-typescript-metadata": "^0.3.2",
+        "concurrently": "^7.2.2",
         "eslint": "^8.12.0",
         "eslint-config-next": "^12.1.4",
         "eslint-config-prettier": "^8.3.0",

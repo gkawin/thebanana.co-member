@@ -1,6 +1,6 @@
 import { useLoading } from '@/core/LoadingContext'
 import { useSignUp } from '@/core/SignupContext'
-import { mobileToThaiNumber } from '@thebanana-members/core/lib/utils'
+import { mobileToThaiNumber } from '@thebanana/core/lib/utils'
 import { SubmitHandler, useForm } from 'react-hook-form'
 
 export const MobilePhoneForm: React.VFC = () => {

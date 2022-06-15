@@ -2,7 +2,7 @@ import axios from 'axios'
 import { ConfirmationResult, getAuth, signInWithPhoneNumber, updateProfile } from 'firebase/auth'
 import { createContext, useContext, useMemo, useState } from 'react'
 import { useRecaptchaForm } from '@/concerns/use-recaptcha-form'
-import { withModel, UserModelV2 } from '@thebanana-members/core/lib/models'
+import { withModel, UserModelV2 } from '@thebanana/core/lib/models'
 import { SocialPlatform, UserStatus } from '@/constants'
 
 export type SignupContextProps = {
