@@ -1,0 +1,10 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "module": "commonjs",
+        "outDir": "lib",
+        "target": "ES6",
+        "declaration": true
+    },
+    "exclude": ["lib/**/*"]
+}

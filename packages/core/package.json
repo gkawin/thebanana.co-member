@@ -1,0 +1,19 @@
+{
+    "name": "@thebanana/core",
+    "version": "0.0.1",
+    "author": {
+        "name": "Kawin Glomjai"
+    },
+    "main": "lib/index.js",
+    "scripts": {
+        "prebuild": "rimraf lib",
+        "build": "tsc",
+        "prestart": "rimraf lib",
+        "start": "tsc -w",
+        "pack": "yarn pack"
+    },
+    "dependencies": {
+        "firebase": "^9.8.3",
+        "firebase-admin": "^10.3.0"
+    }
+}

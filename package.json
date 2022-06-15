@@ -2,43 +2,22 @@
     "name": "thebanana-members",
     "version": "0.1.0",
     "private": true,
-    "scripts": {
-        "dev": "next dev",
-        "build": "next build",
-        "start": "next start",
-        "lint": "next lint",
-        "serve": "yarn build && firebase emulators:start --only functions,hosting",
-        "shell": "yarn build && firebase functions:shell",
-        "deploy": "firebase deploy --only functions,hosting",
-        "logs": "firebase functions:log"
+    "workspaces": {
+        "packages": [
+            "packages/*"
+        ],
+        "nohoist": [
+            "**/@thebanana/core"
+        ]
     },
-    "dependencies": {
-        "@fortawesome/fontawesome-svg-core": "^6.1.1",
-        "@fortawesome/free-brands-svg-icons": "^6.1.1",
-        "@fortawesome/free-regular-svg-icons": "^6.1.1",
-        "@fortawesome/free-solid-svg-icons": "^6.1.1",
-        "@fortawesome/react-fontawesome": "^0.1.18",
-        "@google-cloud/pubsub": "^2.19.4",
-        "@hapi/boom": "^9.1.4",
-        "@tailwindcss/forms": "^0.5.0",
-        "ajv": "^8.9.0",
-        "axios": "^0.26.1",
-        "class-validator": "^0.13.2",
-        "dayjs": "^1.10.7",
-        "firebase": "^9.6.1",
-        "firebase-admin": "^10.0.0",
-        "firebase-functions": "^3.16.0",
-        "next": "^12.0.7",
-        "omise": "^0.8.5",
-        "react": "^18.0.0",
-        "react-dom": "^18.0.0",
-        "react-hook-form": "^7.21.2",
-        "react-imask": "^6.4.2",
-        "react-lottie": "^1.2.3",
-        "react-modal": "^3.14.4",
-        "reflect-metadata": "^0.1.13",
-        "tsyringe": "^4.6.0",
-        "typescript-json-serializer": "^3.4.5"
+    "scripts": {
+        "build:core": "yarn workspace @thebanana/core build",
+        "build:web": "yarn workspace web build",
+        "dev:web": "yarn workspace web dev",
+        "start:web": "yarn workspace web start",
+        "dev": "yarn build:core && yarn dev:web",
+        "build": "yarn build:core && yarn build:web",
+        "start": "yarn start:web"
     },
     "devDependencies": {
         "@babel/core": "^7.16.0",
@@ -53,6 +32,7 @@
         "autoprefixer": "^10.4.4",
         "babel-plugin-direct-import": "^1.0.0",
         "babel-plugin-transform-typescript-metadata": "^0.3.2",
+        "concurrently": "^7.2.2",
         "eslint": "^8.12.0",
         "eslint-config-next": "^12.1.4",
         "eslint-config-prettier": "^8.3.0",
@@ -64,13 +44,6 @@
         "prettier": "^2.5.1",
         "tailwindcss": "^3.0.23",
         "tslib": "^2.3.1",
-        "typescript": "^4.5.3"
-    },
-    "browserslist": [
-        ">0.3%",
-        "not ie 11",
-        "not dead",
-        "not op_mini all"
-    ],
-    "packageManager": "yarn@3.1.1"
+        "typescript": "^4.7.3"
+    }
 }
