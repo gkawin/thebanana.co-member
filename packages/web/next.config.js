@@ -1,8 +1,11 @@
+const isProd = process.env.NODE_ENV === 'production'
+const path = require('path')
+
 /**
  * @type {import('next').NextConfig}
  */
-const isProd = process.env.NODE_ENV === 'production'
 const nextConfig = {
+    cleanDistDir: true,
     images: {
         loader: 'default',
         domains: ['fakeimg.pl', 'firebasestorage.googleapis.com'],
