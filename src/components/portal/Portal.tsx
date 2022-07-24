@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, PropsWithChildren } from 'react'
 import { createPortal } from 'react-dom'
 
-export const Portal: React.FC = ({ children }) => {
+export const Portal: React.FC<PropsWithChildren> = ({ children }) => {
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {

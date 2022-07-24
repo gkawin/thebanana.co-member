@@ -8,7 +8,7 @@ export const MobilePhoneForm: React.VFC = () => {
         register,
         handleSubmit,
         formState: { errors },
-    } = useForm()
+    } = useForm<{ mobileNumber: string }>()
     const { loading, loaded, isLoading } = useLoading()
 
     const { requestOtp, sentOtp } = useSignUp()

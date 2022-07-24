@@ -2,7 +2,7 @@ import { PaymentMethod, PaymentStep } from '@/constants'
 import type { ChargeResultModel } from '@/models/payment/ChargeResult.model'
 import { CheckoutFormField } from '@/pages/purchase/[slug]'
 import Script from 'next/script'
-import { createContext, useCallback, useContext, useMemo, useState } from 'react'
+import { createContext, PropsWithChildren, useCallback, useContext, useMemo, useState } from 'react'
 import { useAxios } from './RootContext'
 
 export type PaymentContextProps = {
@@ -17,7 +17,11 @@ export type PaymentProviderProps = { productId: string; amount: number }
 
 const PaymentContext = createContext<PaymentContextProps>(null)
 
-export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children, productId, amount = 0 }) => {
+export const PaymentProvider: React.FC<PropsWithChildren<PaymentProviderProps>> = ({
+    children,
+    productId,
+    amount = 0,
+}) => {
     const [step, setPaymentStep] = useState<PaymentStep>(PaymentStep.INIT)
     const [chargeResult, setChargeResult] = useState<ChargeResultModel>(null)
     const { post } = useAxios()

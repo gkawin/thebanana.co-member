@@ -2,7 +2,7 @@ import { BookingGroup } from '@/constants'
 
 export type BookingFilterPanelProps = { setBookingGroup: (group: BookingGroup) => void; bookingGroup: BookingGroup }
 
-export const BookingFilterPanel: React.VFC<BookingFilterPanelProps> = (props) => {
+export const BookingFilterPanel: React.FC<BookingFilterPanelProps> = (props) => {
     const getTabClasses = (definedGroup: BookingGroup) =>
         definedGroup === props.bookingGroup
             ? 'text-blue-600 border-blue-600 active dark:text-blue-500 dark:border-blue-500'

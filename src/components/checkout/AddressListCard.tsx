@@ -1,5 +1,6 @@
 import { addrCollection } from '@/concerns/query'
 import { useUser } from '@/core/RootContext'
+import type { PaymentChargeBodyModel } from '@/models/payment/PaymentChargeBody.model'
 import { UserAddressModel } from '@/models/UserAddressModel'
 import { getFirestore, onSnapshot } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
@@ -10,7 +11,7 @@ export const AddressListCard: React.FC = () => {
     const {
         register,
         formState: { errors },
-    } = useFormContext()
+    } = useFormContext<PaymentChargeBodyModel>()
     const db = getFirestore()
     const { uid } = useUser()
     const [addresses, setAddresses] = useState<UserAddressModel[]>([])

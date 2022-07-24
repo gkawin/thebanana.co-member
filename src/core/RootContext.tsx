@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState, createContext } from 'react'
+import { useContext, useEffect, useMemo, useState, createContext, PropsWithChildren } from 'react'
 import { initializeApp, getApps } from 'firebase/app'
 
 import axios, { AxiosInstance } from 'axios'
@@ -72,7 +72,7 @@ const createAxios = (token: string) => {
     return instance
 }
 
-const RootContext: React.FC = ({ children }) => {
+const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
     const { loaded, loading } = useLoading()
     const [context, setContext] = useState<AppContext>({
         $userInfo: { addresses: [], personal: null, schools: [], uid: null, lineProfile: null },
