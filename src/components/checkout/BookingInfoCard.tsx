@@ -1,9 +1,10 @@
 import { DatasetType } from '@/constants'
 import { useUser } from '@/core/RootContext'
+import type { PaymentChargeBodyModel } from '@/models/payment/PaymentChargeBody.model'
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 
-export const BookingInfoCard: React.VFC = () => {
+export const BookingInfoCard: React.FC = () => {
     const { personal, schools } = useUser()
     const {
         register,
@@ -11,7 +12,7 @@ export const BookingInfoCard: React.VFC = () => {
         setValue,
         resetField,
         formState: { errors },
-    } = useFormContext()
+    } = useFormContext<PaymentChargeBodyModel>()
 
     const datasetType = watch('datasetType', DatasetType.EXISITING)
     useEffect(() => {

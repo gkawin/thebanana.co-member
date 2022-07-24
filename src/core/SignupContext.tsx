@@ -4,7 +4,7 @@ import { withModel } from '@/models/Model'
 import { UserModelV2 } from '@/models/user/user.model'
 import axios from 'axios'
 import { ConfirmationResult, getAuth, signInWithPhoneNumber, updateProfile } from 'firebase/auth'
-import { createContext, useContext, useMemo, useState } from 'react'
+import { createContext, PropsWithChildren, useContext, useMemo, useState } from 'react'
 
 export type SignupContextProps = {
     sentOtp: boolean
@@ -14,7 +14,7 @@ export type SignupContextProps = {
 
 const context = createContext<SignupContextProps>(null)
 
-export const SignupContext: React.FC = ({ children }) => {
+export const SignupContext: React.FC<PropsWithChildren> = ({ children }) => {
     const { sentOtp, resetRecaptcha } = useRecaptchaForm({ containerId: 'recaptcha-container' })
     const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult>(null)
 

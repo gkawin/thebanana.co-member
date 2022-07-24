@@ -1,12 +1,9 @@
 /**
  * @type {import('next').NextConfig}
  */
-const isProd = process.env.NODE_ENV === 'production'
-const nextConfig = {
-    images: {
-        loader: 'default',
-        domains: ['fakeimg.pl', 'firebasestorage.googleapis.com'],
+module.exports = {
+    output: 'standalone',
+    experimental: {
+        outputStandalone: true,
     },
-    assetPrefix: isProd ? 'https://member.thebanana.co' : '',
 }
-module.exports = nextConfig

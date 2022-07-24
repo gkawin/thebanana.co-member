@@ -1,9 +1,9 @@
 import { SpinLoading } from '@/components/portal/SpinLoading'
-import { createContext, useContext, useState } from 'react'
+import { createContext, PropsWithChildren, useContext, useState } from 'react'
 
 const loadingContext = createContext<{ isLoading: boolean; loaded: VoidFunction; loading: VoidFunction }>(null)
 
-const LoadingContext: React.FC = ({ children }) => {
+const LoadingContext: React.FC<PropsWithChildren> = ({ children }) => {
     const [isLoading, setLoading] = useState(false)
     const loaded = () => setLoading(false)
     const loading = () => setLoading(true)
