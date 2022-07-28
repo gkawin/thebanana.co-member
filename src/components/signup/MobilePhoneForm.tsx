@@ -24,16 +24,16 @@ export const MobilePhoneForm: React.VFC = () => {
                     type="text"
                     pattern="[0-9]*"
                     maxLength={10}
-                    readOnly={true}
+                    readOnly={sentOtp}
                     {...register('mobileNumber', { maxLength: 10, required: 'กรุณาระบุ' })}
                 />
                 <small className="text-red-500">{errors?.mobileNumber?.message}</small>
             </div>
 
             <button
-                className={`${true || sentOtp ? 'bg-yellow-500 opacity-20' : 'bg-yellow-500'} rounded p-2 my-2`}
+                className={`${sentOtp ? 'bg-yellow-500 opacity-20' : 'bg-yellow-500'} rounded p-2 my-2`}
                 type="submit"
-                disabled={true}
+                disabled={sentOtp}
             >
                 ขอรหัส OTP
             </button>

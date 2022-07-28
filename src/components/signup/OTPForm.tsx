@@ -1,18 +1,28 @@
+import { ErrorCode } from '@/constants'
 import { useSignUp } from '@/core/SignupContext'
+import { OTPError } from '@/exceptions/otp-error'
 import { useRouter } from 'next/router'
 import { SubmitHandler, useForm } from 'react-hook-form'
 
-export const OTPForm: React.VFC = () => {
+export const OTPForm: React.FC = () => {
     const { sentOtp, confirmOtp } = useSignUp()
-    const { register, handleSubmit } = useForm()
-    const router = useRouter()
+    const {
+        register,
+        handleSubmit,
+        setError,
+        formState: { errors },
+    } = useForm<{ otp: string }>()
+    const { push } = useRouter()
 
     const onSubmit: SubmitHandler<{ otp: string }> = async ({ otp }) => {
         try {
             await confirmOtp(otp)
-            router.replace('/')
+            push('/')
         } catch (error) {
-            console.error('cannot sent SMS')
+            if (error instanceof OTPError && error.code === ErrorCode.INVALID_OTP) {
+                console.log('test')
+                setError('otp', { message: 'กรุณาระบุเลข OTP  ให้ถูกต้อง' }, { shouldFocus: true })
+            }
         }
     }
 
@@ -24,12 +34,13 @@ export const OTPForm: React.VFC = () => {
                     {...register('otp', { required: 'กรุณาระบุ', maxLength: 6 })}
                     id="otp"
                     type="text"
-                    className="form-input"
+                    className={`form-input ${!!errors.otp ? 'border border-red-500' : ''} rounded w-full`}
                     pattern="[0-9]*"
                     placeholder=""
                     maxLength={6}
                 ></input>
-                <button type="submit" className="bg-yellow-500 p-2 rounded">
+                <small className="text-red-500 ">{errors.otp?.message}</small>
+                <button type="submit" className="bg-yellow-500 p-2 rounded w-full mt-4">
                     ยืนยัน
                 </button>
             </form>

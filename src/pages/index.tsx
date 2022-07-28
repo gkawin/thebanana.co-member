@@ -8,18 +8,18 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 export default function Home() {
-    const products = useCourses()
-    const { lineProfile, alreadyMember } = useUser()
+    // const products = useCourses()
+    const { uid, profile } = useUser()
 
-    return !alreadyMember ? null : (
+    return (
         <section className="container mx-auto">
             <div className="py-4 grid grid-cols-[64px_1fr] gap-x-4">
                 <div>
-                    {lineProfile?.pictureUrl && (
+                    {profile?.pictureUrl && (
                         <Image
                             unoptimized
                             className="rounded-full"
-                            src={lineProfile.pictureUrl}
+                            src={profile.pictureUrl}
                             width={64}
                             height={64}
                             alt="avatar"
@@ -27,8 +27,8 @@ export default function Home() {
                     )}
                 </div>
                 <div>
-                    <h1 className="font-semibold text-xl text-gray-700">{lineProfile?.displayName}</h1>
-                    <h2 className="font-light text-gray-700 text-sm">{lineProfile?.statusMessage}</h2>
+                    <h1 className="font-semibold text-xl text-gray-700">{profile.displayName}</h1>
+                    <h2 className="font-light text-gray-700 text-sm">{profile.statusMessage}</h2>
                 </div>
             </div>
             <div className="grid grid-cols-2 gap-4 py-4">
@@ -47,7 +47,7 @@ export default function Home() {
             </div>
             <h2 className="text-2xl font-semibold">กำลังเปิดรับสมัคร</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-4">
-                {products.map((product) => (
+                {/* {products.map((product) => (
                     <ProductCard
                         slug={`/courses/${product.slug}`}
                         disabled={false}
@@ -55,7 +55,7 @@ export default function Home() {
                         course={product}
                         key={product.code}
                     />
-                ))}
+                ))} */}
             </div>
         </section>
     )

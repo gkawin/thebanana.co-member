@@ -1,5 +1,6 @@
 import { useRecaptchaForm } from '@/concerns/use-recaptcha-form'
 import { SocialPlatform, UserStatus } from '@/constants'
+import { OTPError } from '@/exceptions/otp-error'
 import { withModel } from '@/models/Model'
 import { UserModelV2 } from '@/models/user/user.model'
 import axios from 'axios'
@@ -29,43 +30,41 @@ export const SignupContext: React.FC<PropsWithChildren> = ({ children }) => {
             }
         },
         confirmOtp: async (otp: string) => {
-            try {
-                if (!confirmationResult) throw new Error()
+            if (!confirmationResult) throw new Error('Confirm result is wrong')
 
-                const credential = await confirmationResult.confirm(otp)
+            const credential = await confirmationResult.confirm(otp).catch(() => {
+                throw OTPError.INVALID_OTP()
+            })
 
-                const { user } = credential
+            const { user } = credential
 
-                const lineProfile = await window.liff.getProfile()
+            const lineProfile = await window.liff.getProfile()
 
-                updateProfile(user, {
-                    displayName: lineProfile.displayName,
-                    photoURL: lineProfile.pictureUrl,
-                })
+            updateProfile(user, {
+                displayName: lineProfile.displayName,
+                photoURL: lineProfile.pictureUrl,
+            })
 
-                const payload = withModel(UserModelV2).fromJson({
-                    email: user.email,
-                    phoneNumber: user.phoneNumber,
-                    platform: SocialPlatform.LINE,
-                    socialId: lineProfile.userId,
-                    status: UserStatus.ACTIVE,
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                    firstname: '',
-                    lastname: '',
-                    nickname: '',
-                })
+            const payload = withModel(UserModelV2).fromJson({
+                email: user.email,
+                phoneNumber: user.phoneNumber,
+                platform: SocialPlatform.LINE,
+                socialId: lineProfile.userId,
+                status: UserStatus.ACTIVE,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                firstname: '',
+                lastname: '',
+                nickname: '',
+            })
 
-                const token = await user.getIdToken()
+            const token = await user.getIdToken(true)
 
-                await axios.post(`/api/users/${user.uid}/create`, payload, {
-                    headers: { Authorization: `Bearer ${token}` },
-                })
+            await axios.post(`/api/users/${user.uid}/create`, payload, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
 
-                resetRecaptcha()
-            } catch (error) {
-                console.log(error)
-            }
+            resetRecaptcha()
         },
     }
 

@@ -2,14 +2,7 @@ import { MobilePhoneForm } from '@/components/signup/MobilePhoneForm'
 import { OTPForm } from '@/components/signup/OTPForm'
 import { SignupContext } from '@/core/SignupContext'
 
-import { NextPage } from 'next'
-
-export type SignInPageForm = {
-    phoneNumber: string
-    acceptedTC: boolean
-}
-
-const SignUpPage: NextPage = () => {
+const SignUpPage: React.FC = () => {
     return (
         <SignupContext>
             <div className="container pt-4">

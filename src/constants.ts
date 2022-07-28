@@ -74,3 +74,7 @@ export enum UserStatus {
 export enum SocialPlatform {
     LINE = 'line',
 }
+
+export enum ErrorCode {
+    INVALID_OTP = 'invalid.otp',
+}
