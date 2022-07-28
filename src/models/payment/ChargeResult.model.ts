@@ -1,9 +1,9 @@
 import { PaymentMethod } from '@/constants'
-import { JsonProperty, Serializable } from 'typescript-json-serializer'
+import { JsonProperty, JsonObject } from 'typescript-json-serializer'
 import { PaymentCardModel } from './PaymentCard.model'
 import { PaymentScanableImageModel } from './PaymentScanableImage.model'
 
-@Serializable()
+@JsonObject()
 export class ChargeResultModel {
     @JsonProperty()
     bookingCode: string

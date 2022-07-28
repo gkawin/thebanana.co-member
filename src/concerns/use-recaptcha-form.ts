@@ -46,8 +46,6 @@ export const useRecaptchaForm = (el: { containerId: string }) => {
 
     useEffect(() => {
         if (getApps().length > 0 && !window.recaptchaWidgetId) {
-            console.log('init')
-
             _initializeRecaptcha()
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,4 +1,3 @@
-import { useLoading } from '@/core/LoadingContext'
 import { useSignUp } from '@/core/SignupContext'
 import { mobileToThaiNumber } from '@/utils/phone-number'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -9,17 +8,12 @@ export const MobilePhoneForm: React.VFC = () => {
         handleSubmit,
         formState: { errors },
     } = useForm<{ mobileNumber: string }>()
-    const { loading, loaded, isLoading } = useLoading()
 
     const { requestOtp, sentOtp } = useSignUp()
 
     const onSubmit: SubmitHandler<{ mobileNumber: string }> = async ({ mobileNumber }) => {
-        loading()
         await requestOtp(mobileToThaiNumber(mobileNumber))
-        loaded()
     }
-
-    const disabled = isLoading || sentOtp
 
     return (
         <form className="flex flex-col justify-center " onSubmit={handleSubmit(onSubmit)}>
@@ -30,16 +24,16 @@ export const MobilePhoneForm: React.VFC = () => {
                     type="text"
                     pattern="[0-9]*"
                     maxLength={10}
-                    readOnly={disabled}
+                    readOnly={true}
                     {...register('mobileNumber', { maxLength: 10, required: 'กรุณาระบุ' })}
                 />
                 <small className="text-red-500">{errors?.mobileNumber?.message}</small>
             </div>
 
             <button
-                className={`${isLoading || sentOtp ? 'bg-yellow-500 opacity-20' : 'bg-yellow-500'} rounded p-2 my-2`}
+                className={`${true || sentOtp ? 'bg-yellow-500 opacity-20' : 'bg-yellow-500'} rounded p-2 my-2`}
                 type="submit"
-                disabled={disabled}
+                disabled={true}
             >
                 ขอรหัส OTP
             </button>

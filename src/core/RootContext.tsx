@@ -1,4 +1,13 @@
-import { useContext, useEffect, useMemo, useState, createContext, PropsWithChildren } from 'react'
+import {
+    useContext,
+    useEffect,
+    useMemo,
+    useState,
+    createContext,
+    PropsWithChildren,
+    Suspense,
+    useTransition,
+} from 'react'
 import { initializeApp, getApps, getApp } from 'firebase/app'
 import { CustomProvider, initializeAppCheck } from 'firebase/app-check'
 
@@ -12,7 +21,8 @@ import { UserModelV2 } from '@/models/user/user.model'
 import { addrCollection, schoolCollection, userCollection, userDoc } from '@/concerns/query'
 import { UserAddressModel } from '@/models/UserAddressModel'
 import { Liff } from '@liff/liff-types'
-import { useLoading } from './LoadingContext'
+
+import { SpinLoading } from '@/components/portal/SpinLoading'
 
 const liffId = '1653826193-QbmamAo0'
 const firebaseConfig = {
@@ -74,7 +84,9 @@ const createAxios = (token: string) => {
 }
 
 const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
-    const { loaded, loading } = useLoading()
+    const router = useRouter()
+    const [isPending, startTransition] = useTransition()
+
     const [context, setContext] = useState<AppContext>({
         $userInfo: { addresses: [], personal: null, schools: [], uid: null, lineProfile: null },
         alreadyMember: false,
@@ -82,18 +94,13 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
         authenticationCode: null,
         initilized: false,
     })
-    const router = useRouter()
 
     useEffect(() => {
         if (getApps().length === 0 && window.liff) {
-            const app = initializeApp(firebaseConfig)
-
+            initializeApp(firebaseConfig)
             const analytic = getAnalytics()
             const auth = getAuth()
             logEvent(analytic, 'notification_received')
-            console.log('firebase initilized')
-
-            loading()
 
             createLiff()
                 .then(async () => {
@@ -105,19 +112,27 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
                 })
                 .then(async ({ authentication: { alreadyMember, authenticationCode } }) => {
                     if (alreadyMember) {
-                        const { user } = await signInWithCustomToken(auth, authenticationCode)
-                    } else {
-                        router.push('/signup')
+                        await signInWithCustomToken(auth, authenticationCode)
                     }
                     setContext((state) => ({ ...state, alreadyMember, initilized: true }))
-                    return { alreadyMember, authenticationCode }
                 })
-                .finally(() => loaded())
+                .finally(() => {
+                    console.log('firebase initilized')
+                })
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {
+        if (router.pathname !== '/signup' && !context.alreadyMember) {
+            router.replace('/signup')
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [context.alreadyMember, router.pathname])
+
+    useEffect(() => {
+        if (!context.initilized) return () => {}
+
         const unsubcriber = getAuth().onAuthStateChanged(async (user) => {
             console.log(user)
             if (user) {
@@ -125,45 +140,38 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
                 const token = await user.getIdToken()
                 const axiosInstance = createAxios(token)
 
-                getDocs(collection(db, 'users'))
-
-                // const addresses = (await getDocs(addrCollection(db, user.uid))).docs.map((doc) => ({
-                //     id: doc.id,
-                //     ...doc.data(),
-                // }))
-                //     const personal = (await getDoc(userDoc(db, user.uid))).data()
-                //     const schools = (await getDocs(schoolCollection(db, user.uid))).docs.map((doc) => doc.data())
-                //     const lineProfile = await window.liff.getProfile()
-                //     setContext((state) => ({
-                //         ...state,
-                //         $axios: axiosInstance,
-                //         alreadyMember: true,
-                //         $userInfo: {
-                //             addresses,
-                //             personal,
-                //             schools,
-                //             uid: user.uid,
-                //             lineProfile,
-                //         },
-                //     }))
+                const addresses = (await getDocs(addrCollection(db, user.uid))).docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }))
+                const personal = (await getDoc(userDoc(db, user.uid))).data()
+                const schools = (await getDocs(schoolCollection(db, user.uid))).docs.map((doc) => doc.data())
+                const lineProfile = await window.liff.getProfile()
+                setContext((state) => ({
+                    ...state,
+                    $axios: axiosInstance,
+                    alreadyMember: true,
+                    $userInfo: {
+                        addresses,
+                        personal,
+                        schools,
+                        uid: user.uid,
+                        lineProfile,
+                    },
+                }))
             }
         })
         return () => {
             unsubcriber()
         }
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [context.initilized])
 
     return (
-        <>
-            <Script
-                charSet="utf-8"
-                src="https://static.line-scdn.net/liff/edge/2/sdk.js"
-                strategy="beforeInteractive"
-            ></Script>
-            {/* <appContext.Provider value={context}>{context.initilized && children}</appContext.Provider> */}
-        </>
+        <Suspense fallback={<SpinLoading />}>
+            <div style={{ opacity: isPending ? 0.8 : 1 }}>
+                {context.initilized && <appContext.Provider value={context}>{children}</appContext.Provider>}
+            </div>
+        </Suspense>
     )
 }
 

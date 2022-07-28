@@ -1,8 +1,8 @@
 import { DocumentReference } from 'firebase/firestore'
-import { JsonProperty, Serializable } from 'typescript-json-serializer'
+import { JsonProperty, JsonObject } from 'typescript-json-serializer'
 import { UserModel } from '../UserModel'
 
-@Serializable()
+@JsonObject()
 export class SocialConnectModel {
     @JsonProperty()
     id: string

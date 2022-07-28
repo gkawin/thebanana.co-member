@@ -1,9 +1,9 @@
-import { JsonProperty, Serializable } from 'typescript-json-serializer'
+import { JsonProperty, JsonObject } from 'typescript-json-serializer'
 import { PaymentCardModel } from './PaymentCard.model'
 import { PaymentDataSourceModel } from './PaymentDataSource.model'
 import { PaymentMetadataModel } from './PaymentMetadata.model'
 
-@Serializable()
+@JsonObject()
 export class PaymentOmiseDataModel {
     @JsonProperty()
     object: string

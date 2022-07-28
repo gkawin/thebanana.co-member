@@ -1,5 +1,5 @@
-/* eslint-disable @next/next/no-sync-scripts */
 import Document, { Head, Html, Main, NextScript } from 'next/document'
+import Script from 'next/script'
 
 export default class AppDoc extends Document {
     render() {
@@ -14,6 +14,11 @@ export default class AppDoc extends Document {
                         href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600&display=swap"
                         rel="stylesheet"
                     />
+                    <Script
+                        charSet="utf-8"
+                        src="https://static.line-scdn.net/liff/edge/2/sdk.js"
+                        strategy="beforeInteractive"
+                    ></Script>
                 </Head>
                 <body>
                     <Main />

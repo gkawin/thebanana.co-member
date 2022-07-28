@@ -1,6 +1,6 @@
-import { JsonProperty, Serializable } from 'typescript-json-serializer'
+import { JsonProperty, JsonObject } from 'typescript-json-serializer'
 
-@Serializable()
+@JsonObject()
 export class PaymentMetadataModel {
     @JsonProperty()
     bookingCode: string

@@ -4,7 +4,6 @@ import Head from 'next/head'
 import App, { AppContext, AppProps } from 'next/app'
 import { createElement } from 'react'
 import ReactModal from 'react-modal'
-import LoadingContext from '@/core/LoadingContext'
 
 ReactModal.setAppElement('#__next')
 
@@ -17,9 +16,8 @@ export default function MyApp({ Component, pageProps }: AppProps) {
                 <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
                 <title>หน้าสมาชิก</title>
             </Head>
-            <LoadingContext>
-                <RootContext>{createElement(Component, pageProps)}</RootContext>
-            </LoadingContext>
+
+            <RootContext>{createElement(Component, pageProps)}</RootContext>
         </>
     )
 }

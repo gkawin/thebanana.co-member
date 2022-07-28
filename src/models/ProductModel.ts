@@ -1,5 +1,5 @@
 import { withDocumentReferenceToPath, withISOToServerTimestamp, withTimeToDate } from '@/utils/firestore'
-import { JsonProperty, Serializable } from 'typescript-json-serializer'
+import { JsonProperty, JsonObject } from 'typescript-json-serializer'
 
 import { DocumentReference as ClientDocRef } from 'firebase/firestore'
 import { DocumentReference } from 'firebase-admin/firestore'
@@ -10,7 +10,7 @@ export class CourseModel {
     semaster: string
 }
 
-@Serializable()
+@JsonObject()
 export class ProductModel {
     @JsonProperty()
     id: string
