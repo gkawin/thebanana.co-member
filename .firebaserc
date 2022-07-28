@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "thebanana-member"
-  }
+    "production": "prod-member-thebanana-co",
+    "dev": "thebanana-member"
+  },
+  "targets": {}
 }

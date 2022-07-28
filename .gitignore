@@ -47,3 +47,5 @@ yarn-error.log*
 _dev
 .next
 .env*.local
+
+*.log

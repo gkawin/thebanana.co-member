@@ -1,27 +1,28 @@
 import { useContext, useEffect, useMemo, useState, createContext, PropsWithChildren } from 'react'
-import { initializeApp, getApps } from 'firebase/app'
+import { initializeApp, getApps, getApp } from 'firebase/app'
+import { CustomProvider, initializeAppCheck } from 'firebase/app-check'
 
 import axios, { AxiosInstance } from 'axios'
-import { getDoc, getDocs, getFirestore } from 'firebase/firestore'
+import { collection, getDoc, getDocs, getFirestore } from 'firebase/firestore'
 import { getAuth, signInWithCustomToken } from 'firebase/auth'
 import { logEvent, getAnalytics } from 'firebase/analytics'
 import Script from 'next/script'
 import { useRouter } from 'next/router'
 import { UserModelV2 } from '@/models/user/user.model'
-import { addrCollection, schoolCollection, userDoc } from '@/concerns/query'
+import { addrCollection, schoolCollection, userCollection, userDoc } from '@/concerns/query'
 import { UserAddressModel } from '@/models/UserAddressModel'
 import { Liff } from '@liff/liff-types'
 import { useLoading } from './LoadingContext'
 
 const liffId = '1653826193-QbmamAo0'
 const firebaseConfig = {
-    apiKey: 'AIzaSyA0jgSwsfOagPehdRrzbposqkYIn2mHnF8',
-    authDomain: 'thebanana-member.firebaseapp.com',
-    projectId: 'thebanana-member',
-    storageBucket: 'thebanana-member.appspot.com',
-    messagingSenderId: '696744791245',
-    appId: '1:696744791245:web:c46ca8c522c7f8b301ad84',
-    measurementId: 'G-8BXSYMCMDH',
+    apiKey: 'AIzaSyABewxwss6AP3bH5YDPfSJ1ZiYNPGkJ8Rs',
+    authDomain: 'prod-member-thebanana-co.firebaseapp.com',
+    projectId: 'prod-member-thebanana-co',
+    storageBucket: 'prod-member-thebanana-co.appspot.com',
+    messagingSenderId: '560154323667',
+    appId: '1:560154323667:web:17b5cff2ede9bc4ffd0226',
+    measurementId: 'G-KPYSRNLGFX',
 }
 
 export type AppContext = {
@@ -85,7 +86,7 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
 
     useEffect(() => {
         if (getApps().length === 0 && window.liff) {
-            initializeApp(firebaseConfig)
+            const app = initializeApp(firebaseConfig)
 
             const analytic = getAnalytics()
             const auth = getAuth()
@@ -104,7 +105,7 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
                 })
                 .then(async ({ authentication: { alreadyMember, authenticationCode } }) => {
                     if (alreadyMember) {
-                        await signInWithCustomToken(auth, authenticationCode)
+                        const { user } = await signInWithCustomToken(auth, authenticationCode)
                     } else {
                         router.push('/signup')
                     }
@@ -124,26 +125,27 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
                 const token = await user.getIdToken()
                 const axiosInstance = createAxios(token)
 
-                const addresses = (await getDocs(addrCollection(db, user.uid))).docs.map((doc) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                }))
-                const personal = (await getDoc(userDoc(db, user.uid))).data()
-                const schools = (await getDocs(schoolCollection(db, user.uid))).docs.map((doc) => doc.data())
-                const lineProfile = await window.liff.getProfile()
+                getDocs(collection(db, 'users'))
 
-                setContext((state) => ({
-                    ...state,
-                    $axios: axiosInstance,
-                    alreadyMember: true,
-                    $userInfo: {
-                        addresses,
-                        personal,
-                        schools,
-                        uid: user.uid,
-                        lineProfile,
-                    },
-                }))
+                // const addresses = (await getDocs(addrCollection(db, user.uid))).docs.map((doc) => ({
+                //     id: doc.id,
+                //     ...doc.data(),
+                // }))
+                //     const personal = (await getDoc(userDoc(db, user.uid))).data()
+                //     const schools = (await getDocs(schoolCollection(db, user.uid))).docs.map((doc) => doc.data())
+                //     const lineProfile = await window.liff.getProfile()
+                //     setContext((state) => ({
+                //         ...state,
+                //         $axios: axiosInstance,
+                //         alreadyMember: true,
+                //         $userInfo: {
+                //             addresses,
+                //             personal,
+                //             schools,
+                //             uid: user.uid,
+                //             lineProfile,
+                //         },
+                //     }))
             }
         })
         return () => {
@@ -160,7 +162,7 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
                 src="https://static.line-scdn.net/liff/edge/2/sdk.js"
                 strategy="beforeInteractive"
             ></Script>
-            <appContext.Provider value={context}>{context.initilized && children}</appContext.Provider>
+            {/* <appContext.Provider value={context}>{context.initilized && children}</appContext.Provider> */}
         </>
     )
 }
