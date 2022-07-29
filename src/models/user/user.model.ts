@@ -1,7 +1,7 @@
 import { UserStatus } from '@/constants'
-import { JsonProperty, JsonObject } from 'typescript-json-serializer'
+import { JsonProperty, Serializable } from 'typescript-json-serializer'
 
-@JsonObject()
+@Serializable()
 export class UserModelV2 {
     @JsonProperty()
     createdAt: Date

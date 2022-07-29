@@ -1,6 +1,6 @@
-import { JsonProperty, JsonObject } from 'typescript-json-serializer'
+import { JsonProperty, Serializable } from 'typescript-json-serializer'
 
-@JsonObject()
+@Serializable()
 export class UserAddressModel {
     @JsonProperty()
     address: string

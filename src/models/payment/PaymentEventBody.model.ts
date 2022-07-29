@@ -1,9 +1,9 @@
 import { OmiseHookEvent } from '@/constants'
 import { IsEnum, IsString } from 'class-validator'
-import { JsonProperty, JsonObject } from 'typescript-json-serializer'
+import { JsonProperty, Serializable } from 'typescript-json-serializer'
 import { PaymentOmiseDataModel } from './PaymentOmiseData.model'
 
-@JsonObject()
+@Serializable()
 export class PaymentEventBodyModel {
     @JsonProperty()
     @IsEnum(OmiseHookEvent)

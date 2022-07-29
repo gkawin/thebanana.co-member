@@ -5546,10 +5546,10 @@ typedarray-to-buffer@^3.1.5:
   dependencies:
     is-typedarray "^1.0.0"
 
-typescript-json-serializer@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/typescript-json-serializer/-/typescript-json-serializer-4.2.0.tgz#0ded6bc9e19bd2b0fcf02c4725c53a8a9a0dd2d6"
-  integrity sha512-o/rgBfbtOO1PC/8YeNBenl53WlZKE7GxL2E7Pvnvsv1NhSUWbGLchtfMMjPUHhqNYVkHj1FL5XHFJS3ZeR0Gsw==
+typescript-json-serializer@^3:
+  version "3.4.5"
+  resolved "https://registry.yarnpkg.com/typescript-json-serializer/-/typescript-json-serializer-3.4.5.tgz#8180b117e4850cae106edee860ea2e2112fbc019"
+  integrity sha512-KWsDGa1vddY3alUIzE9oBo6AfVzVXQCCHm9ATF4oiGAoTHTTIV0IBGSRAu2uiJHrpPC/n7fxnnAagOhLQZyTcg==
   dependencies:
     reflect-metadata "^0.1.13"
     tslib "^2.3.0"

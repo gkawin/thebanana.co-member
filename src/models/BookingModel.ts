@@ -1,13 +1,13 @@
 import { DocumentReference } from 'firebase/firestore'
 import { UserModel } from './UserModel'
-import { JsonObject, JsonProperty } from 'typescript-json-serializer'
+import { Serializable, JsonProperty } from 'typescript-json-serializer'
 import { withISOToServerTimestamp, withTimeToDate } from '@/utils/firestore'
 import { BookingStatus, FailureCode, PaymentMethod, SourceOfFund } from '@/constants'
 import dayjs from 'dayjs'
 import { UserAddressModel } from './UserAddressModel'
 import { CourseModel } from './course/course.model'
 
-@JsonObject()
+@Serializable()
 export class ReceiptModel {
     @JsonProperty()
     receiptId: string
@@ -19,7 +19,7 @@ export class ReceiptModel {
     createdAt: Date
 }
 
-@JsonObject()
+@Serializable()
 export class BookingModel {
     static generateBookingCode = () => {
         const day = parseInt(dayjs().format('YYMMDD'), 10)

@@ -1,11 +1,9 @@
-import { useContext, useEffect, useMemo, useState, createContext, PropsWithChildren, Suspense } from 'react'
+import { useContext, useEffect, useMemo, useState, createContext, PropsWithChildren } from 'react'
 import { initializeApp, getApps } from 'firebase/app'
 
 import axios, { AxiosInstance } from 'axios'
-import { getFirestore } from 'firebase/firestore'
 import { getAuth, signInWithCustomToken } from 'firebase/auth'
 import { logEvent, getAnalytics } from 'firebase/analytics'
-import { useRouter } from 'next/router'
 import { UserModelV2 } from '@/models/user/user.model'
 import { UserAddressModel } from '@/models/UserAddressModel'
 import { Liff } from '@liff/liff-types'
@@ -74,7 +72,6 @@ const createAxios = (token: string) => {
 }
 
 const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
-    const router = useRouter()
     const [isLoading, setLoading] = useState(true)
 
     const [context, setContext] = useState<AppContext>({
@@ -105,7 +102,6 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
                         await signInWithCustomToken(auth, authenticationCode)
                     }
                     setContext((state) => ({ ...state, alreadyMember, initilized: true }))
-                    setLoading(false)
                 })
                 .finally(() => {
                     console.log('firebase initilized')
@@ -131,8 +127,8 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
                     $axios: axiosInstance,
                     $userInfo: { uid: user.uid, lineProfile },
                 }))
-                setLoading(false)
             }
+            setLoading(false)
         })
         return () => {
             unsubcriber()
@@ -140,19 +136,15 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
     }, [context.initilized])
 
     return (
-        <>
+        <appContext.Provider value={context}>
             {isLoading && (
                 <Curtain>
                     <SpinLoading />
                 </Curtain>
             )}
-            {context.initilized && (
-                <appContext.Provider value={context}>
-                    {!isLoading && context.alreadyMember && children}
-                    {!isLoading && !context.alreadyMember && <SignUpPage />}
-                </appContext.Provider>
-            )}
-        </>
+            {context.initilized && !isLoading && context.alreadyMember && children}
+            {context.initilized && !context.alreadyMember && <SignUpPage />}
+        </appContext.Provider>
     )
 }
 

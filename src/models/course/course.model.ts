@@ -1,11 +1,11 @@
 import { withDocumentReferenceToPath, withISOToServerTimestamp, withTimeToDate } from '@/utils/firestore'
-import { JsonProperty, JsonObject } from 'typescript-json-serializer'
+import { JsonProperty, Serializable } from 'typescript-json-serializer'
 
 import { DocumentReference as ClientDocRef } from 'firebase/firestore'
 import { DocumentReference } from 'firebase-admin/firestore'
 import { SubjectModel } from './subject.model'
 
-@JsonObject()
+@Serializable()
 export class CourseModel {
     @JsonProperty()
     id: string
@@ -29,13 +29,16 @@ export class CourseModel {
     slug: string
 
     @JsonProperty({ beforeDeserialize: withTimeToDate, afterSerialize: withISOToServerTimestamp })
-    effectiveDate: Date
+    enrollmentAt: Date
 
     @JsonProperty({ beforeDeserialize: withTimeToDate, afterSerialize: withISOToServerTimestamp })
-    expiredDate: Date
+    closeEnrollAt: Date
 
     @JsonProperty()
     price: number
+
+    @JsonProperty()
+    vat: number
 
     @JsonProperty()
     get pricing(): string {

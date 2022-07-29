@@ -1,10 +1,10 @@
 import { withISOToServerTimestamp, withTimeToDate } from '@/utils/firestore'
-import { JsonProperty, JsonObject } from 'typescript-json-serializer'
+import { JsonProperty, Serializable } from 'typescript-json-serializer'
 import { UserParentModel } from './UserParentModel'
 import { UserSchoolModel } from './UserSchoolModel'
 import { UserSocialModel } from './UserSocialModel'
 
-@JsonObject()
+@Serializable()
 export class UserModel {
     @JsonProperty()
     email: string

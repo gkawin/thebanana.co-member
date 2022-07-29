@@ -59,7 +59,7 @@ class PaymentChargeApi {
                         userId: payload.userId,
                         price: product.price,
                         shippingAddressId: payload.shippingAddressId,
-                        effectiveDate: today.toDate(),
+                        enrollmentAt: today.toDate(),
                         expiredDate: expiredDate.toDate(),
                         startDate: product.startDate,
                         endDate: product.endDate,

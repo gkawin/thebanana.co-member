@@ -1,9 +1,9 @@
 import { PaymentMethod } from '@/constants'
-import { JsonProperty, JsonObject } from 'typescript-json-serializer'
+import { JsonProperty, Serializable } from 'typescript-json-serializer'
 import { PaymentCardModel } from './PaymentCard.model'
 import { PaymentScanableImageModel } from './PaymentScanableImage.model'
 
-@JsonObject()
+@Serializable()
 export class ChargeResultModel {
     @JsonProperty()
     bookingCode: string
@@ -30,7 +30,7 @@ export class ChargeResultModel {
     metadata?: {
         productCode: string
         productName: string
-        effectiveDate: Date
+        enrollmentAt: Date
         startDate: Date
         endDate: Date
         description: string

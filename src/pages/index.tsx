@@ -8,8 +8,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 export default function Home() {
-    // const products = useCourses()
-    const { uid, profile } = useUser()
+    const courses = useCourses()
+    const { profile } = useUser()
 
     return (
         <section className="container mx-auto">
@@ -47,15 +47,15 @@ export default function Home() {
             </div>
             <h2 className="text-2xl font-semibold">กำลังเปิดรับสมัคร</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-4">
-                {/* {products.map((product) => (
+                {courses.map((course) => (
                     <ProductCard
-                        slug={`/courses/${product.slug}`}
+                        slug={`/courses/${course.slug}`}
                         disabled={false}
                         onClick={() => {}}
-                        course={product}
-                        key={product.code}
+                        course={course}
+                        key={course.code}
                     />
-                ))} */}
+                ))}
             </div>
         </section>
     )

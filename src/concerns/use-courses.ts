@@ -5,27 +5,24 @@ import { courseCollection } from './query'
 import { CourseModel } from '@/models/course/course.model'
 
 export default function useCourses() {
-    const [productsList, setProductsList] = useState<CourseModel[]>([])
+    const [courses, setCourses] = useState<CourseModel[]>([])
     const db = getFirestore()
 
     useEffect(() => {
-        const productsRef = query(courseCollection(db), where('effectiveDate', '<=', new Date()))
-        getDocs(productsRef).then(({ docs }) => {
+        const courseRef = query(courseCollection(db), where('enrollmentAt', '<=', new Date()))
+        getDocs(courseRef).then(({ docs }) => {
             const results = docs.reduce((prev, item) => {
                 const data = item.data()
-
-                const notExpired = dayjs().isBefore(data.expiredDate, 'second')
-
+                const notExpired = dayjs().isBefore(data.closeEnrollAt, 'second')
                 if (notExpired) {
                     prev.push(data)
                 }
-
                 return prev
             }, [])
-            setProductsList(results)
+            setCourses(results)
         })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    return useMemo(() => productsList, [productsList])
+    return useMemo(() => courses, [courses])
 }
