@@ -21,4 +21,6 @@ class OmiseService {
 
 const o = new OmiseService()
 
+console.log(o)
+
 export default Object.freeze(o)
