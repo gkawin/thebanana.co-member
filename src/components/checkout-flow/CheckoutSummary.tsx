@@ -5,6 +5,7 @@ import { BookingInfoCard } from '../checkout/BookingInfoCard'
 import { AddressListCard } from '../checkout/AddressListCard'
 import { RegistrationSummary } from '../checkout/RegistrationSummary'
 import type { CourseModel } from '@/models/course/course.model'
+import { NewAddressForm } from '../checkout/NewAddressForm'
 
 export const CheckoutSummary: React.FC<{ course: CourseModel }> = ({ course }) => {
     const { step } = usePaymentContext()
@@ -15,7 +16,9 @@ export const CheckoutSummary: React.FC<{ course: CourseModel }> = ({ course }) =
         <>
             <RegistrationSummary name={course.title} price={course.price} />
             <BookingInfoCard />
-            <AddressListCard />
+            <AddressListCard>
+                <NewAddressForm enabled />
+            </AddressListCard>
         </>
     )
 }

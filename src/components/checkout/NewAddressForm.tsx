@@ -4,6 +4,8 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import Modal from 'react-modal'
 import Datalist from '../forms/Datalist'
+import { Curtain } from '../portal/Curtain'
+import { SpinLoading } from '../portal/SpinLoading'
 import styles from './new-address-form.module.css'
 
 export type NewAddressFormFields = {
@@ -29,10 +31,10 @@ const debounce = (callback: Function, wait = 500) => {
 }
 
 export type NewAddressFormProps = {
-    enabled: boolean
+    enabled?: boolean
 }
 
-export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ enabled = true }) => {
+export const NewAddressForm: React.FC<NewAddressFormProps> = ({ enabled = true }) => {
     const {
         register,
         handleSubmit,
@@ -60,7 +62,6 @@ export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ enabled = true 
                 createdOn: new Date(),
             }
             await addDoc(collection(db, 'users', uid, 'address'), newAddr)
-
             setIsOpen(false)
         } catch (error) {
             alert('เพิ่มข้อมูลไม่สำเร็จ')
@@ -85,36 +86,49 @@ export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ enabled = true 
 
     useEffect(() => {
         const subscrible = watch((value, { name, type }) => {
+            if (name === 'postcode' && type === 'change') {
+                resetField('district')
+                resetField('province')
+                resetField('subdistrict')
+                setAddrOptions([])
+            }
+
             handleDebounce(async () => {
-                if (name === 'postcode' && value[name].length === 5) {
+                if (name === 'postcode' && type === 'change' && value[name].length === 5) {
                     const { data } = await $axios.get('/api/geo/search/postcode', {
                         params: { keyword: encodeURIComponent(value.postcode) },
                     })
-                    if (data.length === 0) {
-                        resetField('district')
-                        resetField('province')
-                        resetField('subdistrict')
-                        setAddrOptions([])
-                    } else {
-                        setAddrOptions(data)
-                    }
+                    setAddrOptions(data)
                 }
             })
         })
-        return () => subscrible.unsubscribe()
-    }, [$axios, handleDebounce, resetField, watch])
+        return () => {
+            subscrible.unsubscribe()
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     useEffect(() => {
         if (!isOpen) {
             reset({ commonAddr: '', district: '', phoneNumber: '', postcode: '', province: '', subdistrict: '' })
             setAddrOptions([])
         }
-    }, [isOpen, reset])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen])
 
     return (
         <>
+            {isLoading && (
+                <Curtain>
+                    <SpinLoading />
+                </Curtain>
+            )}
             <Modal isOpen={isOpen && enabled}>
-                <form className={`${styles['new-address-form']}`} onSubmit={handleSubmit(handleSubmitNewAddress)}>
+                <form
+                    autoComplete="off"
+                    className={`${styles['new-address-form']}`}
+                    onSubmit={handleSubmit(handleSubmitNewAddress)}
+                >
                     <h2 className="text-sub-title font-semibold">เพิ่มที่อยู่ใหม่</h2>
 
                     <div className="flex flex-col mb-4">
@@ -146,6 +160,7 @@ export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ enabled = true 
                         <label htmlFor="postcode">รหัสไปรณีย์</label>
                         <div className="relative">
                             <input
+                                autoComplete="false"
                                 id="postcode"
                                 name="postcode"
                                 list="postcodelist"
@@ -175,6 +190,7 @@ export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ enabled = true 
                             id="subDistrict"
                             className="form-input rounded text-sm"
                             type="text"
+                            readOnly
                             {...register('subdistrict', { required: 'กรุณาระบุ' })}
                         />
                         <small className="text-red-500">{errors.subdistrict?.message}</small>
@@ -186,6 +202,7 @@ export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ enabled = true 
                             id="city"
                             className="form-input rounded text-sm"
                             type="text"
+                            readOnly
                             {...register('district', { required: 'กรุณาระบุ' })}
                         />
                         <small className="text-red-500">{errors.district?.message}</small>
@@ -197,6 +214,7 @@ export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ enabled = true 
                             id="province"
                             className="form-input rounded text-sm"
                             type="text"
+                            readOnly
                             {...register('province', { required: 'กรุณาระบุ' })}
                         />
                         <small className="text-red-500">{errors.province?.message}</small>

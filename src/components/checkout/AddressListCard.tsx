@@ -3,11 +3,10 @@ import { useUserInfo } from '@/core/RootContext'
 import type { PaymentChargeBodyModel } from '@/models/payment/PaymentChargeBody.model'
 import { UserAddressModel } from '@/models/UserAddressModel'
 import { getFirestore, onSnapshot } from 'firebase/firestore'
-import { useEffect, useState } from 'react'
+import { PropsWithChildren, useEffect, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
-import { NewAddressForm } from './NewAddressForm'
 
-export const AddressListCard: React.FC = () => {
+export const AddressListCard: React.FC<PropsWithChildren> = ({ children }) => {
     const {
         register,
         formState: { errors },
@@ -46,7 +45,7 @@ export const AddressListCard: React.FC = () => {
                         </label>
                     </li>
                 ))}
-                <NewAddressForm enabled />
+                {children}
                 <small className="text-red-500">{errors.shippingAddressId?.message}</small>
             </ul>
         </div>
