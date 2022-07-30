@@ -1,22 +1,20 @@
-import React from 'react'
-import Lottie, { LottieProps } from 'react-lottie'
+import React, { useState } from 'react'
+import { Player } from '@lottiefiles/react-lottie-player'
+import type { AnimationItem } from 'lottie-web'
 
-export type SpinLoadingProps = { global?: boolean } & Partial<LottieProps>
+export type SpinLoadingProps = { global?: boolean }
 
-export const SpinLoading: React.FC<SpinLoadingProps> = ({ global = false, ...lottieProps }) => {
+export const SpinLoading: React.FC<SpinLoadingProps> = ({ global = false }) => {
+    const [_, setLottie] = useState<AnimationItem>(null)
     return (
-        <Lottie
-            height={lottieProps?.height ?? 200}
-            width={lottieProps?.width ?? 200}
-            {...lottieProps}
-            options={{
-                loop: true,
-                animationData: require('@/public/loading'),
-                rendererSettings: {
-                    preserveAspectRatio: 'xMidYMid slice',
-                },
-                ...(lottieProps?.options ?? {}),
+        <Player
+            lottieRef={(instance) => {
+                setLottie(instance)
             }}
+            autoplay
+            src={require('@/public/loading')}
+            style={{ height: '200px', width: '200px' }}
+            loop
         />
     )
 }
