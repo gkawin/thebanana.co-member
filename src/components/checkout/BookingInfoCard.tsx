@@ -5,23 +5,24 @@ import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 export const BookingInfoCard: React.FC = () => {
-    const { personal, schools } = useUserInfo()
+    const {
+        personal: { fullname, nickname },
+        schools,
+    } = useUserInfo()
 
     const {
         register,
-        watch,
         setValue,
-        resetField,
         formState: { errors },
     } = useFormContext<PaymentChargeBodyModel>()
 
-    const datasetType = watch('datasetType', DatasetType.CREATED_NEW)
-
     useEffect(() => {
-        setValue('studentName', personal?.fullname ?? '')
-        setValue('nickname', personal?.nickname ?? '')
+        setValue('studentName', fullname ?? '')
+        setValue('nickname', nickname ?? '')
         setValue('school', schools[0]?.school)
-    }, [datasetType, personal, resetField, schools, setValue])
+        setValue('datasetType', DatasetType.CREATED_NEW)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fullname, nickname, schools])
 
     return (
         <div className="p-4 rounded shadow-md border flex flex-col">

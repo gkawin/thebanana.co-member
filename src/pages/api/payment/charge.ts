@@ -38,7 +38,7 @@ class PaymentChargeApi {
                 throw badRequest(hasErrors.toString())
             }
 
-            const productRef = this.#course.doc(payload.productId).withConverter(Model.convert(CourseModel))
+            const productRef = this.#course.doc(payload.courseId).withConverter(Model.convert(CourseModel))
             const product = (await productRef.get()).data()
             const today = dayjs()
             const expiredDate = today.add(7, 'day')
@@ -54,7 +54,7 @@ class PaymentChargeApi {
                     customer: payload.token ? null : `${payload.studentName} (${payload.nickname})`,
                     metadata: {
                         bookingCode,
-                        productId: payload.productId,
+                        courseId: payload.courseId,
                         productCode: product.code,
                         userId: payload.userId,
                         price: product.price,

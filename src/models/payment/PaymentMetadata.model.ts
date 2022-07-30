@@ -6,7 +6,7 @@ export class PaymentMetadataModel {
     bookingCode: string
 
     @JsonProperty()
-    productId: string
+    courseId: string
 
     @JsonProperty()
     userId: string

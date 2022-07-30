@@ -66,12 +66,12 @@ class HookPaymentBooking {
     private validateRequesting(body: PaymentEventBodyModel) {
         const {
             bookingCode = null,
-            productId = null,
+            courseId = null,
             userId = null,
             shippingAddressId = null,
         } = body.data.metadata as PaymentMetadataModel
         if (!bookingCode) throw badRequest('required bookingCode')
-        if (!productId) throw badRequest('required productId')
+        if (!courseId) throw badRequest('required productId')
         if (!userId) throw badRequest('required userId')
         if (!shippingAddressId) throw badRequest('required shippingAddressId')
     }
@@ -82,9 +82,9 @@ class HookPaymentBooking {
         failureCode: FailureCode = null
     ): Promise<string | null> {
         try {
-            const { bookingCode, productId, shippingAddressId, userId, startDate, endDate, price } = body.data.metadata
+            const { bookingCode, courseId, shippingAddressId, userId, startDate, endDate, price } = body.data.metadata
 
-            const course = this.#courseRef.doc(productId)
+            const course = this.#courseRef.doc(courseId)
             const user = this.#userRef.doc(userId)
             const shippingAddress = user
                 .collection('address')

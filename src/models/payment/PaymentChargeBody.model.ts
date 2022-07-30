@@ -31,7 +31,7 @@ export class PaymentChargeBodyModel implements CheckoutFormField {
 
     @JsonProperty()
     @IsString()
-    productId: string
+    courseId: string
 
     @JsonProperty()
     @IsString()

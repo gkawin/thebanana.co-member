@@ -28,7 +28,7 @@ export type CheckoutFormField = {
     datasetType: DatasetType
     paymentMethod: PaymentMethod
     userId: string
-    productId: string
+    courseId: string
 }
 
 const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
@@ -38,7 +38,7 @@ const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
     useEffect(() => {
         if (uid) {
             methods.register('userId', { value: uid })
-            methods.register('productId', { value: props.course.id })
+            methods.register('courseId', { value: props.course.id })
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [uid, props.course.id])
