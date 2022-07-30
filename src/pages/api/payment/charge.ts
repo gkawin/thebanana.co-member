@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 import runsWithMethods from '@/middleware/runsWithMethods'
-import { OmiseService } from '@/services/omise.service'
+import OmiseService from '@/services/omise.service'
 import resolver from '@/services/resolver'
 import { badRequest, Boom } from '@hapi/boom'
 import { NextApiHandler } from 'next'
@@ -21,7 +21,7 @@ import { CourseModel } from '@/models/course/course.model'
 @injectable()
 class PaymentChargeApi {
     #course: FirebaseFirestore.CollectionReference<CourseModel>
-    constructor(private readonly omise: OmiseService, private readonly sdk: AdminSDK) {
+    constructor(private readonly sdk: AdminSDK) {
         this.#course = this.sdk.db.collection('courses').withConverter(Model.convert(CourseModel))
     }
 
@@ -42,7 +42,7 @@ class PaymentChargeApi {
             const expiredDate = today.add(7, 'day')
             const bookingCode = BookingModel.generateBookingCode()
 
-            const chargedResult = await this.omise.charges
+            const chargedResult = await OmiseService.charges
                 .create({
                     amount: product.price * 100,
                     currency: 'thb',

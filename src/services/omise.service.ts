@@ -1,9 +1,7 @@
-const omise = require('omise')
-import { singleton } from 'tsyringe'
+import omise from 'omise'
 
-@singleton()
-export class OmiseService {
-    #instance: any
+class OmiseService {
+    #instance: omise.IOmise
 
     constructor() {
         this.#instance = omise({
@@ -20,3 +18,7 @@ export class OmiseService {
         return this.#instance.customers
     }
 }
+
+const o = new OmiseService()
+
+export default Object.freeze(o)
