@@ -1,24 +1,24 @@
-import { ProductModel } from '@/models/ProductModel'
 import { useAxios, useUserInfo } from '@/core/RootContext'
 import React from 'react'
 import { useRouter } from 'next/dist/client/router'
+import { CourseModel } from '@/models/course/course.model'
 
 export type ConfirmedProductFormProps = {
-    productInfo: ProductModel
+    courseInfo: CourseModel
 }
 
-export const ConfirmedProductForm: React.VFC<ConfirmedProductFormProps> = ({ productInfo }) => {
+export const ConfirmedProductForm: React.FC<ConfirmedProductFormProps> = ({ courseInfo }) => {
     const { uid } = useUserInfo()
     const axios = useAxios()
     const router = useRouter()
 
     const handleOnSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault()
-        await axios.post('/api/enrollment', { productId: productInfo.id, userId: uid })
+        await axios.post('/api/enrollment', { productId: courseInfo.id, userId: uid })
         router.push('/checkout')
     }
 
-    if (!productInfo) return null
+    if (!courseInfo) return null
 
     return (
         <form onSubmit={handleOnSubmit}>
@@ -26,9 +26,9 @@ export const ConfirmedProductForm: React.VFC<ConfirmedProductFormProps> = ({ pro
                 <h2 className="text-xl font-semibold">สรุปรายการลงทะเบียน</h2>
                 <div className="grid grid-flow-row">
                     <div>คอร์สเรียน</div>
-                    <div>{productInfo.name}</div>
+                    <div>{courseInfo.title}</div>
                     <div>ราคา</div>
-                    <div>{productInfo.pricing}</div>
+                    <div>{courseInfo.pricing}</div>
                 </div>
             </section>
 
