@@ -11,9 +11,6 @@ import { SelectPaymentMethod } from '@/components/checkout-flow/SelectPaymentMet
 import { PaymentChargesButton } from '@/components/checkout/PaymentChargesButton'
 import { PaymentStatusModal } from '@/components/checkout/PaymentStatusModal'
 import { CourseModel } from '@/models/course/course.model'
-import { RegistrationSummary } from '@/components/checkout/RegistrationSummary'
-import { BookingInfoCard } from '@/components/checkout/BookingInfoCard'
-import { AddressListCard } from '@/components/checkout/AddressListCard'
 import { useUserInfo } from '@/core/RootContext'
 import { useEffect } from 'react'
 import { serialize } from 'typescript-json-serializer'
@@ -53,16 +50,13 @@ const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
                 <title>จองและชำระเงิน</title>
             </Head>
             <h2 className="text-sub-title font-semibold">เลือกวิธีการชำระเงิน</h2>
+
             {!isBookingNotExist && (
                 <PaymentProvider courseId={props.course.id} amount={props.course.price}>
                     <PaymentStatusModal />
                     <FormProvider {...methods}>
                         <form className="grid gap-y-4">
-                            <CheckoutSummary>
-                                <RegistrationSummary name={props.course.title} price={props.course.price} />
-                                <BookingInfoCard />
-                                <AddressListCard />
-                            </CheckoutSummary>
+                            <CheckoutSummary course={props.course} />
                             <SelectPaymentMethod />
                             <PaymentChargesButton product={props.course} />
                         </form>

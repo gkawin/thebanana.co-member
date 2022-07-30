@@ -4,7 +4,7 @@ export type RegistrationSummaryProps = { name: string; price: number }
 
 const calcVAT = (price: number, ratio = 0.07) => Number(price * ratio)
 
-export const RegistrationSummary: React.VFC<RegistrationSummaryProps> = ({ name, price = 0 }) => {
+export const RegistrationSummary: React.FC<RegistrationSummaryProps> = ({ name, price = 0 }) => {
     return (
         <div className="p-4 border shadow-md rounded">
             <div className="grid grid-rows-2 grid-cols-2 gap-4 ">

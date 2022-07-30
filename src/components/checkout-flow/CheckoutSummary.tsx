@@ -1,22 +1,21 @@
-import { AddressListCard } from '@/components/checkout/AddressListCard'
-import { BookingInfoCard } from '@/components/checkout/BookingInfoCard'
-import { RegistrationSummary } from '@/components/checkout/RegistrationSummary'
 import { usePaymentContext } from '@/core/PaymentContext'
 import { PaymentStep } from '@/constants'
-import { CourseModel } from '@/models/course/course.model'
-import { PropsWithChildren } from 'react'
 
-export const CheckoutSummary: React.FC<PropsWithChildren> = ({ children }) => {
+import { BookingInfoCard } from '../checkout/BookingInfoCard'
+import { AddressListCard } from '../checkout/AddressListCard'
+import { RegistrationSummary } from '../checkout/RegistrationSummary'
+import type { CourseModel } from '@/models/course/course.model'
+
+export const CheckoutSummary: React.FC<{ course: CourseModel }> = ({ course }) => {
     const { step } = usePaymentContext()
 
     if (step !== PaymentStep.INIT) return null
 
     return (
         <>
-            {children}
-            {/* <RegistrationSummary name={product.title} price={product.price} />
+            <RegistrationSummary name={course.title} price={course.price} />
             <BookingInfoCard />
-            <AddressListCard /> */}
+            <AddressListCard />
         </>
     )
 }

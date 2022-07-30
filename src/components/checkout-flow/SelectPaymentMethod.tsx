@@ -7,12 +7,13 @@ import MasterCardImage from '@/public/mastercard.png'
 import VisaImage from '@/public/visa.png'
 import PromtPayLogo from '@/public/promt-pay-logo.png'
 
-export const SelectPaymentMethod: React.VFC = () => {
+export const SelectPaymentMethod: React.FC = () => {
     const {
         register,
         formState: { errors },
     } = useFormContext()
     const { step } = usePaymentContext()
+
     if (step !== PaymentStep.SELECT_PAYMENT_METHOD) return null
 
     const renderAcceptedCreditCardLogo = () => {
