@@ -1,7 +1,6 @@
 import { ProductCard } from '@/components/products/ProductCard'
 import useCourses from '@/concerns/use-courses'
 import { useUserInfo } from '@/core/RootContext'
-import { faAddressCard } from '@fortawesome/free-regular-svg-icons'
 import { faHistory } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Image from 'next/image'
