@@ -5,7 +5,6 @@ import { ok } from 'assert'
 import { AdminSDK } from '@/libs/adminSDK'
 import { injectable } from 'tsyringe'
 import resolver from '@/services/resolver'
-import runWithAuthorization from '@/middleware/runWithAuthorization'
 
 import Model from '@/models/Model'
 import { UserModelV2 } from '@/models/user/user.model'
@@ -18,7 +17,6 @@ class TokenApi {
     }
 
     main: NextApiHandler = async (req, res) => {
-        await runWithAuthorization(req, res, {})
         await runsWithMethods(req, res, { methods: ['POST'] })
 
         try {

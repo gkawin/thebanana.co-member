@@ -10,7 +10,6 @@ import { deserialize } from 'typescript-json-serializer'
 import { AdminSDK } from '@/libs/adminSDK'
 import Model, { withModel } from '@/models/Model'
 import { PaymentChargeBodyModel } from '@/models/payment/PaymentChargeBody.model'
-import runWithAuthorization from '@/middleware/runWithAuthorization'
 import dayjs from 'dayjs'
 import { PaymentMetadataModel } from '@/models/payment/PaymentMetadata.model'
 import { PaymentOmiseDataModel } from '@/models/payment/PaymentOmiseData.model'
@@ -27,7 +26,6 @@ class PaymentChargeApi {
     }
 
     main: NextApiHandler = async (req, res) => {
-        await runWithAuthorization(req, res, {})
         await runsWithMethods(req, res, { methods: ['POST'] })
         try {
             if (!req.body) throw badRequest()

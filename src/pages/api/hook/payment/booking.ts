@@ -2,7 +2,6 @@ import 'reflect-metadata'
 import { BookingStatus, FailureCode, PaymentMethod, SourceOfFund } from '@/constants'
 import { AdminSDK } from '@/libs/adminSDK'
 import runsWithMethods from '@/middleware/runsWithMethods'
-import runWithAuthorization from '@/middleware/runWithAuthorization'
 import { BookingModel } from '@/models/BookingModel'
 import Model from '@/models/Model'
 import { PaymentEventBodyModel } from '@/models/payment/PaymentEventBody.model'
@@ -30,7 +29,6 @@ class HookPaymentBooking {
     }
 
     main: NextApiHandler = async (req, res) => {
-        await runWithAuthorization(req, res, {})
         await runsWithMethods(req, res, { methods: ['POST'] })
 
         try {

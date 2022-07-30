@@ -2,7 +2,6 @@ import 'reflect-metadata'
 import runsWithMethods from '@/middleware/runsWithMethods'
 import { AdminSDK } from '@/libs/adminSDK'
 import { injectable } from 'tsyringe'
-import runWithAuthorization from '@/middleware/runWithAuthorization'
 import { NextApiHandler } from 'next'
 import { badRequest, Boom, notFound } from '@hapi/boom'
 import resolver from '@/services/resolver'
@@ -18,7 +17,6 @@ class UserCreatedApi {
     }
 
     main: NextApiHandler = async (req, res) => {
-        await runWithAuthorization(req, res, {})
         await runsWithMethods(req, res, { methods: ['POST'] })
 
         try {
