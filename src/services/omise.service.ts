@@ -1,23 +1,14 @@
-import omise from 'omise'
-import { injectable } from 'tsyringe'
+const omise = require('omise')
+import { singleton } from 'tsyringe'
 
-@injectable()
+@singleton()
 export class OmiseService {
-    static _instance: OmiseService
+    #instance: any
 
-    static getInstance() {
-        if (!OmiseService._instance) {
-            OmiseService._instance = new OmiseService()
-            return OmiseService._instance
-        }
-        return OmiseService._instance
-    }
-
-    #instance: omise.IOmise
     constructor() {
         this.#instance = omise({
-            publicKey: 'pkey_test_5q52539zzmb9psl4k9p',
-            secretKey: 'skey_test_5prhner7awkpj5pjd73',
+            publicKey: process.env.OMISE_PUBLIC_KEY,
+            secretKey: process.env.OMISE_SECRET_KEY,
         })
     }
 

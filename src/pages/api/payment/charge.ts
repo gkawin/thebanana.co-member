@@ -63,7 +63,7 @@ class PaymentChargeApi {
                         endDate: product.endDate,
                     } as PaymentMetadataModel,
                 })
-                .then((result) => deserialize(result, PaymentOmiseDataModel))
+                .then((result: any) => deserialize(result, PaymentOmiseDataModel))
 
             const response = withModel(ChargeResultModel)
             const paymentMethod =
