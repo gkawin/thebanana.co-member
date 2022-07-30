@@ -1,11 +1,12 @@
 import { DatasetType } from '@/constants'
-import { useUser } from '@/core/RootContext'
+import { useUserInfo } from '@/core/RootContext'
 import type { PaymentChargeBodyModel } from '@/models/payment/PaymentChargeBody.model'
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 export const BookingInfoCard: React.FC = () => {
-    const { personal, schools } = useUser()
+    const { personal, schools } = useUserInfo()
+
     const {
         register,
         watch,
@@ -14,50 +15,23 @@ export const BookingInfoCard: React.FC = () => {
         formState: { errors },
     } = useFormContext<PaymentChargeBodyModel>()
 
-    const datasetType = watch('datasetType', DatasetType.EXISITING)
+    const datasetType = watch('datasetType', DatasetType.CREATED_NEW)
+
     useEffect(() => {
         setValue('studentName', personal?.fullname ?? '')
         setValue('nickname', personal?.nickname ?? '')
         setValue('school', schools[0]?.school)
     }, [datasetType, personal, resetField, schools, setValue])
 
-    const isReadonly = datasetType === DatasetType.EXISITING
     return (
         <div className="p-4 rounded shadow-md border flex flex-col">
             <h2 className="text-2xl font-semibold">รายละเอียดผู้เรียน</h2>
-            <div className="py-2">
-                <span>
-                    <input
-                        id="dataset_existing"
-                        className="form-radio"
-                        type="radio"
-                        value={DatasetType.EXISITING}
-                        defaultChecked
-                        {...register('datasetType', { required: 'กรุณาเลือก' })}
-                    />
-                    <label htmlFor="dataset_existing" className="ml-4">
-                        เลือกข้อมูลที่มีอยู่แล้ว
-                    </label>
-                </span>
-                <span className="ml-4">
-                    <input
-                        id="dataset_new"
-                        className="form-radio"
-                        type="radio"
-                        value={DatasetType.CREATED_NEW}
-                        {...register('datasetType', { required: 'กรุณาเลือก' })}
-                    />
-                    <label htmlFor="dataset_new" className="ml-4">
-                        กรอกข้อมูลใหม่
-                    </label>
-                </span>
-            </div>
+
             <label htmlFor="studentName">ชื่อผู้เรียน</label>
             <input
                 type="text"
-                className={`form-input rounded ${isReadonly ? 'bg-gray-200' : 'bg-transparent'}`}
+                className="form-input rounded"
                 id="studentName"
-                readOnly={isReadonly}
                 {...register('studentName', { required: 'กรุณาระบุ' })}
             />
             <small className="text-red-500 mb-2">{errors.studentName?.message}</small>
@@ -65,9 +39,8 @@ export const BookingInfoCard: React.FC = () => {
             <label htmlFor="nickname">ชื่อเล่น</label>
             <input
                 type="text"
-                className={`form-input rounded ${isReadonly ? 'bg-gray-200' : 'bg-transparent'}`}
+                className="form-input rounded"
                 id="nickname"
-                readOnly={isReadonly}
                 {...register('nickname', { required: 'กรุณาระบุ' })}
             />
             <small className="text-red-500 mb-2">{errors.nickname?.message}</small>
@@ -75,9 +48,8 @@ export const BookingInfoCard: React.FC = () => {
             <label htmlFor="school">โรงเรียน</label>
             <input
                 type="text"
-                className={`form-input rounded ${isReadonly ? 'bg-gray-200' : 'bg-transparent'}`}
+                className="form-input rounded"
                 id="school"
-                readOnly={isReadonly}
                 {...register('school', { required: 'กรุณาระบุ' })}
             />
             <small className="text-red-500 mb-2">{errors.school?.message}</small>

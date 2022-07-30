@@ -1,7 +1,7 @@
-import { useUser } from '@/core/RootContext'
+import { useUserInfo } from '@/core/RootContext'
 
 export const UserCard: React.VFC = () => {
-    const { lineProfile } = useUser()
+    const { lineProfile } = useUserInfo()
 
     return (
         <div className="border-none  bg-gradient-to-b from-yellow-200 to-yellow-500 p-4">

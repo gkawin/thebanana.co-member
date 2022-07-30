@@ -7,19 +7,19 @@ import { useAxios } from './RootContext'
 
 export type PaymentContextProps = {
     step: PaymentStep
-    productId: string
+    courseId: string
     chargeResult?: ChargeResultModel
     setPaymentStep: (step: PaymentStep) => void
     createOmiseCharges: (formData: CheckoutFormField, method: PaymentMethod) => void
 }
 
-export type PaymentProviderProps = { productId: string; amount: number }
+export type PaymentProviderProps = { courseId: string; amount: number }
 
 const PaymentContext = createContext<PaymentContextProps>(null)
 
 export const PaymentProvider: React.FC<PropsWithChildren<PaymentProviderProps>> = ({
     children,
-    productId,
+    courseId,
     amount = 0,
 }) => {
     const [step, setPaymentStep] = useState<PaymentStep>(PaymentStep.INIT)
@@ -79,7 +79,7 @@ export const PaymentProvider: React.FC<PropsWithChildren<PaymentProviderProps>> 
     )
 
     return (
-        <PaymentContext.Provider value={{ productId, setPaymentStep, step, createOmiseCharges, chargeResult }}>
+        <PaymentContext.Provider value={{ courseId, setPaymentStep, step, createOmiseCharges, chargeResult }}>
             <Script type="text/javascript" src="https://cdn.omise.co/omise.js"></Script>
             {children}
         </PaymentContext.Provider>

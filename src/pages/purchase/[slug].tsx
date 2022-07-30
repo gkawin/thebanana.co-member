@@ -2,7 +2,6 @@ import { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import adminSDK from '@/libs/adminSDK'
 import Model from '@/models/Model'
-import { serialize } from 'typescript-json-serializer'
 import { FormProvider, useForm } from 'react-hook-form'
 import Link from 'next/link'
 import { BookingStatus, DatasetType, PaymentMethod } from '@/constants'
@@ -10,13 +9,17 @@ import { CheckoutSummary } from '@/components/checkout-flow/CheckoutSummary'
 import { PaymentProvider } from '@/core/PaymentContext'
 import { SelectPaymentMethod } from '@/components/checkout-flow/SelectPaymentMethod'
 import { PaymentChargesButton } from '@/components/checkout/PaymentChargesButton'
-import { useEffect } from 'react'
-import { useUser } from '@/core/RootContext'
 import { PaymentStatusModal } from '@/components/checkout/PaymentStatusModal'
 import { CourseModel } from '@/models/course/course.model'
+import { RegistrationSummary } from '@/components/checkout/RegistrationSummary'
+import { BookingInfoCard } from '@/components/checkout/BookingInfoCard'
+import { AddressListCard } from '@/components/checkout/AddressListCard'
+import { useUserInfo } from '@/core/RootContext'
+import { useEffect } from 'react'
+import { serialize } from 'typescript-json-serializer'
 
 export type CheckoutPageProps = {
-    product: CourseModel
+    course: CourseModel
     bookingStatus: BookingStatus
 }
 
@@ -33,17 +36,17 @@ export type CheckoutFormField = {
 
 const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
     const methods = useForm<CheckoutFormField>()
-    const { uid } = useUser()
+    const { uid } = useUserInfo()
 
     useEffect(() => {
         if (uid) {
             methods.register('userId', { value: uid })
-            methods.register('productId', { value: props.product.id })
+            methods.register('productId', { value: props.course.id })
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [uid, props.product.id])
+    }, [uid, props.course.id])
 
-    const isBookingNotExist = !props.product
+    const isBookingNotExist = !props.course
     return (
         <div className="p-4">
             <Head>
@@ -51,13 +54,17 @@ const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
             </Head>
             <h2 className="text-sub-title font-semibold">เลือกวิธีการชำระเงิน</h2>
             {!isBookingNotExist && (
-                <PaymentProvider productId={props.product.id} amount={props.product.price}>
+                <PaymentProvider courseId={props.course.id} amount={props.course.price}>
                     <PaymentStatusModal />
                     <FormProvider {...methods}>
                         <form className="grid gap-y-4">
-                            <CheckoutSummary product={props.product} />
+                            <CheckoutSummary>
+                                <RegistrationSummary name={props.course.title} price={props.course.price} />
+                                <BookingInfoCard />
+                                <AddressListCard />
+                            </CheckoutSummary>
                             <SelectPaymentMethod />
-                            <PaymentChargesButton product={props.product} />
+                            <PaymentChargesButton product={props.course} />
                         </form>
                     </FormProvider>
                 </PaymentProvider>
@@ -75,27 +82,29 @@ const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
     )
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ params }) => {
+export const getServerSideProps: GetServerSideProps<CheckoutPageProps> = async ({ params }) => {
     const { db } = adminSDK()
     const slug = String(params.slug)
-    const productCol = await db
+
+    const courseCol = await db
         .collection('courses')
         .withConverter(Model.convert(CourseModel))
         .orderBy('slug')
         .startAt(slug)
         .endAt(`${slug}\uf8ff`)
+        .limit(1)
         .get()
 
-    if (productCol.empty) {
+    if (courseCol.empty) {
         return { notFound: true, props: { slug: null, product: null } } as any
     }
 
-    const product = productCol.docs[0].data()
+    const course = courseCol.docs[0].data()
 
     return {
         props: {
             slug,
-            product: serialize(product),
+            course: serialize(course),
         },
     }
 }

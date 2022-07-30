@@ -11,6 +11,8 @@ import { Liff } from '@liff/liff-types'
 import { SpinLoading } from '@/components/portal/SpinLoading'
 import { Curtain } from '@/components/portal/Curtain'
 import SignUpPage from '@/components/signup/SignupPage'
+import { getDoc, getDocs, getFirestore } from 'firebase/firestore'
+import { schoolCollection, userDoc } from '@/concerns/query'
 
 const liffId = '1653826193-QbmamAo0'
 const firebaseConfig = {
@@ -37,17 +39,27 @@ export type AppContext = {
 
 export type AuthenticationResponse = { authenticationCode: string; alreadyMember: boolean }
 
-const appContext = createContext<AppContext>(null)
+export const appContext = createContext<AppContext>(null)
 
 export const useAxios = () => {
     const { $axios } = useContext(appContext)
     return useMemo(() => $axios, [$axios])
 }
 
-export const useUser = () => {
+export const useUserInfo = () => {
     const ctx = useContext(appContext)
     if (!ctx.alreadyMember && !ctx.initilized) throw Error('Please Login')
-    return useMemo(() => ({ uid: ctx.$userInfo.uid, profile: ctx.$userInfo.lineProfile }), [ctx.$userInfo])
+
+    return useMemo(
+        () => ({
+            uid: ctx.$userInfo.uid,
+            profile: ctx.$userInfo.lineProfile,
+            personal: ctx.$userInfo.personal,
+            schools: ctx.$userInfo.schools,
+        }),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [ctx.$userInfo.uid]
+    )
 }
 
 const createLiff = async () => {
@@ -121,11 +133,21 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
 
                 const lineProfile = await window.liff.getProfile()
 
+                const db = getFirestore()
+                const createQueryUserInfo = getDoc(userDoc(db, user.uid))
+                const createQuerySchools = getDocs(schoolCollection(db, user.uid))
+                const [personal, schools] = await Promise.all([createQueryUserInfo, createQuerySchools])
+
                 setContext((state) => ({
                     ...state,
                     alreadyMember: true,
                     $axios: axiosInstance,
-                    $userInfo: { uid: user.uid, lineProfile },
+                    $userInfo: {
+                        uid: user.uid,
+                        lineProfile,
+                        personal: personal.data(),
+                        schools: schools.docs.map((doc) => doc.data()),
+                    },
                 }))
             }
             setLoading(false)

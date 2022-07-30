@@ -7,7 +7,7 @@ import { useFormContext } from 'react-hook-form'
 
 export type PaymentChargesButtonProps = { product: CourseModel }
 
-export const PaymentChargesButton: React.VFC<PaymentChargesButtonProps> = ({ product }) => {
+export const PaymentChargesButton: React.FC<PaymentChargesButtonProps> = ({ product }) => {
     const { step, setPaymentStep, createOmiseCharges } = usePaymentContext()
     const { handleSubmit } = useFormContext<CheckoutFormField>()
 

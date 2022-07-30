@@ -1,4 +1,4 @@
-import { useAxios, useUser } from '@/core/RootContext'
+import { useAxios, useUserInfo } from '@/core/RootContext'
 import { addDoc, collection, getFirestore } from 'firebase/firestore'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -44,7 +44,7 @@ export const NewAddressForm: React.VFC<NewAddressFormProps> = ({ enabled = true 
     } = useForm<NewAddressFormFields>()
     const $axios = useAxios()
     const db = getFirestore()
-    const { uid } = useUser()
+    const { uid } = useUserInfo()
     const [isOpen, setIsOpen] = useState(false)
     const [addrOptions, setAddrOptions] = useState<NewAddressFormFields[]>([])
     const [isLoading, setIsLoading] = useState(false)

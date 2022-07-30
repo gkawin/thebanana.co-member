@@ -1,5 +1,5 @@
 import { BookingGroup, BookingStatus, FailureCode, PaymentMethod } from '@/constants'
-import { useUser } from '@/core/RootContext'
+import { useUserInfo } from '@/core/RootContext'
 import { BookingModel, ReceiptModel } from '@/models/BookingModel'
 import { CourseModel } from '@/models/course/course.model'
 import Model from '@/models/Model'
@@ -36,7 +36,7 @@ export type BookingInfo = {
 export default function useMyBooking(options?: { bookingCode?: string; bookingGroup?: BookingGroup }) {
     const [items, setItems] = useState<BookingInfo[]>([])
     const db = getFirestore()
-    const { uid } = useUser()
+    const { uid } = useUserInfo()
     const [bookingGroup, setBookingGroup] = useState<BookingGroup>(options?.bookingGroup ?? BookingGroup.UpComming)
 
     const queryBooinkGroupCondition = () => {

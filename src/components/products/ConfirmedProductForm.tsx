@@ -1,5 +1,5 @@
 import { ProductModel } from '@/models/ProductModel'
-import { useAxios, useUser } from '@/core/RootContext'
+import { useAxios, useUserInfo } from '@/core/RootContext'
 import React from 'react'
 import { useRouter } from 'next/dist/client/router'
 
@@ -8,7 +8,7 @@ export type ConfirmedProductFormProps = {
 }
 
 export const ConfirmedProductForm: React.VFC<ConfirmedProductFormProps> = ({ productInfo }) => {
-    const { uid } = useUser()
+    const { uid } = useUserInfo()
     const axios = useAxios()
     const router = useRouter()
 

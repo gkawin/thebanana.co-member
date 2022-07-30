@@ -4,7 +4,7 @@ import { faArrowLeft, faQrcode, faDownload } from '@fortawesome/free-solid-svg-i
 import { getDownloadURL, getStorage, ref } from 'firebase/storage'
 
 import { GetServerSideProps, NextPage } from 'next'
-import { useUser } from '@/core/RootContext'
+import { useUserInfo } from '@/core/RootContext'
 import { BookingStatus, PaymentMethod, PaymentMethodLabel } from '@/constants'
 import Link from 'next/link'
 import { withThaiDateFormat } from '@/utils/date'
@@ -15,7 +15,7 @@ export type MyEditBookingProps = {
 }
 
 const MyEditBooking: NextPage<MyEditBookingProps> = ({ bookingCode }) => {
-    const { personal, schools } = useUser()
+    const { personal, schools } = useUserInfo()
     const { items } = useMyBooking({ bookingCode })
     const bookingInfo = items[0]
     const [receiptUrl, setReceiptUrl] = useState<string>('')

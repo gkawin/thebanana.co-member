@@ -1,6 +1,6 @@
 import { ProductCard } from '@/components/products/ProductCard'
 import useCourses from '@/concerns/use-courses'
-import { useUser } from '@/core/RootContext'
+import { useUserInfo } from '@/core/RootContext'
 import { faAddressCard } from '@fortawesome/free-regular-svg-icons'
 import { faHistory } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -9,7 +9,7 @@ import Link from 'next/link'
 
 export default function Home() {
     const courses = useCourses()
-    const { profile } = useUser()
+    const { profile } = useUserInfo()
 
     return (
         <section className="container mx-auto">

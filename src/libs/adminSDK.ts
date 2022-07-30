@@ -1,6 +1,6 @@
 import 'reflect-metadata'
-import * as firestore from 'firebase-admin/firestore'
-import * as auth from 'firebase-admin/auth'
+import { getFirestore } from 'firebase-admin/firestore'
+import { getAuth } from 'firebase-admin/auth'
 import { initializeApp, cert, getApps } from 'firebase-admin/app'
 import { singleton } from 'tsyringe'
 
@@ -17,8 +17,8 @@ const adminSDK = () => {
     }
 
     return {
-        db: firestore.getFirestore(),
-        auth: auth.getAuth(),
+        db: getFirestore(),
+        auth: getAuth(),
     }
 }
 
@@ -39,10 +39,10 @@ export class AdminSDK {
     }
 
     get db() {
-        return firestore.getFirestore()
+        return getFirestore()
     }
 
     get auth() {
-        return auth.getAuth()
+        return getAuth()
     }
 }
