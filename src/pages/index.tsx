@@ -31,19 +31,19 @@ export default function Home() {
                     <h2 className="font-light text-gray-700 text-sm">{profile.statusMessage}</h2>
                 </div>
             </div>
-            <div className="grid grid-cols-2 gap-4 py-4">
+            <div className="grid grid-flow-col gap-4 py-4">
                 <Link href="/my/booking">
                     <a className="rounded border border-gray-200 shadow p-4 flex flex-col items-center hover:-translate-y-1 hover:shadow-lg transition duration-150">
                         <FontAwesomeIcon icon={faHistory} size="2x" />
                         <span>การจองของฉัน</span>
                     </a>
                 </Link>
-                <Link href="/my/info">
+                {/* <Link href="/my/info">
                     <a className="rounded border border-gray-200 shadow p-4 flex flex-col items-center hover:-translate-y-1 hover:shadow-lg transition duration-150">
                         <FontAwesomeIcon icon={faAddressCard} size="2x" />
                         <span>ข้อมูลส่วนตัว</span>
                     </a>
-                </Link>
+                </Link> */}
             </div>
             <h2 className="text-2xl font-semibold">กำลังเปิดรับสมัคร</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-4">

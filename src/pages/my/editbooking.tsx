@@ -20,6 +20,8 @@ const MyEditBooking: NextPage<MyEditBookingProps> = ({ bookingCode }) => {
     const bookingInfo = items[0]
     const [receiptUrl, setReceiptUrl] = useState<string>('')
 
+    console.log(bookingInfo, bookingCode)
+
     useEffect(() => {
         if (bookingInfo?.receipt) {
             const generateDownloadableReceiptLink = async (filePath: string) => {
@@ -51,18 +53,20 @@ const MyEditBooking: NextPage<MyEditBookingProps> = ({ bookingCode }) => {
                     <div>{PaymentMethodLabel.get(bookingInfo.paymentMethod)}</div>
                 </div>
                 {[BookingStatus.PAID, BookingStatus.EXPIRED].includes(bookingInfo.status) && (
-                    <div className="py-4">
-                        <div>ใบเสร็จ/ใบกำกับภาษี</div>
-                        {!bookingInfo.receipt && <div>ไม่มีรายการใบเสร็จ/ใบกำกับภาษี</div>}
-                        {bookingInfo.receipt && (
-                            <Link href={receiptUrl}>
-                                <a target="_blank" className="text-sm text-gray-500 flex justify-between">
-                                    <span className="underline">{bookingInfo.receipt.receiptId}</span>
-                                    <FontAwesomeIcon icon={faDownload} />
-                                </a>
-                            </Link>
-                        )}
-                    </div>
+                    <>
+                        <div className="py-4">
+                            <div>ใบเสร็จ/ใบกำกับภาษี</div>
+                            {!bookingInfo.receipt && <div>ไม่มีรายการใบเสร็จ/ใบกำกับภาษี</div>}
+                            {bookingInfo.receipt && (
+                                <Link href={receiptUrl}>
+                                    <a target="_blank" className="text-sm text-gray-500 flex justify-between">
+                                        <span className="underline">{bookingInfo.receipt.receiptId}</span>
+                                        <FontAwesomeIcon icon={faDownload} />
+                                    </a>
+                                </Link>
+                            )}
+                        </div>
+                    </>
                 )}
                 {[BookingStatus.CREATED].includes(bookingInfo.status) &&
                     bookingInfo.paymentMethod === PaymentMethod.PROMPT_PAY && (

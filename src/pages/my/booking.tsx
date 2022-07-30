@@ -3,12 +3,20 @@ import useMyBooking from '@/concerns/use-my-booking'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { withThaiDateFormat } from '@/utils/date'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 
 const MyBookingPage: NextPage = () => {
     const { items, setBookingGroup, bookingGroup } = useMyBooking()
 
     return (
         <div className="container py-4">
+            <Link href="/">
+                <a className="text-indigo-500 ">
+                    <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
+                    กลับหน้าหลัก
+                </a>
+            </Link>
             <h1 className="text-title">การจองของฉัน</h1>
             <BookingFilterPanel setBookingGroup={setBookingGroup} bookingGroup={bookingGroup} />
             <table className="w-full text-sm text-left text-gray-500">

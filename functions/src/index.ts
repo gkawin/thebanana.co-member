@@ -116,7 +116,8 @@ export const generateReceipt = func
             },
         })
 
-        db.collection('booking')
+        await db
+            .collection('booking')
             .doc(bookingCode)
             .update({
                 receipt: {
@@ -126,7 +127,6 @@ export const generateReceipt = func
                     createdAt: new Date(),
                 },
             })
-            .then(() => {
-                console.timeEnd(`saving pdf file ${filepath}`)
-            })
+
+        console.timeEnd(`saving pdf file ${filepath}`)
     })

@@ -14,6 +14,8 @@ import { CourseModel } from '@/models/course/course.model'
 import { useUserInfo } from '@/core/RootContext'
 import { useEffect } from 'react'
 import { serialize } from 'typescript-json-serializer'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 
 export type CheckoutPageProps = {
     course: CourseModel
@@ -49,6 +51,12 @@ const PurchasePage: NextPage<CheckoutPageProps> = (props) => {
             <Head>
                 <title>จองและชำระเงิน</title>
             </Head>
+            <Link href="/">
+                <a className="text-indigo-500 pb-4 block">
+                    <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
+                    กลับหน้าหลัก
+                </a>
+            </Link>
             <h2 className="text-sub-title font-semibold">เลือกวิธีการชำระเงิน</h2>
 
             {!isBookingNotExist && (
