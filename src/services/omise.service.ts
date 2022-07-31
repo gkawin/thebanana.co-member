@@ -6,8 +6,6 @@ import { singleton } from 'tsyringe'
 export class OmiseService {
     #api: AxiosInstance = null
 
-    protected omiseVersion: '2019-05-29'
-
     private static instance: OmiseService = null
 
     private static init() {
@@ -22,7 +20,7 @@ export class OmiseService {
             baseURL: 'https://api.omise.co',
             headers: {
                 'User-Agent': `omise-nodejs/${process.env.npm_package_version ?? '0.0.1'}`,
-                'Omise-Version': this.omiseVersion,
+                'Omise-Version': "2019-05-29'",
             },
             auth: {
                 username: process.env.OMISE_SECRET_KEY,
@@ -34,13 +32,10 @@ export class OmiseService {
     get charges() {
         const instance = OmiseService.init()
         return {
-            create: (req: Charges.IRequest) =>
-                instance.#api.post('/charges', req, { headers: { Authorization: 'Basic' } }),
+            create: async (req: Charges.IRequest) => {
+                const response = await instance.#api.post('/charges', req, { headers: { Authorization: 'Basic' } })
+                return response.data
+            },
         }
     }
-
-    // get customers() {
-    //     const instance = OmiseService.init()
-    //     return instance.customers
-    // }
 }
