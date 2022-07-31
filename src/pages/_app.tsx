@@ -1,7 +1,7 @@
 import '../styles/globals.css'
 import RootContext from '@/core/RootContext'
 import Head from 'next/head'
-import App, { AppContext, AppProps } from 'next/app'
+import { AppProps } from 'next/app'
 import { createElement } from 'react'
 import ReactModal from 'react-modal'
 
@@ -20,10 +20,4 @@ export default function MyApp({ Component, pageProps }: AppProps) {
             <RootContext>{createElement(Component, pageProps)}</RootContext>
         </>
     )
-}
-
-MyApp.getInitialProps = async (context: AppContext) => {
-    const pageProps = await App.getInitialProps(context)
-
-    return pageProps
 }
