@@ -1,6 +1,8 @@
 import omise from 'omise'
+import { singleton } from 'tsyringe'
 
-class OmiseService {
+@singleton()
+export class OmiseService {
     #instance: omise.IOmise
 
     constructor() {
@@ -18,9 +20,3 @@ class OmiseService {
         return this.#instance.customers
     }
 }
-
-const o = new OmiseService()
-
-console.log(o)
-
-export default Object.freeze(o)
