@@ -1,15 +1,12 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import puppeteer from 'puppeteer'
-import Handlebars from 'handlebars'
-
-import fs from 'fs'
-import path from 'path'
 
 import { withThaiDateFormat } from '../../src/utils/date'
 import thaiBath from '../../src/utils/thai-bath'
 import { withPricing } from '../../src/utils/payment'
-import { PaymentMethodLabel } from '../../src/constants'
+import { BookingStatus, PaymentMethodLabel } from '../../src/constants'
+import { generateReceiptFromHtml } from './receipt'
 
 admin.initializeApp()
 
@@ -17,55 +14,26 @@ const func = functions.region('asia-southeast1')
 const storage = admin.storage().bucket()
 const db = admin.firestore()
 
-Handlebars.registerHelper('math', function (lvalue, operator, rvalue): any {
-    lvalue = parseFloat(lvalue)
-    rvalue = parseFloat(rvalue)
-
-    return {
-        '+': lvalue + rvalue,
-        '-': lvalue - rvalue,
-        '*': lvalue * rvalue,
-        '/': lvalue / rvalue,
-        '%': lvalue % rvalue,
-    }[operator]
-})
-
-type ReceiptTemplateProps = {
-    parentName: string
-    address: string
-    buyerTaxId?: string
-    receiptId: string
-    createdAt: string
-    totalPricing: string
-    totalPricingThai: string
-    listCoursesEnrolled: { uid?: string; course: string; session: string; pricing: number }[]
-    isShownBuyerTaxId: boolean
-    studentName: string
-    nickname: string
-    paymentMethodLabel: string
-}
-
 export const generateReceipt = func
     .runWith({ memory: '1GB', timeoutSeconds: 540 })
     .firestore.document('/booking/{bookingCode}')
-    .onCreate(async (change, context) => {
-        const bufferString = fs.readFileSync(path.resolve(__dirname, './html/receipt-template.handlebars'))
-        const template = Handlebars.compile<ReceiptTemplateProps>(bufferString.toString('utf-8'))
-
+    .onWrite(async (change, context) => {
+        const { status, receipt, ...info } = change.after.data()
         const bookingCode = context.params.bookingCode
-        const info = change.data()
+        const receiptId = `rcpt_${bookingCode}`
+
+        console.log(JSON.stringify({ bookingCode, receiptId, status }))
+
+        if (status !== BookingStatus.PAID || receipt) return
+
         const userRef = info?.user as FirebaseFirestore.DocumentReference
 
-        if (!userRef) {
-            console.error(`User ${userRef} not exist.`)
-        }
+        if (!userRef) return
 
-        const receiptId = `rcpt_${bookingCode}`
         const courseRef = info?.course as FirebaseFirestore.DocumentReference
         const { title: courseTitle = '', session: courseSession = '' } = (await courseRef.get()).data()
         const userId = (await userRef.get()).id
         const { nickname = '', firstname = '', lastname = '' } = (await userRef.get()).data()
-
         const shippingAddressRef = info?.shippingAddress as FirebaseFirestore.DocumentReference
         const address = (await shippingAddressRef.get()).data()?.address ?? ''
 
@@ -76,24 +44,21 @@ export const generateReceipt = func
         })
         const page = await browser.newPage()
 
-        await page.setContent(
-            template({
-                address,
-                isShownBuyerTaxId: false,
-                createdAt: withThaiDateFormat(new Date().toISOString()),
-                parentName: 'test',
-                receiptId,
-                totalPricing: withPricing(info?.price ?? 0),
-                listCoursesEnrolled: [{ course: courseTitle, session: courseSession, pricing: info?.price }],
-                totalPricingThai: thaiBath(info?.price ?? 0),
-                nickname,
-                studentName: `${firstname} ${lastname}`,
-                paymentMethodLabel: PaymentMethodLabel.get(info?.paymentMethod),
-            }),
-            {
-                waitUntil: 'networkidle2',
-            }
-        )
+        const dehydrateHtml = generateReceiptFromHtml({
+            address,
+            isShownBuyerTaxId: false,
+            createdAt: withThaiDateFormat(new Date().toISOString()),
+            parentName: 'test',
+            receiptId,
+            totalPricing: withPricing(info?.price ?? 0),
+            listCoursesEnrolled: [{ course: courseTitle, session: courseSession, pricing: info?.price }],
+            totalPricingThai: thaiBath(info?.price ?? 0),
+            nickname,
+            studentName: `${firstname} ${lastname}`,
+            paymentMethodLabel: PaymentMethodLabel.get(info?.paymentMethod),
+        })
+
+        await page.setContent(dehydrateHtml, { waitUntil: 'networkidle2' })
 
         const pdf = await page.pdf({
             format: 'A4',
@@ -103,9 +68,7 @@ export const generateReceipt = func
         await browser.close()
 
         const filepath = `receipts/${userId}/${receiptId}.pdf`
-
         console.time(`saving pdf file ${filepath}`)
-
         const file = storage.file(filepath)
 
         await file.save(pdf, {
@@ -115,7 +78,6 @@ export const generateReceipt = func
                 userId,
             },
         })
-
         await db
             .collection('booking')
             .doc(bookingCode)
@@ -126,6 +88,7 @@ export const generateReceipt = func
                     filepath,
                     createdAt: new Date(),
                 },
+                status: BookingStatus.PAID,
             })
 
         console.timeEnd(`saving pdf file ${filepath}`)

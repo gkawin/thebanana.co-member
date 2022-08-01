@@ -10,7 +10,7 @@
         "deploy": "firebase deploy --only functions",
         "logs": "firebase functions:log",
         "build:watch": "concurrently --kill-others \"tsc -w\"",
-        "serve:watch": "npm run build:watch | firebase emulators:start --only functions,storage,firestore"
+        "serve:watch": "npm run build:watch | firebase emulators:start --import ../export --only functions,storage,firestore"
     },
     "engines": {
         "node": "16"
@@ -19,7 +19,7 @@
     "dependencies": {
         "dayjs": "^1.11.3",
         "firebase-admin": "^9.8.0",
-        "firebase-functions": "^3.21.2",
+        "firebase-functions": "^3.22.0",
         "handlebars": "^4.7.7",
         "puppeteer": "^14.2.1"
     },

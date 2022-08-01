@@ -103,6 +103,7 @@ class HookPaymentBooking {
                 endDate,
                 price,
                 failureCode,
+                receipt: null,
             })
             console.log(result)
             return bookingCode

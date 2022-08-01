@@ -7,9 +7,9 @@
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
-        "serve": "yarn build && firebase emulators:start --only functions,hosting",
-        "shell": "yarn build && firebase functions:shell",
-        "deploy": "firebase deploy --only functions,hosting",
+        "serve": "firebase emulators:start --only functions,hosting,firestore",
+        "shell": "firebase functions:shell",
+        "deploy": "firebase deploy",
         "logs": "firebase functions:log"
     },
     "dependencies": {
