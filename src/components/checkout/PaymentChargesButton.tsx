@@ -31,8 +31,8 @@ export const PaymentChargesButton: React.FC<PaymentChargesButtonProps> = ({ prod
     return (
         <>
             <button
-                disabled={loading || !!chargeResult}
-                className="bg-indigo-700 rounded p-2 text-white"
+                disabled={loading}
+                className={`rounded p-2 text-white ${loading ? 'bg-indigo-300' : 'bg-indigo-700'}`}
                 type="button"
                 onClick={handleSubmit(onClick)}
             >
