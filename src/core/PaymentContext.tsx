@@ -11,6 +11,7 @@ export type PaymentContextProps = {
     chargeResult?: ChargeResultModel
     setPaymentStep: (step: PaymentStep) => void
     createOmiseCharges: (formData: CheckoutFormField, method: PaymentMethod) => void
+    loading: boolean
 }
 
 export type PaymentProviderProps = { courseId: string; amount: number }
@@ -24,14 +25,18 @@ export const PaymentProvider: React.FC<PropsWithChildren<PaymentProviderProps>> 
 }) => {
     const [step, setPaymentStep] = useState<PaymentStep>(PaymentStep.INIT)
     const [chargeResult, setChargeResult] = useState<ChargeResultModel>(null)
+    const [loading, setLoading] = useState(false)
     const { post } = useAxios()
 
     const handleChargeApi = useCallback(async (formData: { token?: string; source?: string } & Record<string, any>) => {
         try {
+            setLoading(true)
             const chargeResult = await post('/api/payment/charge', formData)
             setChargeResult(chargeResult.data)
         } catch (error) {
             setChargeResult(error as ChargeResultModel)
+        } finally {
+            setLoading(false)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
@@ -79,7 +84,7 @@ export const PaymentProvider: React.FC<PropsWithChildren<PaymentProviderProps>> 
     )
 
     return (
-        <PaymentContext.Provider value={{ courseId, setPaymentStep, step, createOmiseCharges, chargeResult }}>
+        <PaymentContext.Provider value={{ courseId, setPaymentStep, step, createOmiseCharges, chargeResult, loading }}>
             <Script type="text/javascript" src="https://cdn.omise.co/omise.js"></Script>
             {children}
         </PaymentContext.Provider>
