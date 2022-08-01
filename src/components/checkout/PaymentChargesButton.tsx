@@ -3,13 +3,12 @@ import { usePaymentContext } from '@/core/PaymentContext'
 import { CourseModel } from '@/models/course/course.model'
 import type { CheckoutFormField } from '@/pages/purchase/[slug]'
 import { withPricing } from '@/utils/payment'
-import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 export type PaymentChargesButtonProps = { product: CourseModel }
 
 export const PaymentChargesButton: React.FC<PaymentChargesButtonProps> = ({ product }) => {
-    const { step, setPaymentStep, createOmiseCharges, chargeResult, loading } = usePaymentContext()
+    const { step, setPaymentStep, createOmiseCharges, loading } = usePaymentContext()
     const { handleSubmit } = useFormContext<CheckoutFormField>()
 
     const onClick = async (data: CheckoutFormField) => {
