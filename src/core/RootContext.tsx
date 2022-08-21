@@ -13,6 +13,7 @@ import { Curtain } from '@/components/portal/Curtain'
 import SignUpPage from '@/components/signup/SignupPage'
 import { getDoc, getDocs, getFirestore } from 'firebase/firestore'
 import { schoolCollection, userDoc } from '@/concerns/query'
+import { Portal } from '@/components/portal/Portal'
 
 const liffId = '1653826193-QbmamAo0'
 const firebaseConfig = {
@@ -35,6 +36,9 @@ export type AppContext = {
         lineProfile?: Unpromise<ReturnType<Liff['getProfile']>>
     }
     initilized: boolean
+    loading: VoidFunction
+    loaded: VoidFunction
+    isLoading: boolean
 } & AuthenticationResponse
 
 export type AuthenticationResponse = { authenticationCode: string; alreadyMember: boolean }
@@ -42,8 +46,30 @@ export type AuthenticationResponse = { authenticationCode: string; alreadyMember
 export const appContext = createContext<AppContext>(null)
 
 export const useAxios = () => {
-    const { $axios } = useContext(appContext)
-    return useMemo(() => $axios, [$axios])
+    const { alreadyMember, initilized, loaded, loading, authenticationCode } = useContext(appContext)
+    const notReady = !alreadyMember || !initilized
+
+    if (notReady) throw new Error('Need register')
+
+    const instance = axios.create({
+        headers: {
+            Authorization: `Bearer ${authenticationCode}`,
+            'Content-Type': 'application/json',
+        },
+        timeout: 10000,
+    })
+
+    instance.interceptors.request.use((ctx) => {
+        console.log('test')
+        loading()
+        return ctx
+    })
+    instance.interceptors.response.use((ctx) => {
+        loaded()
+        return ctx
+    })
+
+    return useMemo(() => instance, [instance])
 }
 
 export const useUserInfo = () => {
@@ -57,8 +83,8 @@ export const useUserInfo = () => {
             personal: ctx.$userInfo.personal,
             schools: ctx.$userInfo.schools,
         }),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [ctx.$userInfo.uid]
+
+        [ctx.$userInfo.lineProfile, ctx.$userInfo.personal, ctx.$userInfo.schools, ctx.$userInfo.uid]
     )
 }
 
@@ -72,26 +98,16 @@ const createLiff = async () => {
     }
 }
 
-const createAxios = (token: string) => {
-    const instance = axios.create({
-        headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-        timeout: 10000,
-    })
-    return instance
-}
-
 const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
     const [isLoading, setLoading] = useState(true)
-
     const [context, setContext] = useState<AppContext>({
-        $userInfo: { addresses: [], personal: null, schools: [], uid: null, lineProfile: null },
+        $userInfo: null,
         alreadyMember: false,
-        $axios: null,
         authenticationCode: null,
         initilized: false,
+        loaded: () => setLoading(false),
+        loading: () => setLoading(true),
+        isLoading,
     })
 
     useEffect(() => {
@@ -113,7 +129,7 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
                     if (alreadyMember) {
                         await signInWithCustomToken(auth, authenticationCode)
                     }
-                    setContext((state) => ({ ...state, alreadyMember, initilized: true }))
+                    setContext((state) => ({ ...state, authenticationCode, alreadyMember, initilized: true }))
                 })
                 .finally(() => {
                     console.log('firebase initilized')
@@ -126,13 +142,8 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
         if (!context.initilized) return () => {}
 
         const unsubcriber = getAuth().onAuthStateChanged(async (user) => {
-            console.log(user)
             if (user) {
-                const token = await user.getIdToken()
-                const axiosInstance = createAxios(token)
-
                 const lineProfile = await window.liff.getProfile()
-
                 const db = getFirestore()
                 const createQueryUserInfo = getDoc(userDoc(db, user.uid))
                 const createQuerySchools = getDocs(schoolCollection(db, user.uid))
@@ -141,7 +152,6 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
                 setContext((state) => ({
                     ...state,
                     alreadyMember: true,
-                    $axios: axiosInstance,
                     $userInfo: {
                         uid: user.uid,
                         lineProfile,
@@ -159,12 +169,12 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
 
     return (
         <appContext.Provider value={context}>
-            {isLoading && (
+            {!context.initilized && (
                 <Curtain>
-                    <SpinLoading />
+                    <SpinLoading isLoading />
                 </Curtain>
             )}
-            {context.initilized && !isLoading && context.alreadyMember && children}
+            {context.initilized && context.alreadyMember && context.$userInfo !== null && children}
             {context.initilized && !context.alreadyMember && <SignUpPage />}
         </appContext.Provider>
     )

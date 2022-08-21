@@ -31,4 +31,11 @@ export class PaymentMetadataModel {
 
     @JsonProperty()
     endDate: Date
+
+    @JsonProperty({ isDictionary: true })
+    studentInfo: {
+        nickname: string
+        school: string
+        studentName: string
+    }
 }

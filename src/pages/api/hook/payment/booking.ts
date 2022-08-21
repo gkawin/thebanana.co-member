@@ -80,7 +80,8 @@ class HookPaymentBooking {
         failureCode: FailureCode = null
     ): Promise<string | null> {
         try {
-            const { bookingCode, courseId, shippingAddressId, userId, startDate, endDate, price } = body.data.metadata
+            const { bookingCode, courseId, shippingAddressId, userId, startDate, endDate, price, studentInfo } =
+                body.data.metadata
 
             const course = this.#courseRef.doc(courseId)
             const user = this.#userRef.doc(userId)
@@ -104,6 +105,7 @@ class HookPaymentBooking {
                 price,
                 failureCode,
                 receipt: null,
+                studentInfo,
             })
             console.log(result)
             return bookingCode

@@ -62,6 +62,13 @@ export class BookingModel {
     @JsonProperty()
     price: number
 
+    @JsonProperty({ isDictionary: true })
+    studentInfo: {
+        nickname: string
+        school: string
+        studentName: string
+    }
+
     @JsonProperty({ beforeDeserialize: withTimeToDate, afterSerialize: withISOToServerTimestamp })
     startDate: Date
 

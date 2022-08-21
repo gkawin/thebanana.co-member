@@ -22,8 +22,8 @@ export default class AppDoc extends Document {
                 </Head>
                 <body>
                     <Main />
-                    <NextScript />
                     <div id="portal"></div>
+                    <NextScript />
                 </body>
             </Html>
         )

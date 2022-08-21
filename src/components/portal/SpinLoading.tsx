@@ -2,11 +2,11 @@ import React, { useState } from 'react'
 import { Player } from '@lottiefiles/react-lottie-player'
 import type { AnimationItem } from 'lottie-web'
 
-export type SpinLoadingProps = { global?: boolean }
+export type SpinLoadingProps = { isLoading?: boolean }
 
-export const SpinLoading: React.FC<SpinLoadingProps> = ({ global = false }) => {
+export const SpinLoading: React.FC<SpinLoadingProps> = ({ isLoading = false }) => {
     const [_, setLottie] = useState<AnimationItem>(null)
-    return (
+    return !isLoading ? null : (
         <Player
             lottieRef={(instance) => {
                 setLottie(instance)

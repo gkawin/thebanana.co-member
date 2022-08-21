@@ -41,27 +41,31 @@ class PaymentChargeApi {
             const today = dayjs()
             const expiredDate = today.add(7, 'day')
             const bookingCode = BookingModel.generateBookingCode()
+            const { token: card = null, source = null, studentName, nickname, school, ...props } = payload
 
             const chargedResult = await this.omise.charges
                 .create({
                     amount: product.price * 100,
                     currency: 'thb',
-                    card: payload?.token ?? null,
-                    source: payload?.source ?? null,
+                    card,
+                    source,
                     description: product.title,
-                    customer: payload.token ? null : `${payload.studentName} (${payload.nickname})`,
+                    customer: payload.userId,
                     metadata: {
+                        ...props,
                         bookingCode,
-                        courseId: payload.courseId,
+                        studentInfo: {
+                            studentName,
+                            nickname,
+                            school,
+                        },
                         productCode: product.code,
-                        userId: payload.userId,
                         price: product.price,
-                        shippingAddressId: payload.shippingAddressId,
                         enrollmentAt: today.toDate(),
                         expiredDate: expiredDate.toDate(),
                         startDate: product.startDate,
                         endDate: product.endDate,
-                    } as PaymentMetadataModel,
+                    },
                 })
                 .then((result: any) => deserialize(result, PaymentOmiseDataModel))
 
