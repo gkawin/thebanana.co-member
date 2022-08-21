@@ -13,7 +13,6 @@ import { Curtain } from '@/components/portal/Curtain'
 import SignUpPage from '@/components/signup/SignupPage'
 import { getDoc, getDocs, getFirestore } from 'firebase/firestore'
 import { schoolCollection, userDoc } from '@/concerns/query'
-import { Portal } from '@/components/portal/Portal'
 
 const liffId = '1653826193-QbmamAo0'
 const firebaseConfig = {
