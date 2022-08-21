@@ -47,6 +47,8 @@ class HookPaymentBooking {
                     break
                 }
                 case 'failed': {
+                    await this.setBookingRow(body, BookingStatus.REJECTED, body.data.failureCode as any)
+                    break
                 }
             }
 

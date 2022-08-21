@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import ReactModal from 'react-modal'
+import { SpinLoading } from '../portal/SpinLoading'
 
 type PaymentActivityInfoProps = {
     bookingCode: string
@@ -14,7 +15,13 @@ type PaymentActivityInfoProps = {
 const PaymentActivityInfo: React.FC<PaymentActivityInfoProps> = ({ bookingCode, qrImage }) => {
     const { items: bookingList } = useMyBooking({ bookingCode })
 
-    if (bookingList.length === 0) return null
+    if (bookingList.length === 0)
+        return (
+            <div>
+                <h1 className="text-2xl">กำลังประมวลผล ห้ามปิดหน้าจอ</h1>
+                <SpinLoading isLoading />
+            </div>
+        )
 
     const booking = bookingList[0]
     const isPromptPay = booking.paymentMethod === PaymentMethod.PROMPT_PAY
