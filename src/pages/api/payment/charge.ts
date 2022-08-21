@@ -49,7 +49,7 @@ class PaymentChargeApi {
                     card,
                     source,
                     description: product.title,
-                    customer: payload.userId,
+                    customer: payload.token ? null : payload.userId,
                     metadata: {
                         ...props,
                         bookingCode,
