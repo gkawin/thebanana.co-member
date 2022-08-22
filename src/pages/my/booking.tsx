@@ -45,13 +45,13 @@ const MyBookingPage: NextPage = () => {
                                     <div className="font-thin text-xs text-gray-600">
                                         เริ่ม{' '}
                                         <span className="font-semibold">
-                                            {withThaiDateFormat(booking.startDate, 'dd DD MMM BBBB')}
+                                            {withThaiDateFormat(booking.startDate.toISOString(), 'dd DD MMM BBBB')}
                                         </span>
                                     </div>
                                     <div className="font-thin text-xs text-gray-600">
                                         ถึง{' '}
                                         <span className="font-semibold">
-                                            {withThaiDateFormat(booking.endDate, 'dd DD MMM BBBB')}
+                                            {withThaiDateFormat(booking.endDate.toISOString(), 'dd DD MMM BBBB')}
                                         </span>
                                     </div>
                                     <div className="text-red-500">{booking.pricing}</div>

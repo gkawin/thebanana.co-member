@@ -1,4 +1,4 @@
-import useMyBooking, { BookingInfo } from '@/concerns/use-my-booking'
+import useMyBooking from '@/concerns/use-my-booking'
 import { BookingGroup, PaymentMethod } from '@/constants'
 import Image from 'next/image'
 
@@ -24,7 +24,7 @@ export const ObservationPaymentStatusContent: React.VFC<ObservationPaymentStatus
 
     if (upCommingItems.length === 0 && haltItems.length === 0) return null
 
-    let bookingInfo: BookingInfo
+    let bookingInfo
     if (upCommingItems.length > 0) {
         bookingInfo = upCommingItems[0]
     }

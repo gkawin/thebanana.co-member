@@ -1,6 +1,6 @@
-import { BookingGroup, BookingStatus, FailureCode, PaymentMethod } from '@/constants'
+import { BookingGroup, BookingStatus } from '@/constants'
 import { useUserInfo } from '@/core/RootContext'
-import { BookingModel, ReceiptModel } from '@/models/BookingModel'
+import { BookingModel } from '@/models/BookingModel'
 import { CourseModel } from '@/models/course/course.model'
 import Model from '@/models/Model'
 import { UserAddressModel } from '@/models/UserAddressModel'
@@ -18,23 +18,18 @@ import {
 import { useEffect, useState } from 'react'
 import { bookingCollection } from './query'
 
-export type BookingInfo = {
-    billingId: string
-    bookingCode: string
-    startDate: string
-    endDate: string
-    pricing: string
-    status: BookingStatus
-    userId: string
-    productName: string
+export type PickBookingInfoFromApi = Pick<
+    BookingModel,
+    'startDate' | 'endDate' | 'bookingCode' | 'billingId' | 'receipt' | 'status' | 'paymentMethod' | 'studentInfo'
+>
+export interface UseMyBookingInfo extends PickBookingInfoFromApi {
     shippingAddress: string
-    paymentMethod: PaymentMethod
-    failureCode: FailureCode
-    receipt?: ReceiptModel
+    pricing: string
+    productName: string
 }
 
 export default function useMyBooking(options?: { bookingCode?: string; bookingGroup?: BookingGroup }) {
-    const [items, setItems] = useState<BookingInfo[]>([])
+    const [items, setItems] = useState<UseMyBookingInfo[]>([])
     const db = getFirestore()
     const { uid } = useUserInfo()
     const [bookingGroup, setBookingGroup] = useState<BookingGroup>(options?.bookingGroup ?? BookingGroup.UpComming)
@@ -75,33 +70,43 @@ export default function useMyBooking(options?: { bookingCode?: string; bookingGr
         ).withConverter(Model.convert(BookingModel))
 
         const unsubscribe = onSnapshot(q, async (ss) => {
-            const results = await Promise.all(
-                ss.docs
-                    .map<Promise<any>>(async (doc) => {
-                        if (!doc.exists()) return null
-                        const props = doc.data()
-                        const product = (await getDoc(props.course as DocumentReference<CourseModel>)).data()
-                        const address = (
-                            await getDoc(props.shippingAddress as DocumentReference<UserAddressModel>)
-                        ).data()
+            const createdListBookings = ss.docs.map<Promise<UseMyBookingInfo>>(async (doc) => {
+                if (!doc.exists()) return null
 
-                        return {
-                            billingId: props.billingId,
-                            bookingCode: props.bookingCode,
-                            startDate: props.startDate.toISOString(),
-                            endDate: props.endDate.toISOString(),
-                            pricing: withPricing(props.price),
-                            status: props.status,
-                            userId: props.user.id,
-                            productName: product.title,
-                            shippingAddress: address && address.address,
-                            paymentMethod: props.paymentMethod,
-                            failureCode: props.failureCode,
-                            receipt: props.receipt,
-                        }
-                    })
-                    .filter(Boolean)
-            )
+                const { course: CourseRef, user: UserRef, shippingAddress: AddrRef, ...props } = doc.data()
+
+                const [course, shippingAddress] = await Promise.all([
+                    (
+                        await getDoc(
+                            CourseRef.withConverter(
+                                Model.convert(CourseModel) as null
+                            ) as DocumentReference<CourseModel>
+                        )
+                    ).data(),
+                    (
+                        await getDoc(
+                            AddrRef.withConverter(
+                                Model.convert(UserAddressModel) as null
+                            ) as DocumentReference<UserAddressModel>
+                        )
+                    ).data(),
+                ])
+
+                return {
+                    billingId: props.billingId,
+                    pricing: withPricing(props.price),
+                    bookingCode: props.bookingCode,
+                    endDate: props.endDate,
+                    startDate: props.startDate,
+                    productName: course.title,
+                    shippingAddress: shippingAddress.address,
+                    studentInfo: props.studentInfo,
+                    receipt: props.receipt,
+                    paymentMethod: props.paymentMethod,
+                    status: props.status,
+                }
+            })
+            const results = await Promise.all(createdListBookings)
             setItems(results)
         })
 

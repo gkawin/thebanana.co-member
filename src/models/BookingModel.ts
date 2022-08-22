@@ -1,11 +1,11 @@
 import { DocumentReference } from 'firebase/firestore'
-import { UserModel } from './UserModel'
 import { Serializable, JsonProperty } from 'typescript-json-serializer'
 import { withISOToServerTimestamp, withTimeToDate } from '@/utils/firestore'
 import { BookingStatus, FailureCode, PaymentMethod, SourceOfFund } from '@/constants'
 import dayjs from 'dayjs'
 import { UserAddressModel } from './UserAddressModel'
 import { CourseModel } from './course/course.model'
+import { UserModelV2 } from './user/user.model'
 
 @Serializable()
 export class ReceiptModel {
@@ -42,7 +42,7 @@ export class BookingModel {
     course: FirebaseFirestore.DocumentReference<CourseModel> | DocumentReference<CourseModel>
 
     @JsonProperty()
-    user: FirebaseFirestore.DocumentReference<UserModel> | DocumentReference<UserModel>
+    user: FirebaseFirestore.DocumentReference<UserModelV2> | DocumentReference<UserModelV2>
 
     @JsonProperty({ beforeDeserialize: withTimeToDate, afterSerialize: withISOToServerTimestamp })
     createdOn: Date

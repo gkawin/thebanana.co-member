@@ -1,7 +1,7 @@
-import { DocumentReference, Timestamp } from 'firebase/firestore'
+import { DocumentReference } from 'firebase/firestore'
 
 export const withTimeToDate = (v: any) => {
-    if (v instanceof Timestamp || typeof v.toDate !== undefined) {
+    if ('toDate' in v) {
         return v.toDate()
     }
     return v

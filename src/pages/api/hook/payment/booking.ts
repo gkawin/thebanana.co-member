@@ -8,24 +8,24 @@ import { PaymentEventBodyModel } from '@/models/payment/PaymentEventBody.model'
 import { PaymentMetadataModel } from '@/models/payment/PaymentMetadata.model'
 
 import { UserAddressModel } from '@/models/UserAddressModel'
-import { UserModel } from '@/models/UserModel'
 import resolver from '@/services/resolver'
 import { badRequest, Boom } from '@hapi/boom'
 import { NextApiHandler } from 'next'
 import { injectable } from 'tsyringe'
 import { deserialize } from 'typescript-json-serializer'
 import { CourseModel } from '@/models/course/course.model'
+import { UserModelV2 } from '@/models/user/user.model'
 
 @injectable()
 class HookPaymentBooking {
     #bookingRef: FirebaseFirestore.CollectionReference<BookingModel>
     #courseRef: FirebaseFirestore.CollectionReference<CourseModel>
-    #userRef: FirebaseFirestore.CollectionReference<UserModel>
+    #userRef: FirebaseFirestore.CollectionReference<UserModelV2>
 
     constructor(private sdk: AdminSDK) {
         this.#bookingRef = this.sdk.db.collection('booking').withConverter(Model.convert(BookingModel))
         this.#courseRef = this.sdk.db.collection('courses').withConverter(Model.convert(CourseModel))
-        this.#userRef = this.sdk.db.collection('users').withConverter(Model.convert(UserModel))
+        this.#userRef = this.sdk.db.collection('users').withConverter(Model.convert(UserModelV2))
     }
 
     main: NextApiHandler = async (req, res) => {
@@ -92,7 +92,7 @@ class HookPaymentBooking {
                 .withConverter(Model.convert(UserAddressModel))
                 .doc(shippingAddressId)
 
-            const result = await this.#bookingRef.doc(bookingCode).set({
+            const result = await this.#bookingRef.doc(bookingCode).create({
                 billingId: body.id,
                 bookingCode: bookingCode,
                 sourceOfFund: SourceOfFund.OMISE,

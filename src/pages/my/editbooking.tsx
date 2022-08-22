@@ -4,7 +4,6 @@ import { faArrowLeft, faQrcode, faDownload } from '@fortawesome/free-solid-svg-i
 import { getDownloadURL, getStorage, ref } from 'firebase/storage'
 
 import { GetServerSideProps, NextPage } from 'next'
-import { useUserInfo } from '@/core/RootContext'
 import { BookingStatus, PaymentMethod, PaymentMethodLabel } from '@/constants'
 import Link from 'next/link'
 import { withThaiDateFormat } from '@/utils/date'
@@ -15,7 +14,6 @@ export type MyEditBookingProps = {
 }
 
 const MyEditBooking: NextPage<MyEditBookingProps> = ({ bookingCode }) => {
-    const { personal, schools } = useUserInfo()
     const { items } = useMyBooking({ bookingCode })
     const bookingInfo = items[0]
     const [receiptUrl, setReceiptUrl] = useState<string>('')
@@ -98,13 +96,13 @@ const MyEditBooking: NextPage<MyEditBookingProps> = ({ bookingCode }) => {
                     <div>
                         <span className="text-sm text-gray-500 block">เริ่มเรียน</span>
                         <span className="font-semibold">
-                            {withThaiDateFormat(bookingInfo.startDate, 'dddd DD MMMM BBBB')}
+                            {withThaiDateFormat(bookingInfo.startDate.toISOString(), 'dddd DD MMMM BBBB')}
                         </span>
                     </div>
                     <div>
                         <span className="text-sm text-gray-500 block">วันสุดท้าย</span>
                         <span className="font-semibold">
-                            {withThaiDateFormat(bookingInfo.endDate, 'dddd DD MMMM BBBB')}
+                            {withThaiDateFormat(bookingInfo.endDate.toISOString(), 'dddd DD MMMM BBBB')}
                         </span>
                     </div>
                 </div>
@@ -112,9 +110,9 @@ const MyEditBooking: NextPage<MyEditBookingProps> = ({ bookingCode }) => {
                     <h2>ข้อมูลผู้เรียน</h2>
                     <div className="text-sm">
                         <h3>
-                            {personal?.fullname} ({personal?.nickname})
+                            {bookingInfo.studentInfo?.studentName} ({bookingInfo.studentInfo?.nickname})
                         </h3>
-                        <div className="text-gray-500 text-xs">โรงเรียน{schools[0]?.school}</div>
+                        <div className="text-gray-500 text-xs">โรงเรียน{bookingInfo.studentInfo?.school}</div>
                     </div>
                 </div>
                 <div className="px-2 py-4 rounded shadow-gray-300 shadow-md border border-gray-50 space-y-1">
