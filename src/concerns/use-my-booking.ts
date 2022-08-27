@@ -20,7 +20,15 @@ import { bookingCollection } from './query'
 
 export type PickBookingInfoFromApi = Pick<
     BookingModel,
-    'startDate' | 'endDate' | 'bookingCode' | 'billingId' | 'receipt' | 'status' | 'paymentMethod' | 'studentInfo'
+    | 'startDate'
+    | 'endDate'
+    | 'bookingCode'
+    | 'billingId'
+    | 'receipt'
+    | 'status'
+    | 'paymentMethod'
+    | 'studentInfo'
+    | 'promptPayInfo'
 >
 export interface UseMyBookingInfo extends PickBookingInfoFromApi {
     shippingAddress: string
@@ -104,6 +112,7 @@ export default function useMyBooking(options?: { bookingCode?: string; bookingGr
                     receipt: props.receipt,
                     paymentMethod: props.paymentMethod,
                     status: props.status,
+                    promptPayInfo: props?.promptPayInfo,
                 }
             })
             const results = await Promise.all(createdListBookings)

@@ -1,56 +1,7 @@
-import useMyBooking from '@/concerns/use-my-booking'
-import { BookingStatus, PaymentMethod } from '@/constants'
 import { usePaymentContext } from '@/core/PaymentContext'
-import Image from 'next/image'
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import ReactModal from 'react-modal'
-import { SpinLoading } from '../portal/SpinLoading'
-
-type PaymentActivityInfoProps = {
-    bookingCode: string
-    qrImage?: string
-}
-
-export const PaymentActivityInfo: React.FC<PaymentActivityInfoProps> = ({ bookingCode, qrImage }) => {
-    const { items: bookingList } = useMyBooking({ bookingCode })
-
-    if (bookingList.length === 0)
-        return (
-            <div>
-                <h1 className="text-2xl">กำลังประมวลผล ห้ามปิดหน้าจอ</h1>
-                <SpinLoading isLoading />
-            </div>
-        )
-
-    const booking = bookingList[0]
-    const isPromptPay = booking.paymentMethod === PaymentMethod.PROMPT_PAY
-
-    if (isPromptPay && booking.status === BookingStatus.PENDING) {
-        return (
-            <div className="text-center space-y-4">
-                <div className="relative">
-                    <Image unoptimized src={qrImage} alt="qr_code" layout="intrinsic" width={300} height={300} />
-                </div>
-            </div>
-        )
-    }
-
-    return (
-        <div className="text-center space-y-4">
-            <div className="text-sm">หมายเลขการจอง</div>
-            <div className="text-2xl font-semibold">{booking.bookingCode}</div>
-            <div className="text-xs text-gray-500">กรุณาบันทึกหมายเลขการจองนี้ไว้เพื่อตรวจสอบ</div>
-            <div className="text-xs flex justify-between">
-                <span className="text-gray-500">หมายเลขใบเสร็จ</span>
-                <span className="">{booking.billingId}</span>
-            </div>
-            <Link href={{ pathname: '/my/booking' }}>
-                <a className="p-2 bg-indigo-500 rounded block text-white">ไปยังการจองของฉัน</a>
-            </Link>
-        </div>
-    )
-}
+import { PaymentActivityInfo } from './PaymentActivityInfo'
 
 export const PaymentStatusModal: React.FC = () => {
     const { chargeResult } = usePaymentContext()
@@ -89,10 +40,7 @@ export const PaymentStatusModal: React.FC = () => {
                     </div>
                 )}
                 {(chargeResult.status === 'pending' || chargeResult.status === 'successful') && (
-                    <PaymentActivityInfo
-                        bookingCode={chargeResult?.bookingCode}
-                        qrImage={chargeResult?.qrCode?.download_uri}
-                    />
+                    <PaymentActivityInfo bookingCode={chargeResult?.bookingCode} />
                 )}
             </ReactModal>
         )

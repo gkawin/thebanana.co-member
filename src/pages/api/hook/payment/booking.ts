@@ -92,7 +92,7 @@ class HookPaymentBooking {
                 .withConverter(Model.convert(UserAddressModel))
                 .doc(shippingAddressId)
 
-            const result = await this.#bookingRef.doc(bookingCode).create({
+            const result = await this.#bookingRef.doc(bookingCode).set({
                 billingId: body.id,
                 bookingCode: bookingCode,
                 sourceOfFund: SourceOfFund.OMISE,

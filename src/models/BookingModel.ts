@@ -2,10 +2,10 @@ import { DocumentReference } from 'firebase/firestore'
 import { Serializable, JsonProperty } from 'typescript-json-serializer'
 import { withISOToServerTimestamp, withTimeToDate } from '@/utils/firestore'
 import { BookingStatus, FailureCode, PaymentMethod, SourceOfFund } from '@/constants'
-import dayjs from 'dayjs'
 import { UserAddressModel } from './UserAddressModel'
 import { CourseModel } from './course/course.model'
 import { UserModelV2 } from './user/user.model'
+import dayjs from 'dayjs'
 
 @Serializable()
 export class ReceiptModel {
@@ -17,6 +17,15 @@ export class ReceiptModel {
     filepath: string
     @JsonProperty({ beforeDeserialize: withTimeToDate, afterSerialize: withISOToServerTimestamp })
     createdAt: Date
+}
+
+@Serializable()
+export class PromptPayInfoModel {
+    @JsonProperty()
+    qrCodeImage: string
+
+    @JsonProperty({ beforeDeserialize: withTimeToDate, afterSerialize: withISOToServerTimestamp })
+    expiryDate?: Date
 }
 
 @Serializable()
@@ -78,9 +87,6 @@ export class BookingModel {
     @JsonProperty()
     receipt?: ReceiptModel
 
-    @JsonProperty({ isDictionary: true })
-    promptPayInfo?: {
-        qrCodeImage: string
-        expiryDate: Date
-    }
+    @JsonProperty()
+    promptPayInfo?: PromptPayInfoModel
 }

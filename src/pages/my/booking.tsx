@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { withThaiDateFormat } from '@/utils/date'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import { BookingStatus } from '@/constants'
 
 const MyBookingPage: NextPage = () => {
     const { items, setBookingGroup, bookingGroup } = useMyBooking()
@@ -57,16 +58,18 @@ const MyBookingPage: NextPage = () => {
                                     <div className="text-red-500">{booking.pricing}</div>
                                 </th>
                                 <td className="px-2 py-2 text-right">
-                                    <Link
-                                        href={{
-                                            pathname: '/my/editbooking',
-                                            query: { bookingCode: encodeURIComponent(booking.bookingCode) },
-                                        }}
-                                    >
-                                        <a className="font-medium text-indigo-600 border border-indigo-600 p-2 rounded hover:bg-indigo-600 hover:text-white">
-                                            จัดการ
-                                        </a>
-                                    </Link>
+                                    {booking.status === BookingStatus.REJECTED ? null : (
+                                        <Link
+                                            href={{
+                                                pathname: '/my/editbooking',
+                                                query: { bookingCode: encodeURIComponent(booking.bookingCode) },
+                                            }}
+                                        >
+                                            <a className="font-medium text-indigo-600 border border-indigo-600 p-2 rounded hover:bg-indigo-600 hover:text-white">
+                                                จัดการ
+                                            </a>
+                                        </Link>
+                                    )}
                                 </td>
                             </tr>
                         )

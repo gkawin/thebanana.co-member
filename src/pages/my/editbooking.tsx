@@ -1,16 +1,16 @@
 import useMyBooking from '@/concerns/use-my-booking'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowLeft, faQrcode, faDownload } from '@fortawesome/free-solid-svg-icons'
+import { faArrowLeft, faDownload } from '@fortawesome/free-solid-svg-icons'
 import { getDownloadURL, getStorage, ref } from 'firebase/storage'
 
 import { GetServerSideProps, NextPage } from 'next'
-import { BookingStatus, PaymentMethod, PaymentMethodLabel } from '@/constants'
+import { BookingStatus, PaymentMethodLabel } from '@/constants'
 import Link from 'next/link'
 import { withThaiDateFormat } from '@/utils/date'
 import { useEffect, useState } from 'react'
-import { ReminderBar } from '@/components/editbooking/ReminderBar'
 import { ShippingAddressPanel } from '@/components/editbooking/ShippingAddressPanel'
 import { StudentInfoPanel } from '@/components/editbooking/StudentInfoPanel'
+import { PaymentActivityInfo } from '@/components/checkout/PaymentActivityInfo'
 
 export type MyEditBookingProps = {
     bookingCode: string
@@ -59,20 +59,12 @@ const MyEditBooking: NextPage<MyEditBookingProps> = ({ bookingCode }) => {
                         </div>
                     </>
                 )}
-                {[BookingStatus.PENDING].includes(bookingInfo.status) &&
-                    bookingInfo.paymentMethod === PaymentMethod.PROMPT_PAY && (
-                        <button
-                            type="button"
-                            // onClick={handleRequestQRCode}
-                            className="text-white bg-indigo-500 p-2 w-full rounded font-semibold"
-                        >
-                            <FontAwesomeIcon icon={faQrcode} />
-                            <span> ขอ QR Code เพื่อชำระเงิน</span>
-                        </button>
-                    )}
             </>
         )
     }
+
+    const isRejected = bookingInfo.status === BookingStatus.REJECTED
+    const isPending = bookingInfo.status === BookingStatus.PENDING
 
     return (
         bookingInfo && (
@@ -84,8 +76,21 @@ const MyEditBooking: NextPage<MyEditBookingProps> = ({ bookingCode }) => {
                             กลับไปหน้าการจอง
                         </a>
                     </Link>
-                    <ReminderBar bookingStatus={bookingInfo.status} bookingCode={bookingInfo.bookingCode} qrImage="" />
-                    <div className="px-2 py-4 rounded shadow-gray-300 shadow border border-gray-50 space-y-1">
+                    {isPending && (
+                        <div className="py-4 text-center border border-red-300 bg-red-50 rounded">
+                            <span className="text-lg font-semibold">
+                                <PaymentActivityInfo bookingCode={bookingCode} />
+                            </span>
+                        </div>
+                    )}
+                    {isRejected && (
+                        <div className="py-4 text-center border border-red-300 bg-red-50 rounded">
+                            <span className="text-lg font-semibold">
+                                ทำรายการไม่สำเร็จ หรือคุณได้ยกเลิกรายการชำระเงิน กรุณาลองใหม่อีกครั้ง
+                            </span>
+                        </div>
+                    )}
+                    <div className={`px-2 py-4 rounded shadow-gray-300 shadow border border-gray-50 space-y-1`}>
                         <h2>รายละเอียด</h2>
                         <div>
                             <span className="text-sm text-gray-500 block">หมายเลขการจอง</span>
