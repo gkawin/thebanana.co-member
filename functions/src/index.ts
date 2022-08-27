@@ -33,7 +33,7 @@ export const generateReceipt = func
         const courseRef = info?.course as FirebaseFirestore.DocumentReference
         const { title: courseTitle = '', session: courseSession = '' } = (await courseRef.get()).data()
         const userId = (await userRef.get()).id
-        const { nickname = '', firstname = '', lastname = '' } = (await userRef.get()).data()
+        const { nickname = '', firstname = '', lastname = '' } = info?.studentInfo ?? {}
         const shippingAddressRef = info?.shippingAddress as FirebaseFirestore.DocumentReference
         const address = (await shippingAddressRef.get()).data()?.address ?? ''
 
@@ -63,7 +63,7 @@ export const generateReceipt = func
         const pdf = await page.pdf({
             format: 'A4',
             printBackground: true,
-            margin: { bottom: 10, left: 10, right: 10, top: 10 },
+            margin: { bottom: 16, left: 16, right: 16, top: 16 },
         })
         await browser.close()
 

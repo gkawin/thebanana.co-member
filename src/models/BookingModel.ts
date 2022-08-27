@@ -77,4 +77,10 @@ export class BookingModel {
 
     @JsonProperty()
     receipt?: ReceiptModel
+
+    @JsonProperty({ isDictionary: true })
+    promptPayInfo?: {
+        qrCodeImage: string
+        expiryDate: Date
+    }
 }

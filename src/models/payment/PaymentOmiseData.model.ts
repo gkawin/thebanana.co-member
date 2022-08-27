@@ -58,4 +58,10 @@ export class PaymentOmiseDataModel {
 
     @JsonProperty({ name: 'failure_code' })
     failureCode: string
+
+    @JsonProperty({ name: 'expires_at' })
+    expiresAt: Date
+
+    @JsonProperty({ name: 'created_at' })
+    createdAt: Date
 }

@@ -12,7 +12,7 @@ type PaymentActivityInfoProps = {
     qrImage?: string
 }
 
-const PaymentActivityInfo: React.FC<PaymentActivityInfoProps> = ({ bookingCode, qrImage }) => {
+export const PaymentActivityInfo: React.FC<PaymentActivityInfoProps> = ({ bookingCode, qrImage }) => {
     const { items: bookingList } = useMyBooking({ bookingCode })
 
     if (bookingList.length === 0)
@@ -29,13 +29,9 @@ const PaymentActivityInfo: React.FC<PaymentActivityInfoProps> = ({ bookingCode, 
     if (isPromptPay && booking.status === BookingStatus.PENDING) {
         return (
             <div className="text-center space-y-4">
-                <span className="text-gray-700">กรุณาทำรายการผ่าน app ธนาคาร</span>
                 <div className="relative">
                     <Image unoptimized src={qrImage} alt="qr_code" layout="intrinsic" width={300} height={300} />
                 </div>
-                <span className="text-red-600 text-sm font-semibold">
-                    กรุณาอย่าปิดหน้าจนกว่าจะทำรายการชำระผ่าน QR Code สำเร็จ
-                </span>
             </div>
         )
     }

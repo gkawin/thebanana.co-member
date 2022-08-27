@@ -108,6 +108,13 @@ class HookPaymentBooking {
                 failureCode,
                 receipt: null,
                 studentInfo,
+                promptPayInfo:
+                    body.data.source.type === 'promptpay'
+                        ? {
+                              qrCodeImage: body.data?.source?.scannableCode?.image?.download_uri ?? '',
+                              expiryDate: !!body.data?.expiresAt ? new Date(body.data?.expiresAt) : null,
+                          }
+                        : null,
             })
             console.log(result)
             return bookingCode

@@ -19,10 +19,12 @@
 </head>
 
 <body>
-  <div id="invoice" class="font-light text-lg container m-auto">
+  <div id="invoice" class="font-light text- container m-auto">
     <div class="flex flex-row flex-wrap w-full justify-between py-2">
       <figure class="content-center max-w-xs">
-        <img src="https://www.thebanana.co/images/logo.png" alt="stamped" />
+        <img
+          src="https://firebasestorage.googleapis.com/v0/b/prod-member-thebanana-co.appspot.com/o/public_assets%2Fthe-banana-ogo.png?alt=media"
+          alt="stamped" />
       </figure>
       <div class="max-w-xs text-right">
         <div class="text-2xl font-semibold">ใบเสร็จรับเงิน</div>
@@ -41,7 +43,7 @@
         <div>{{address}}</div>
         <div>ชื่อนักเรียน : {{studentName}} ({{nickname}})</div>
         {{#if isShownBuyerTaxId}}
-          <div>เลขประจำตัวผู้เสียภาษี: {{buyerTaxId}}</div>
+        <div>เลขประจำตัวผู้เสียภาษี: {{buyerTaxId}}</div>
         {{/if}}
       </div>
       <div class="box-border w-full p-4 border border-gray-900 text-gray-700">
@@ -71,12 +73,12 @@
       </thead>
       <tbody class="text-center text-gray-700">
         {{#each listCoursesEnrolled}}
-          <tr>
-            <td class="p-2">{{math @index "+" 1}}</td>
-            <td class="text-left p-2">{{this.course}}</td>
-            <td class="p-2">{{this.session}}</td>
-            <td class="p-2">1</td>
-          </tr>
+        <tr>
+          <td class="p-2">{{math @index "+" 1}}</td>
+          <td class="text-left p-2">{{this.course}}</td>
+          <td class="p-2">{{this.session}}</td>
+          <td class="p-2">1</td>
+        </tr>
         {{/each}}
       </tbody>
     </table>
@@ -104,7 +106,8 @@
       <div></div>
     </div>
 
-    <span class="text-sm text-gray-500">เอกสารฉบับนี้มีการลงรายมืออิเล็กทรอนิกส์ กรุณารักษาเอกสารฉบับนี้เอาไว้เพื่อการอ้างอิง</span>
+    <span class="text-sm text-gray-500">เอกสารฉบับนี้มีการลงรายมืออิเล็กทรอนิกส์
+      กรุณารักษาเอกสารฉบับนี้เอาไว้เพื่อการอ้างอิง</span>
   </div>
 </body>
 
