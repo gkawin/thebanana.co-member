@@ -1,6 +1,8 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import puppeteer from 'puppeteer'
+import { request } from 'http'
+import FormData from 'form-data'
 
 import { withThaiDateFormat } from '../../src/utils/date'
 import thaiBath from '../../src/utils/thai-bath'
@@ -13,6 +15,52 @@ admin.initializeApp()
 const func = functions.region('asia-southeast1')
 const storage = admin.storage().bucket()
 const db = admin.firestore()
+
+export const sendPaymentNotify = func.firestore.document('/booking/{bookingCode}').onUpdate((change) => {
+    const { receipt, paymentMethod, price, studentInfo, bookingCode, billingId } = change.after.data()
+
+    if (!receipt) return
+
+    const lineNotfyUrl = new URL('https://notify-api.line.me/api/notify')
+    const accessToken = process.env.LINE_NOTIFY_ACCESS_TOKEN
+
+    const formData = new FormData()
+    formData.append(
+        'message',
+        `
+        ต้นขั้วใบเสร็จ: ${billingId}\n,
+        รหัสการจอง: ${bookingCode}\n
+        ชื่อผู้เรียน: ${studentInfo.studentName} (${studentInfo.nickname})
+        ช่องทางชำระ: ${paymentMethod}\n
+        ยอดชำระ: ${price}\n
+    `
+    )
+
+    const req = request(
+        {
+            host: lineNotfyUrl.hostname,
+            pathname: lineNotfyUrl.pathname,
+            port: lineNotfyUrl.port,
+            protocol: lineNotfyUrl.protocol,
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'multipart/form-data;boundary="boundary"',
+            },
+        },
+        (res) => {
+            var chunks = []
+            res.on('data', (data) => chunks.push(data))
+            res.on('end', () => {
+                const response = Buffer.concat(chunks)
+                console.log('======= DONE ===========', response)
+            })
+        }
+    )
+
+    req.write(formData)
+    req.end()
+})
 
 export const generateReceipt = func
     .runWith({ memory: '1GB', timeoutSeconds: 540 })
