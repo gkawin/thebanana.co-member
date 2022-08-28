@@ -12,14 +12,11 @@ service cloud.firestore {
     // Should be public
     match /courses/{document=**} {
       allow read: if true;
-    }
-
-    match /subjects/{document=**} {
-      allow read: if true;
+  		allow write, update, delete: if false;
     }
 
     match /booking/{bookingId} {
-    	allow read: if signedIn() && resource.data.user == /databases/$(database)/documents/users/$(request.auth.uid);
+    	allow read, write, update: if signedIn() && resource.data.user == /databases/$(database)/documents/users/$(request.auth.uid);
     }
   }
 }
