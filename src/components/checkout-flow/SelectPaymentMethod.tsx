@@ -32,14 +32,6 @@ export const SelectPaymentMethod: React.FC = () => {
         )
     }
 
-    const renderBankTrasferInfo = () => {
-        return (
-            <div className="flex space-x-1 text-sm text-gray-500 ">
-                <p>กรุณาโอนเงินไปที่บัญชี</p>
-            </div>
-        )
-    }
-
     const renderPromptPay = () => {
         return (
             <div className="flex space-x-1 text-sm text-gray-500 ">
@@ -70,7 +62,6 @@ export const SelectPaymentMethod: React.FC = () => {
                                 />
                                 <label htmlFor={label}>
                                     <h2>{PaymentMethodLabel.get(method)}</h2>
-                                    {method === PaymentMethod.BANK_TRANSFER && renderBankTrasferInfo()}
                                     {method === PaymentMethod.CREDIT_CARD && renderAcceptedCreditCardLogo()}
                                     {method === PaymentMethod.PROMPT_PAY && renderPromptPay()}
                                 </label>

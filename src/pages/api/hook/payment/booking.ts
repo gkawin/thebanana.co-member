@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { BookingStatus, FailureCode, PaymentMethod, SourceOfFund } from '@/constants'
+import { BookingStatus, FailureCode, OmiseHookEvent, PaymentMethod, SourceOfFund } from '@/constants'
 import { AdminSDK } from '@/libs/adminSDK'
 import runsWithMethods from '@/middleware/runsWithMethods'
 import { BookingModel } from '@/models/BookingModel'
@@ -35,24 +35,25 @@ class HookPaymentBooking {
             const body = deserialize(req.body, PaymentEventBodyModel)
             this.validateRequesting(body)
 
+            const invalidRequest = ![OmiseHookEvent.CREATE, OmiseHookEvent.COMPLETE].includes(body.key)
+
+            if (invalidRequest) throw badRequest('invalid Request')
+
             const status = body.data.status
 
+            let response
             switch (status) {
                 case 'successful': {
-                    await this.setBookingRow(body, BookingStatus.PAID)
-                    break
+                    response = await this.setBookingRow(body, BookingStatus.PAID)
                 }
                 case 'pending': {
-                    await this.setBookingRow(body, BookingStatus.PENDING)
-                    break
+                    response = await this.setBookingRow(body, BookingStatus.PENDING)
                 }
                 case 'failed': {
-                    await this.setBookingRow(body, BookingStatus.REJECTED, body.data.failureCode as any)
-                    break
+                    response = await this.setBookingRow(body, BookingStatus.REJECTED, body.data.failureCode as any)
                 }
             }
-
-            res.status(200).json({ status: 'success' })
+            res.status(200).json({ status: 'succeed', response })
         } catch (error) {
             console.log(error)
             if (error instanceof Boom) {
@@ -109,7 +110,7 @@ class HookPaymentBooking {
                 receipt: null,
                 studentInfo,
                 promptPayInfo:
-                    body.data.source.type === 'promptpay'
+                    body.data.source?.type === 'promptpay'
                         ? {
                               qrCodeImage: body.data?.source?.scannableCode?.image?.download_uri ?? '',
                               expiryDate: !!body.data?.expiresAt ? new Date(body.data?.expiresAt) : null,

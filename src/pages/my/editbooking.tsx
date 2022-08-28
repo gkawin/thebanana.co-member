@@ -63,8 +63,8 @@ const MyEditBooking: NextPage<MyEditBookingProps> = ({ bookingCode }) => {
         )
     }
 
-    const isRejected = bookingInfo.status === BookingStatus.REJECTED
-    const isPending = bookingInfo.status === BookingStatus.PENDING
+    const isRejected = bookingInfo?.status === BookingStatus.REJECTED
+    const isPending = bookingInfo?.status === BookingStatus.PENDING
 
     return (
         bookingInfo && (
