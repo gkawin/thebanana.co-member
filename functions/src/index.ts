@@ -1,13 +1,14 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import puppeteer from 'puppeteer'
-import axios from 'axios'
-import dayjs from 'dayjs'
+import axios, { AxiosError } from 'axios'
+import crypto from 'crypto'
+import { URLSearchParams } from 'url'
 
 import { withThaiDateFormat } from '../../src/utils/date'
 import thaiBath from '../../src/utils/thai-bath'
 import { withPricing } from '../../src/utils/payment'
-import { BookingStatus, PaymentMethodLabel } from '../../src/constants'
+import { BookingStatus, PaymentMethod, PaymentMethodLabel } from '../../src/constants'
 import { generateReceiptFromHtml } from './receipt'
 
 admin.initializeApp()
@@ -15,6 +16,62 @@ admin.initializeApp()
 const func = functions.region('asia-southeast1')
 const storage = admin.storage().bucket()
 const db = admin.firestore()
+
+const confirmPaymentWithPushMessage = async (
+    to: string,
+    props: { bookingCode: string; pricing: string; paymentMethod: PaymentMethod }
+) => {
+    const content = `สถาบัน The Banana ขอบพระคุณสำหรับการชำระเงิน ท่านสามารถตรวจสอบรายละเอียดคอร์สเรียนได้ที่เมนู "การจองของฉัน"
+หมายเลขการชำระ ${props.bookingCode}
+ยอดชำระ ${props.pricing}
+ช่องทางชำระ: ${PaymentMethodLabel.get(props.paymentMethod)}`
+    const payload = {
+        to,
+        messages: [
+            {
+                type: 'text',
+                text: content,
+            },
+        ],
+    }
+
+    const { data } = await axios.post('https://api.line.me/v2/bot/message/push', payload, {
+        headers: {
+            Authorization: `Bearer ${process.env.LINE_MESSAGE_TOKEN}`,
+            'Content-Type': 'application/json',
+            'X-Line-Retry-Key': crypto.randomUUID(),
+        },
+    })
+
+    return data
+}
+
+const notifyCustomerPayment = async (props: {
+    bookingCode: string
+    course: string
+    stdName: string
+    paymentMethod: PaymentMethod
+    pricing: string
+}) => {
+    const payload = new URLSearchParams()
+    payload.append(
+        'message',
+        `หมายเลขการจอง: ${props.bookingCode}
+ลงวิชา: ${props.course}
+ชื่อผู้เรียน: ${props.stdName}
+ช่องทางชำระ: ${PaymentMethodLabel.get(props.paymentMethod)}
+ยอดชำระ: ${props.pricing}`
+    )
+
+    const { data } = await axios.post('https://notify-api.line.me/api/notify', payload.toString(), {
+        headers: {
+            Authorization: `Bearer ${process.env.LINE_NOTIFY_ACCESS_TOKEN}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    })
+
+    return data
+}
 
 export const sendPaymentNotify = func.firestore.document('/booking/{bookingCode}').onUpdate(async (change) => {
     const { receipt, paymentMethod, price, studentInfo, bookingCode, course, user } = change.after.data()
@@ -26,26 +83,29 @@ export const sendPaymentNotify = func.firestore.document('/booking/{bookingCode}
     const { title: courseTitle = '', session: courseSession = '' } = (await courseRef.get()).data()
     const { socialId: to } = (await userRef.get()).data()
 
-    const payload = JSON.stringify({
-        to,
-        messages: [
-            ` หมายเลขการจอง: ${bookingCode}
-        ลงวิชา: ${courseTitle} รอบ ${courseSession}
-        ชื่อผู้เรียน: ${studentInfo.studentName} (${studentInfo.nickname})
-        ช่องทางชำระ: ${PaymentMethodLabel.get(paymentMethod)}
-        ยอดชำระ: ${withPricing(price || 0)}`,
-        ],
-    })
+    const pricing = withPricing(price || 0)
 
-    const { data } = await axios.post('https://api.line.me/v2/bot/message/push', payload, {
-        headers: {
-            Authorization: `Bearer ${process.env.LINE_MESSAGE_TOKEN}`,
-            'Content-Type': 'application/json',
-            'X-Line-Retry-Key': `${dayjs().format('YYYYMMDD')}-${Math.random().toString(36).substring(1)}`,
-        },
-    })
+    try {
+        const createListOfNotify = [
+            confirmPaymentWithPushMessage(to, { bookingCode, paymentMethod, pricing }),
+            notifyCustomerPayment({
+                bookingCode,
+                course: `ลงวิชา ${courseTitle} รอบ ${courseSession}`,
+                paymentMethod,
+                pricing,
+                stdName: `${studentInfo.studentName} (${studentInfo.nickname})`,
+            }),
+        ]
 
-    console.log(data)
+        const pushMsgResult = await Promise.all(createListOfNotify)
+        console.log(' ======= pushMsgResult :: createListOfNotify =====', pushMsgResult)
+    } catch (error) {
+        if (error instanceof AxiosError) {
+            console.error(error.response.data)
+            console.error(error.config)
+            console.error(error.status)
+        }
+    }
 })
 
 export const generateReceipt = func

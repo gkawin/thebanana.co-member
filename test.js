@@ -15,10 +15,11 @@ let studentInfo = { studentName: '', nickname: '' }
     ยอดชำระ:0\n
     ดูใบเสร็จ: `
     )
-    const data = await axios.post('https://notify-api.line.me/api/notify', foo.toString(), {
+    const { data } = await axios.post('https://api.line.me/v2/bot/message/push', payload, {
         headers: {
-            Authorization: `Bearer ecMapsKWBH4Ar73UcgwDRheMSWMcqceLNG65yK0LGPc`,
-            'Content-Type': 'application/x-www-form-urlencoded',
+            Authorization: `Bearer ${process.env.LINE_MESSAGE_TOKEN}`,
+            'Content-Type': 'application/json',
+            'X-Line-Retry-Key': `${dayjs().format('YYYYMMDD')}-${Math.random().toString(36).substring(1)}`,
         },
     })
     console.log(data)
