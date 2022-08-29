@@ -4,6 +4,7 @@ import { withThaiDateFormat } from '@/utils/date'
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useEffect } from 'react'
 import { SpinLoading } from '../portal/SpinLoading'
 
 type PaymentActivityInfoProps = {
@@ -12,6 +13,20 @@ type PaymentActivityInfoProps = {
 
 export const PaymentActivityInfo: React.FC<PaymentActivityInfoProps> = ({ bookingCode }) => {
     const { items: bookingList } = useMyBooking({ bookingCode })
+
+    useEffect(() => {
+        if (bookingList.length > 0) {
+            const booking = bookingList[0]
+            if (booking.status === BookingStatus.PAID) {
+                window.liff.sendMessages([
+                    {
+                        type: 'text',
+                        text: `ชำระค่าเรียน ${booking.productName} ราคา ${booking.pricing} เรียบร้อยแล้ว`,
+                    },
+                ])
+            }
+        }
+    }, [bookingList])
 
     if (bookingList.length === 0)
         return (

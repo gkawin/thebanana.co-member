@@ -1,8 +1,9 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import puppeteer from 'puppeteer'
-import { request } from 'http'
-import FormData from 'form-data'
+import { request } from 'https'
+import { URLSearchParams } from 'url'
+import axios from 'axios'
 
 import { withThaiDateFormat } from '../../src/utils/date'
 import thaiBath from '../../src/utils/thai-bath'
@@ -16,50 +17,33 @@ const func = functions.region('asia-southeast1')
 const storage = admin.storage().bucket()
 const db = admin.firestore()
 
-export const sendPaymentNotify = func.firestore.document('/booking/{bookingCode}').onUpdate((change) => {
-    const { receipt, paymentMethod, price, studentInfo, bookingCode, billingId } = change.after.data()
+export const sendPaymentNotify = func.firestore.document('/booking/{bookingCode}').onUpdate(async (change) => {
+    const { receipt, paymentMethod, price, studentInfo, bookingCode, course } = change.after.data()
 
     if (!receipt) return
 
-    const lineNotfyUrl = new URL('https://notify-api.line.me/api/notify')
-    const accessToken = process.env.LINE_NOTIFY_ACCESS_TOKEN
+    const courseRef = course as FirebaseFirestore.DocumentReference
+    const { title: courseTitle = '', session: courseSession = '' } = (await courseRef.get()).data()
 
-    const formData = new FormData()
-    formData.append(
-        'message',
-        `
-        ต้นขั้วใบเสร็จ: ${billingId}\n,
-        รหัสการจอง: ${bookingCode}\n
-        ชื่อผู้เรียน: ${studentInfo.studentName} (${studentInfo.nickname})
-        ช่องทางชำระ: ${paymentMethod}\n
-        ยอดชำระ: ${price}\n
-    `
-    )
-
-    const req = request(
+    const { data, status } = await axios.post(
+        'https://notify-api.line.me/api/notify',
         {
-            host: lineNotfyUrl.hostname,
-            pathname: lineNotfyUrl.pathname,
-            port: lineNotfyUrl.port,
-            protocol: lineNotfyUrl.protocol,
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-                'Content-Type': 'multipart/form-data;boundary="boundary"',
-            },
+            message: `หมายเลขการจอง: ${bookingCode}\n
+        ลงวิชา: ${courseTitle} รอบ ${courseSession}\n
+        ชื่อผู้เรียน: ${studentInfo.studentName} (${studentInfo.nickname})
+        ช่องทางชำระ: ${PaymentMethodLabel.get(paymentMethod)}\n
+        ยอดชำระ: ${withPricing(price || 0)}\n
+        ดูใบเสร็จ: `,
         },
-        (res) => {
-            var chunks = []
-            res.on('data', (data) => chunks.push(data))
-            res.on('end', () => {
-                const response = Buffer.concat(chunks)
-                console.log('======= DONE ===========', response)
-            })
+        {
+            headers: {
+                Authorization: `Bearer ${process.env.LINE_NOTIFY_ACCESS_TOKEN}`,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
         }
     )
 
-    req.write(formData)
-    req.end()
+    console.log(data, status)
 })
 
 export const generateReceipt = func
