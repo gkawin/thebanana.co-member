@@ -1,9 +1,8 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import puppeteer from 'puppeteer'
-import { request } from 'https'
-import { URLSearchParams } from 'url'
 import axios from 'axios'
+import dayjs from 'dayjs'
 
 import { withThaiDateFormat } from '../../src/utils/date'
 import thaiBath from '../../src/utils/thai-bath'
@@ -18,32 +17,35 @@ const storage = admin.storage().bucket()
 const db = admin.firestore()
 
 export const sendPaymentNotify = func.firestore.document('/booking/{bookingCode}').onUpdate(async (change) => {
-    const { receipt, paymentMethod, price, studentInfo, bookingCode, course } = change.after.data()
+    const { receipt, paymentMethod, price, studentInfo, bookingCode, course, user } = change.after.data()
+    const userRef = user as FirebaseFirestore.DocumentReference
 
-    if (!receipt) return
+    if (!receipt || !userRef) return
 
     const courseRef = course as FirebaseFirestore.DocumentReference
     const { title: courseTitle = '', session: courseSession = '' } = (await courseRef.get()).data()
+    const { socialId: to } = (await userRef.get()).data()
 
-    const { data, status } = await axios.post(
-        'https://notify-api.line.me/api/notify',
-        {
-            message: `หมายเลขการจอง: ${bookingCode}\n
-        ลงวิชา: ${courseTitle} รอบ ${courseSession}\n
+    const payload = JSON.stringify({
+        to,
+        messages: [
+            ` หมายเลขการจอง: ${bookingCode}
+        ลงวิชา: ${courseTitle} รอบ ${courseSession}
         ชื่อผู้เรียน: ${studentInfo.studentName} (${studentInfo.nickname})
-        ช่องทางชำระ: ${PaymentMethodLabel.get(paymentMethod)}\n
-        ยอดชำระ: ${withPricing(price || 0)}\n
-        ดูใบเสร็จ: `,
-        },
-        {
-            headers: {
-                Authorization: `Bearer ${process.env.LINE_NOTIFY_ACCESS_TOKEN}`,
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-        }
-    )
+        ช่องทางชำระ: ${PaymentMethodLabel.get(paymentMethod)}
+        ยอดชำระ: ${withPricing(price || 0)}`,
+        ],
+    })
 
-    console.log(data, status)
+    const { data } = await axios.post('https://api.line.me/v2/bot/message/push', payload, {
+        headers: {
+            Authorization: `Bearer ${process.env.LINE_MESSAGE_TOKEN}`,
+            'Content-Type': 'application/json',
+            'X-Line-Retry-Key': `${dayjs().format('YYYYMMDD')}-${Math.random().toString(36).substring(1)}`,
+        },
+    })
+
+    console.log(data)
 })
 
 export const generateReceipt = func
