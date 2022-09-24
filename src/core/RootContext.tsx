@@ -40,26 +40,25 @@ export type AppContext = {
     isLoading: boolean
 } & AuthenticationResponse
 
-export type AuthenticationResponse = { authenticationCode: string; alreadyMember: boolean }
+export type AuthenticationResponse = { authenticationCode?: string; alreadyMember: boolean; accessToken?: string }
 
 export const appContext = createContext<AppContext>(null)
 
 export const useAxios = () => {
-    const { alreadyMember, initilized, loaded, loading, authenticationCode } = useContext(appContext)
-    const notReady = !alreadyMember || !initilized
+    const { alreadyMember, initilized, loaded, loading, accessToken } = useContext(appContext)
+    const notReady = !alreadyMember || !initilized || !accessToken
 
     if (notReady) throw new Error('Need register')
 
     const instance = axios.create({
         headers: {
-            Authorization: `Bearer ${authenticationCode}`,
+            Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
         },
         timeout: 10000,
     })
 
     instance.interceptors.request.use((ctx) => {
-        console.log('test')
         loading()
         return ctx
     })
@@ -68,7 +67,8 @@ export const useAxios = () => {
         return ctx
     })
 
-    return useMemo(() => instance, [instance])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return useMemo(() => instance, [accessToken])
 }
 
 export const useUserInfo = () => {
@@ -103,6 +103,7 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
         $userInfo: null,
         alreadyMember: false,
         authenticationCode: null,
+        accessToken: null,
         initilized: false,
         loaded: () => setLoading(false),
         loading: () => setLoading(true),
@@ -128,7 +129,7 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
                     if (alreadyMember) {
                         await signInWithCustomToken(auth, authenticationCode)
                     }
-                    setContext((state) => ({ ...state, authenticationCode, alreadyMember, initilized: true }))
+                    setContext((state) => ({ ...state, alreadyMember, initilized: true }))
                 })
                 .finally(() => {
                     console.log('firebase initilized')
@@ -147,10 +148,13 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
                 const createQueryUserInfo = getDoc(userDoc(db, user.uid))
                 const createQuerySchools = getDocs(schoolCollection(db, user.uid))
                 const [personal, schools] = await Promise.all([createQueryUserInfo, createQuerySchools])
+                const accessToken = await user.getIdToken()
 
                 setContext((state) => ({
                     ...state,
                     alreadyMember: true,
+                    accessToken,
+                    authenticationCode: null,
                     $userInfo: {
                         uid: user.uid,
                         lineProfile,

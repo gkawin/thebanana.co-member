@@ -1,10 +1,10 @@
 import runsWithMethods from '@/middleware/runsWithMethods'
-import Model, { withModel } from '@/models/Model'
+import { withModel } from '@/models/Model'
 import resolver from '@/services/resolver'
-import { Boom } from '@hapi/boom'
+import { Boom, unauthorized } from '@hapi/boom'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { JsonProperty, Serializable } from 'typescript-json-serializer'
-import { RequestParamType, __ARGS_METADATA__, __METHOD_METADATA__ } from './http-decorators'
+import { CanActivated, RequestParamType, __ARGS_METADATA__, __GUARDS__, __METHOD_METADATA__ } from './http-decorators'
 
 enum HttpCode {
     OK = 200,
@@ -49,6 +49,15 @@ export class HandlerApi {
 
                     const methodMetadata = Reflect.getMetadata(__METHOD_METADATA__, prototype[name])
 
+                    const instanceCanActivateClass = Reflect.getMetadata(__GUARDS__, prototype[name]) as CanActivated
+
+                    if (instanceCanActivateClass) {
+                        const isActivated = await instanceCanActivateClass.canActivate(req)
+                        if (!isActivated) {
+                            throw unauthorized()
+                        }
+                    }
+
                     await runsWithMethods(req, res, { methods: [methodMetadata] })
 
                     const args = Reflect.getMetadata(__ARGS_METADATA__, token, name) as Record<
@@ -82,8 +91,11 @@ export class HandlerApi {
                     )
                 }
             } catch (error) {
+                console.log(error)
                 if (error instanceof Boom) {
                     res.status(error.output.statusCode).json({ ...error.output.payload })
+                } else {
+                    res.status(500).json({ ...error })
                 }
             }
         }

@@ -8,7 +8,8 @@ import Model from '@/models/Model'
 import { badRequest, notFound } from '@hapi/boom'
 import { ok } from 'assert'
 import { HandlerApi } from '@/core/BaseHandler'
-import { Body, Post, Query } from '@/core/http-decorators'
+import { Body, Post, Query, UseGuard } from '@/core/http-decorators'
+import { BearerGuard } from '@/core/guards/bearer.guard'
 
 @injectable()
 class UserCreatedApi extends HandlerApi {
@@ -19,8 +20,9 @@ class UserCreatedApi extends HandlerApi {
     }
 
     @Post()
+    @UseGuard(BearerGuard)
     async main(@Query() query: any, @Body() body: any) {
-        okasync(query?.userId, notFound('user not found'))
+        ok(query?.userId, notFound('user not found'))
         ok(body, badRequest())
 
         const writeResult = await this.#userRef.doc(query.userId.toString()).set(body)
