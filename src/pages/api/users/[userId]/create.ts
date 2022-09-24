@@ -10,6 +10,13 @@ import { ok } from 'assert'
 import { HandlerApi } from '@/core/BaseHandler'
 import { Body, Post, Query, UseGuard } from '@/core/http-decorators'
 import { BearerGuard } from '@/core/guards/bearer.guard'
+import { JsonProperty, Serializable } from 'typescript-json-serializer'
+
+@Serializable()
+export class CreateUserModel {
+    @JsonProperty()
+    userId: string
+}
 
 @injectable()
 class UserCreatedApi extends HandlerApi {
@@ -21,7 +28,7 @@ class UserCreatedApi extends HandlerApi {
 
     @Post()
     @UseGuard(BearerGuard)
-    async main(@Query() query: any, @Body() body: any) {
+    async main(@Query() query: CreateUserModel, @Body() body: any) {
         ok(query?.userId, notFound('user not found'))
         ok(body, badRequest())
 

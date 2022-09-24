@@ -1,8 +1,6 @@
 import 'reflect-metadata'
-import runsWithMethods from '@/middleware/runsWithMethods'
-import resolver from '@/services/resolver'
-import { badRequest, Boom } from '@hapi/boom'
-import { NextApiHandler } from 'next'
+
+import { badRequest } from '@hapi/boom'
 import { injectable } from 'tsyringe'
 import { validate } from 'class-validator'
 import { deserialize } from 'typescript-json-serializer'
@@ -16,88 +14,77 @@ import { ChargeResultModel } from '@/models/payment/ChargeResult.model'
 import { BookingModel } from '@/models/BookingModel'
 import { CourseModel } from '@/models/course/course.model'
 import { OmiseService } from '@/services/omise.service'
+import { HandlerApi } from '@/core/BaseHandler'
+import { Body, Post, UseGuard } from '@/core/http-decorators'
+import { BearerGuard } from '@/core/guards/bearer.guard'
 
 @injectable()
-class PaymentChargeApi {
+class PaymentChargeApi extends HandlerApi {
     #course: FirebaseFirestore.CollectionReference<CourseModel>
     constructor(private sdk: AdminSDK, private omise: OmiseService) {
+        super()
         this.#course = this.sdk.db.collection('courses').withConverter(Model.convert(CourseModel))
     }
 
-    main: NextApiHandler = async (req, res) => {
-        await runsWithMethods(req, res, { methods: ['POST'] })
-        try {
-            if (!req.body) throw badRequest()
-            const payload = deserialize(JSON.stringify(req.body), PaymentChargeBodyModel)
-
-            const hasErrors = await validate(payload)
-            if (hasErrors.length > 0) {
-                throw badRequest(hasErrors.toString())
-            }
-
-            const productRef = this.#course.doc(payload.courseId).withConverter(Model.convert(CourseModel))
-            const product = (await productRef.get()).data()
-            const today = dayjs()
-            const expiredDate = today.add(7, 'day')
-            const bookingCode = BookingModel.generateBookingCode()
-            const { token: card = null, source = null, studentName, nickname, school, ...props } = payload
-
-            const chargedResult = await this.omise.charges
-                .create({
-                    amount: product.price * 100,
-                    currency: 'thb',
-                    card,
-                    source,
-                    description: product.title,
-                    customer: payload.token ? null : payload.userId,
-                    metadata: {
-                        ...props,
-                        bookingCode,
-                        studentInfo: {
-                            studentName,
-                            nickname,
-                            school,
-                        },
-                        productCode: product.code,
-                        price: product.price,
-                        enrollmentAt: today.toDate(),
-                        expiredDate: expiredDate.toDate(),
-                        startDate: product.startDate,
-                        endDate: product.endDate,
-                    },
-                })
-                .then((result: any) => deserialize(result, PaymentOmiseDataModel))
-
-            const response = withModel(ChargeResultModel)
-            const paymentMethod =
-                chargedResult?.source?.type === 'promptpay' ? PaymentMethod.PROMPT_PAY : PaymentMethod.CREDIT_CARD
-
-            const message = chargedResult?.failureCode
-                ? (FailureCode[chargedResult.failureCode as any] as unknown as FailureCode)
-                : null
-
-            res.status(200).json(
-                response.fromJson({
-                    card: chargedResult?.card ?? null,
-                    qrCode: chargedResult?.source?.scannableCode?.image ?? null,
-                    status: chargedResult.status,
-                    paymentMethod,
-                    failureCode: chargedResult?.failureCode,
-                    failureMessage: FailureMessage.get(message),
-                    bookingCode,
-                })
-            )
-        } catch (error) {
-            if (error instanceof Boom) {
-                console.log(error)
-                res.status(error.output.statusCode).json(error.output.payload)
-            } else {
-                console.error(error)
-                res.status(500).json(error)
-            }
+    @Post()
+    @UseGuard(BearerGuard)
+    async main(@Body() body: PaymentChargeBodyModel) {
+        const hasErrors = await validate(body)
+        if (hasErrors.length > 0) {
+            throw badRequest(hasErrors.toString())
         }
+
+        const productRef = this.#course.doc(body.courseId).withConverter(Model.convert(CourseModel))
+        const product = (await productRef.get()).data()
+        const today = dayjs()
+        const expiredDate = today.add(7, 'day')
+        const bookingCode = BookingModel.generateBookingCode()
+        const { token: card = null, source = null, studentName, nickname, school, ...props } = body
+
+        const chargedResult = await this.omise.charges
+            .create({
+                amount: product.price * 100,
+                currency: 'thb',
+                card,
+                source,
+                description: product.title,
+                customer: body.token ? null : body.userId,
+                metadata: {
+                    ...props,
+                    bookingCode,
+                    studentInfo: {
+                        studentName,
+                        nickname,
+                        school,
+                    },
+                    productCode: product.code,
+                    price: product.price,
+                    enrollmentAt: today.toDate(),
+                    expiredDate: expiredDate.toDate(),
+                    startDate: product.startDate,
+                    endDate: product.endDate,
+                },
+            })
+            .then((result: any) => deserialize(result, PaymentOmiseDataModel))
+
+        const response = withModel(ChargeResultModel)
+        const paymentMethod =
+            chargedResult?.source?.type === 'promptpay' ? PaymentMethod.PROMPT_PAY : PaymentMethod.CREDIT_CARD
+
+        const message = chargedResult?.failureCode
+            ? (FailureCode[chargedResult.failureCode as any] as unknown as FailureCode)
+            : null
+
+        return response.fromJson({
+            card: chargedResult?.card ?? null,
+            qrCode: chargedResult?.source?.scannableCode?.image ?? null,
+            status: chargedResult.status,
+            paymentMethod,
+            failureCode: chargedResult?.failureCode,
+            failureMessage: FailureMessage.get(message),
+            bookingCode,
+        })
     }
 }
 
-const handler = resolver.resolve(PaymentChargeApi)
-export default handler.main
+export default HandlerApi.handle(PaymentChargeApi)

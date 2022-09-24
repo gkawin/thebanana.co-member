@@ -1,5 +1,4 @@
 import runsWithMethods from '@/middleware/runsWithMethods'
-import { withModel } from '@/models/Model'
 import resolver from '@/services/resolver'
 import { Boom, unauthorized } from '@hapi/boom'
 import { NextApiRequest, NextApiResponse } from 'next'
@@ -83,12 +82,7 @@ export class HandlerApi {
 
                     const result = await originalValue.apply(instance, newArgs)
 
-                    res.status(HttpCode.CREATED).json(
-                        withModel(HttpResponseModel).fromJson({
-                            data: result,
-                            statusCode: HttpCode.CREATED,
-                        })
-                    )
+                    res.status(HttpCode.CREATED).json(result)
                 }
             } catch (error) {
                 console.log(error)
