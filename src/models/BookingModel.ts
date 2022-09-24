@@ -60,7 +60,7 @@ export class BookingModel {
     status: BookingStatus
 
     @JsonProperty()
-    failureCode: FailureCode
+    failureCode?: FailureCode
 
     @JsonProperty()
     shippingAddress: FirebaseFirestore.DocumentReference<UserAddressModel> | DocumentReference<UserAddressModel>

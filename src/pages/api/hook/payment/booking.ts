@@ -1,130 +1,90 @@
 import 'reflect-metadata'
 import { BookingStatus, FailureCode, OmiseHookEvent, PaymentMethod, SourceOfFund } from '@/constants'
 import { AdminSDK } from '@/libs/adminSDK'
-import runsWithMethods from '@/middleware/runsWithMethods'
 import { BookingModel } from '@/models/BookingModel'
-import Model from '@/models/Model'
+import Model, { withModel } from '@/models/Model'
 import { PaymentEventBodyModel } from '@/models/payment/PaymentEventBody.model'
-import { PaymentMetadataModel } from '@/models/payment/PaymentMetadata.model'
 
 import { UserAddressModel } from '@/models/UserAddressModel'
-import resolver from '@/services/resolver'
-import { badRequest, Boom } from '@hapi/boom'
-import { NextApiHandler } from 'next'
+
+import { badRequest } from '@hapi/boom'
+
 import { injectable } from 'tsyringe'
-import { deserialize } from 'typescript-json-serializer'
+
 import { CourseModel } from '@/models/course/course.model'
 import { UserModelV2 } from '@/models/user/user.model'
+import { HandlerApi } from '@/core/BaseHandler'
+import { Body, Post } from '@/core/http-decorators'
+import { ok } from 'assert'
 
 @injectable()
-class HookPaymentBooking {
+class HookPaymentBooking extends HandlerApi {
     #bookingRef: FirebaseFirestore.CollectionReference<BookingModel>
     #courseRef: FirebaseFirestore.CollectionReference<CourseModel>
     #userRef: FirebaseFirestore.CollectionReference<UserModelV2>
 
     constructor(private sdk: AdminSDK) {
+        super()
         this.#bookingRef = this.sdk.db.collection('booking').withConverter(Model.convert(BookingModel))
         this.#courseRef = this.sdk.db.collection('courses').withConverter(Model.convert(CourseModel))
         this.#userRef = this.sdk.db.collection('users').withConverter(Model.convert(UserModelV2))
     }
 
-    main: NextApiHandler = async (req, res) => {
-        await runsWithMethods(req, res, { methods: ['POST'] })
+    @Post()
+    async main(@Body() body: PaymentEventBodyModel) {
+        ok(body?.data, badRequest())
+        ok(
+            [OmiseHookEvent.CHARGE_CREATE, OmiseHookEvent.CHARGE_COMPLETE].includes(body.key),
+            badRequest('invalid event')
+        )
 
-        try {
-            const body = deserialize(req.body, PaymentEventBodyModel)
-            this.validateRequesting(body)
+        const payload = withModel(PaymentEventBodyModel).fromJson(body)
 
-            const invalidRequest = ![OmiseHookEvent.CREATE, OmiseHookEvent.COMPLETE].includes(body.key)
+        const { bookingCode, courseId, shippingAddressId, userId, startDate, endDate, price, studentInfo } =
+            payload.data.metadata
 
-            if (invalidRequest) throw badRequest('invalid Request')
+        const course = this.#courseRef.doc(courseId)
+        const user = this.#userRef.doc(userId)
+        const shippingAddress = user
+            .collection('address')
+            .withConverter(Model.convert(UserAddressModel))
+            .doc(shippingAddressId)
 
-            const status = body.data.status
+        const response = await this.#bookingRef.doc(bookingCode).set({
+            billingId: payload.id,
+            bookingCode,
+            course,
+            user,
+            shippingAddress,
+            failureCode: FailureCode[payload.data?.failureCode as keyof typeof FailureCode] ?? null,
+            createdOn: new Date(),
+            sourceOfFund: SourceOfFund.OMISE,
+            paymentMethod: body.data.card ? PaymentMethod.CREDIT_CARD : PaymentMethod.PROMPT_PAY,
+            price,
+            status: this.getBookingStatus(payload),
+            receipt: null,
+            studentInfo,
+            startDate,
+            endDate,
+            promptPayInfo:
+                payload.data.source?.type === 'promptpay'
+                    ? {
+                          qrCodeImage: payload.data?.source?.scannableCode?.image?.download_uri ?? '',
+                          expiryDate: !!payload.data?.expiresAt ? new Date(payload.data?.expiresAt) : null,
+                      }
+                    : null,
+        })
 
-            let response
-            switch (status) {
-                case 'successful': {
-                    response = await this.setBookingRow(body, BookingStatus.PAID)
-                }
-                case 'pending': {
-                    response = await this.setBookingRow(body, BookingStatus.PENDING)
-                }
-                case 'failed': {
-                    response = await this.setBookingRow(body, BookingStatus.REJECTED, body.data.failureCode as any)
-                }
-            }
-            res.status(200).json({ status: 'succeed', response })
-        } catch (error) {
-            console.log(error)
-            if (error instanceof Boom) {
-                res.status(error.output.statusCode).json(error.output.payload)
-            } else {
-                res.status(500).json(error)
-            }
-        }
+        console.log('PaymentEventBodyModel :: ', response)
+
+        return { status: 'succeed', response }
     }
 
-    private validateRequesting(body: PaymentEventBodyModel) {
-        const {
-            bookingCode = null,
-            courseId = null,
-            userId = null,
-            shippingAddressId = null,
-        } = body.data.metadata as PaymentMetadataModel
-        if (!bookingCode) throw badRequest('required bookingCode')
-        if (!courseId) throw badRequest('required productId')
-        if (!userId) throw badRequest('required userId')
-        if (!shippingAddressId) throw badRequest('required shippingAddressId')
-    }
-
-    private async setBookingRow(
-        body: PaymentEventBodyModel,
-        status: BookingStatus,
-        failureCode: FailureCode = null
-    ): Promise<string | null> {
-        try {
-            const { bookingCode, courseId, shippingAddressId, userId, startDate, endDate, price, studentInfo } =
-                body.data.metadata
-
-            const course = this.#courseRef.doc(courseId)
-            const user = this.#userRef.doc(userId)
-            const shippingAddress = user
-                .collection('address')
-                .withConverter(Model.convert(UserAddressModel))
-                .doc(shippingAddressId)
-
-            const result = await this.#bookingRef.doc(bookingCode).set({
-                billingId: body.id,
-                bookingCode: bookingCode,
-                sourceOfFund: SourceOfFund.OMISE,
-                shippingAddress,
-                paymentMethod: body.data.card ? PaymentMethod.CREDIT_CARD : PaymentMethod.PROMPT_PAY,
-                createdOn: new Date(),
-                course,
-                status,
-                user,
-                startDate,
-                endDate,
-                price,
-                failureCode,
-                receipt: null,
-                studentInfo,
-                promptPayInfo:
-                    body.data.source?.type === 'promptpay'
-                        ? {
-                              qrCodeImage: body.data?.source?.scannableCode?.image?.download_uri ?? '',
-                              expiryDate: !!body.data?.expiresAt ? new Date(body.data?.expiresAt) : null,
-                          }
-                        : null,
-            })
-            console.log(result)
-            return bookingCode
-        } catch (error) {
-            console.error(error)
-            return null
-        }
+    private getBookingStatus(payload: PaymentEventBodyModel): BookingStatus {
+        if (payload.data.status === 'pending') return BookingStatus.PENDING
+        if (payload.data.failureCode) return BookingStatus.REJECTED
+        return BookingStatus.CREATED
     }
 }
 
-const handler = resolver.resolve(HookPaymentBooking)
-export default handler.main
+export default HandlerApi.handle(HookPaymentBooking)

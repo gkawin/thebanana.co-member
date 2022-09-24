@@ -1,8 +1,23 @@
+import dayjs from 'dayjs'
 import { DocumentReference } from 'firebase/firestore'
 
-export const withTimeToDate = (v: any) => {
-    if ('toDate' in v) {
-        return v.toDate()
+export const withTimeToDate = (v: any): Date => {
+    console.log('withTimeToDate :::', v)
+    if (typeof v === 'object') {
+        if ('_seconds' in v) {
+            return dayjs.unix(v._seconds).toDate()
+        }
+
+        // Note: For supporting Firebase Client side.
+        if ('toDate' in v) {
+            return v.toDate()
+        }
+    }
+
+    if (typeof v === 'string') {
+        if (dayjs(v).isValid()) {
+            return dayjs(v).toDate()
+        }
     }
     return v
 }

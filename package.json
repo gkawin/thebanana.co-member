@@ -30,7 +30,7 @@
         "firebase": "^9.6.1",
         "firebase-admin": "^10",
         "firebase-functions": "^3.16.0",
-        "next": "latest",
+        "next": "^12.3.1",
         "omise": "^0.8.5",
         "postcss": "^8.4.16",
         "react": "^18.0.0",

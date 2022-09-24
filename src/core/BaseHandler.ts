@@ -41,12 +41,16 @@ export class HandlerApi {
         return async function (req: NextApiRequest, res: NextApiResponse) {
             const prototype = token.prototype
             const instance = resolver.resolve(token)
+
             try {
                 for (const name of Reflect.ownKeys(prototype)) {
                     const descriptor = Reflect.getOwnPropertyDescriptor(prototype, name)
+
                     if (name === 'constructor') continue
 
                     const methodMetadata = Reflect.getMetadata(__METHOD_METADATA__, prototype[name])
+
+                    if (!methodMetadata) continue
 
                     const instanceCanActivateClass = Reflect.getMetadata(__GUARDS__, prototype[name]) as CanActivated
 
@@ -82,7 +86,7 @@ export class HandlerApi {
 
                     const result = await originalValue.apply(instance, newArgs)
 
-                    res.status(HttpCode.CREATED).json(result)
+                    res.status(HttpCode.OK).json(result)
                 }
             } catch (error) {
                 console.log(error)
