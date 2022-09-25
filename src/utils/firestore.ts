@@ -2,7 +2,6 @@ import dayjs from 'dayjs'
 import { DocumentReference } from 'firebase/firestore'
 
 export const withTimeToDate = (v: any): Date => {
-    console.log('withTimeToDate :::', v)
     if (typeof v === 'object') {
         if ('_seconds' in v) {
             return dayjs.unix(v._seconds).toDate()

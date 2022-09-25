@@ -112,7 +112,7 @@ export const generateReceipt = func
     .runWith({ memory: '1GB', timeoutSeconds: 540 })
     .firestore.document('/booking/{bookingCode}')
     .onWrite(async (change, context) => {
-        const { status, receipt, ...info } = change.after.data()
+        const { status = null, receipt = null, ...info } = change.after.data()
         const bookingCode = context.params.bookingCode
         const receiptId = `rcpt_${bookingCode}`
 
