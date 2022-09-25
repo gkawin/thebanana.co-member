@@ -83,6 +83,7 @@ class HookPaymentBooking extends HandlerApi {
     private getBookingStatus(payload: PaymentEventBodyModel): BookingStatus {
         if (payload.data.status === 'pending') return BookingStatus.PENDING
         if (payload.data.failureCode) return BookingStatus.REJECTED
+        if (payload.data.status === 'successful') return BookingStatus.PAID
         return BookingStatus.CREATED
     }
 }
