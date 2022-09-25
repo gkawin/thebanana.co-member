@@ -111,24 +111,32 @@ export const sendPaymentNotify = func.firestore.document('/booking/{bookingCode}
 export const generateReceipt = func
     .runWith({ memory: '1GB', timeoutSeconds: 540 })
     .firestore.document('/booking/{bookingCode}')
-    .onWrite(async (change, context) => {
-        const { status = null, receipt = null, ...info } = change.after.data()
+    .onUpdate(async (change, context) => {
+        const data = change.after.data()
+        const previousData = change.before.data()
+
+        if (data.status === previousData.status) {
+            return null
+        }
+
+        if (data.status !== 'PAID') {
+            return null
+        }
+
         const bookingCode = context.params.bookingCode
         const receiptId = `rcpt_${bookingCode}`
 
-        console.log(JSON.stringify({ bookingCode, receiptId, status }))
+        console.log('=== generateReceipt ===', JSON.stringify({ bookingCode, receiptId, status: data.status }))
 
-        if (status !== BookingStatus.PAID || receipt) return
-
-        const userRef = info?.user as FirebaseFirestore.DocumentReference
+        const userRef = data?.user as FirebaseFirestore.DocumentReference
 
         if (!userRef) return
 
-        const courseRef = info?.course as FirebaseFirestore.DocumentReference
+        const courseRef = data?.course as FirebaseFirestore.DocumentReference
         const { title: courseTitle = '', session: courseSession = '' } = (await courseRef.get()).data()
         const userId = (await userRef.get()).id
-        const { nickname = '', firstname = '', lastname = '' } = info?.studentInfo ?? {}
-        const shippingAddressRef = info?.shippingAddress as FirebaseFirestore.DocumentReference
+        const { nickname = '', studentName = '' } = data?.studentInfo ?? {}
+        const shippingAddressRef = data?.shippingAddress as FirebaseFirestore.DocumentReference
         const address = (await shippingAddressRef.get()).data()?.address ?? ''
 
         const browser = await puppeteer.launch({
@@ -144,12 +152,12 @@ export const generateReceipt = func
             createdAt: withThaiDateFormat(new Date().toISOString()),
             parentName: 'test',
             receiptId,
-            totalPricing: withPricing(info?.price ?? 0),
-            listCoursesEnrolled: [{ course: courseTitle, session: courseSession, pricing: info?.price }],
-            totalPricingThai: thaiBath(info?.price ?? 0),
+            totalPricing: withPricing(data?.price ?? 0),
+            listCoursesEnrolled: [{ course: courseTitle, session: courseSession, pricing: data?.price }],
+            totalPricingThai: thaiBath(data?.price ?? 0),
             nickname,
-            studentName: `${firstname} ${lastname}`,
-            paymentMethodLabel: PaymentMethodLabel.get(info?.paymentMethod),
+            studentName,
+            paymentMethodLabel: PaymentMethodLabel.get(data?.paymentMethod),
         })
 
         await page.setContent(dehydrateHtml, { waitUntil: 'networkidle2' })

@@ -9,8 +9,8 @@
         "start": "yarn shell",
         "deploy": "firebase deploy --only functions",
         "logs": "firebase functions:log",
-        "build:watch": "concurrently --kill-others \"tsc -w\"",
-        "serve:watch": "npm run build:watch | firebase emulators:start --import ../export --only functions,storage,firestore"
+        "build:watch": "tsc --watch --preserveWatchOutput",
+        "dev": "npm run build:watch | firebase emulators:start --import export --only functions,storage,firestore"
     },
     "engines": {
         "node": "16"
