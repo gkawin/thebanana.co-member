@@ -1,44 +1,40 @@
 import 'reflect-metadata'
-import runsWithMethods from '@/middleware/runsWithMethods'
 import { AdminSDK } from '@/libs/adminSDK'
 import { injectable } from 'tsyringe'
-import { NextApiHandler } from 'next'
-import { badRequest, Boom, notFound } from '@hapi/boom'
-import resolver from '@/services/resolver'
+
 import { UserModelV2 } from '@/models/user/user.model'
 import Model from '@/models/Model'
+
+import { badRequest, notFound } from '@hapi/boom'
 import { ok } from 'assert'
+import { HandlerApi } from '@/core/BaseHandler'
+import { Body, Post, Query, UseGuard } from '@/core/http-decorators'
+import { BearerGuard } from '@/core/guards/bearer.guard'
+import { JsonProperty, Serializable } from 'typescript-json-serializer'
+
+@Serializable()
+export class CreateUserModel {
+    @JsonProperty()
+    userId: string
+}
 
 @injectable()
-class UserCreatedApi {
+class UserCreatedApi extends HandlerApi {
     #userRef: FirebaseFirestore.CollectionReference<UserModelV2>
     constructor(private sdk: AdminSDK) {
+        super()
         this.#userRef = this.sdk.db.collection('users').withConverter(Model.convert(UserModelV2))
     }
 
-    main: NextApiHandler = async (req, res) => {
-        await runsWithMethods(req, res, { methods: ['POST'] })
+    @Post()
+    @UseGuard(BearerGuard)
+    async main(@Query() query: CreateUserModel, @Body() body: any) {
+        ok(query?.userId, notFound('user not found'))
+        ok(body, badRequest())
 
-        try {
-            ok(req.query?.userId, notFound('user not found'))
-            ok(req.body, badRequest())
-
-            const { userId } = req.query
-            const body = req.body
-
-            const writeResult = await this.#userRef.doc(userId.toString()).set(body)
-
-            res.status(200).json(writeResult)
-        } catch (error) {
-            if (error instanceof Boom) {
-                res.status(error.output.statusCode).json(error.output.payload)
-            } else {
-                res.status(500).json(error)
-            }
-            console.error(error)
-        }
+        const writeResult = await this.#userRef.doc(query.userId.toString()).set(body)
+        return writeResult
     }
 }
 
-const handler = resolver.resolve(UserCreatedApi)
-export default handler.main
+export default HandlerApi.handle(UserCreatedApi)

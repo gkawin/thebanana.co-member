@@ -41,6 +41,7 @@ export default function useMyBooking(options?: { bookingCode?: string; bookingGr
     const db = getFirestore()
     const { uid } = useUserInfo()
     const [bookingGroup, setBookingGroup] = useState<BookingGroup>(options?.bookingGroup ?? BookingGroup.UpComming)
+    const [loading, setLoading] = useState(false)
 
     const queryBooinkGroupCondition = () => {
         const bookingCode = options?.bookingCode ?? null
@@ -53,7 +54,7 @@ export default function useMyBooking(options?: { bookingCode?: string; bookingGr
             switch (bookingGroup) {
                 case BookingGroup.UpComming:
                     queries = [
-                        where('status', 'in', [BookingStatus.PAID, BookingStatus.PENDING]),
+                        where('status', 'in', [BookingStatus.PAID, BookingStatus.PENDING, BookingStatus.CREATED]),
                         where('endDate', '>=', new Date()),
                     ]
                     break
@@ -78,6 +79,7 @@ export default function useMyBooking(options?: { bookingCode?: string; bookingGr
         ).withConverter(Model.convert(BookingModel))
 
         const unsubscribe = onSnapshot(q, async (ss) => {
+            setLoading(true)
             const createdListBookings = ss.docs.map<Promise<UseMyBookingInfo>>(async (doc) => {
                 if (!doc.exists()) return null
 
@@ -117,6 +119,7 @@ export default function useMyBooking(options?: { bookingCode?: string; bookingGr
             })
             const results = await Promise.all(createdListBookings)
             setItems(results)
+            setLoading(false)
         })
 
         return () => {
@@ -127,5 +130,5 @@ export default function useMyBooking(options?: { bookingCode?: string; bookingGr
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [bookingGroup, uid])
 
-    return { setBookingGroup, items, bookingGroup }
+    return { setBookingGroup, items, bookingGroup, loading }
 }

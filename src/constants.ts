@@ -36,12 +36,13 @@ export const PaymentMethodLabel = new Map<PaymentMethod, string>([
 ])
 
 export enum SourceOfFund {
-    OMISE = 'OMISE',
+    OMISE = 'omise',
 }
 
 export enum OmiseHookEvent {
-    CREATE = 'charge.create',
-    COMPLETE = 'charge.complete',
+    CHARGE_CREATE = 'charge.create',
+    CHARGE_COMPLETE = 'charge.complete',
+    CHARGE_REVERSE = 'charge.reverse',
 }
 
 export enum FailureCode {

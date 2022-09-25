@@ -1,8 +1,8 @@
-import runsWithMethods from '@/middleware/runsWithMethods'
-import { NextApiRequest, NextApiResponse } from 'next'
 import axios from 'axios'
-import { notFound } from '@hapi/boom'
-import { ok } from 'assert'
+import { injectable } from 'tsyringe'
+import { HandlerApi } from '@/core/BaseHandler'
+import { Get, Query, UseGuard } from '@/core/http-decorators'
+import { BearerGuard } from '@/core/guards/bearer.guard'
 
 export type LongdoMapSearchAddress = {
     address: {
@@ -16,29 +16,34 @@ export type LongdoMapSearchAddress = {
 }
 const apiKey = process.env.LONGDO_API_KEY || ''
 
-export default async function HandleGeoSerachPostCode(req: NextApiRequest, res: NextApiResponse) {
-    await runsWithMethods(req, res, { methods: ['GET'] })
-    const { keyword } = req.query
+@injectable()
+class HandleGeoSerachPostCode extends HandlerApi {
+    @Get()
+    @UseGuard(BearerGuard)
+    async main(@Query() query: { keyword: string }) {
+        const { keyword } = query
 
-    try {
-        const { data } = await axios.get<LongdoMapSearchAddress>('https://api.longdo.com/POIService/json/address', {
-            params: { postcode: decodeURIComponent(keyword.toString()), key: apiKey, locale: 'th' },
-        })
+        if (!keyword) return []
 
-        ok(data, notFound('data not found'))
-
-        const addresses = data.address.map((addr) => {
-            addr
-            return {
-                province: addr.province.replace('จ.', ''),
-                district: addr.district.replace('อ.', ''),
-                subdistrict: addr.subdistrict.replace('ต.', ''),
-                postcode: keyword,
-            }
-        })
-        res.status(200).json(addresses)
-    } catch (error) {
-        console.error({ keyword, error: error.output })
-        res.status(200).json([])
+        try {
+            const { data } = await axios.get<LongdoMapSearchAddress>('https://api.longdo.com/POIService/json/address', {
+                params: { postcode: decodeURIComponent(keyword.toString()), key: apiKey, locale: 'th' },
+            })
+            const addresses = data.address.map((addr) => {
+                addr
+                return {
+                    province: addr.province.replace('จ.', ''),
+                    district: addr.district.replace('อ.', ''),
+                    subdistrict: addr.subdistrict.replace('ต.', ''),
+                    postcode: keyword,
+                }
+            })
+            return addresses
+        } catch (error) {
+            console.error({ keyword, error: error.output })
+            return []
+        }
     }
 }
+
+export default HandlerApi.handle(HandleGeoSerachPostCode)
