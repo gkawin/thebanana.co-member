@@ -14,11 +14,45 @@ export default class AppDoc extends Document {
                         href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600&display=swap"
                         rel="stylesheet"
                     />
-                    <Script
-                        charSet="utf-8"
-                        src="https://static.line-scdn.net/liff/edge/2/sdk.js"
-                        strategy="beforeInteractive"
-                    ></Script>
+                    {process.env.NEXT_RUNTIME__ENV === 'production' && (
+                        <Script
+                            charSet="utf-8"
+                            src="https://static.line-scdn.net/liff/edge/2/sdk.js"
+                            strategy="beforeInteractive"
+                        ></Script>
+                    )}
+
+                    {process.env.NEXT_RUNTIME__ENV === 'development' && (
+                        <Script
+                            id="hack"
+                            strategy="afterInteractive"
+                            dangerouslySetInnerHTML={{
+                                __html: `
+                                var userId = 'user_demo_id'
+
+                                if (!window.liff) {
+                                    window.liff = {
+                                        async getProfile() {
+                                            return {
+                                                displayName: 'user_demo_line',
+                                                pictureUrl: 'https://www.thebanana.co/wp-content/uploads/2022/07/logo-th-banana-copy.png',
+                                                userId,
+                                                statusMessage: userId,
+                                            }
+                                        },
+                                        getDecodedIDToken() {
+                                            return { sub: userId }
+                                        },
+                                        async sendMessages() {
+                                            return null
+                                        },
+
+                                    }
+                                }
+                                `,
+                            }}
+                        ></Script>
+                    )}
                 </Head>
                 <body>
                     <Main />

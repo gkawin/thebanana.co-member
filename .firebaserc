@@ -1,7 +1,7 @@
 {
-  "projects": {
-    "production": "prod-member-thebanana-co",
-    "dev": "thebanana-member"
-  },
-  "targets": {}
+    "projects": {
+        "production": "prod-member-thebanana-co",
+        "staging": "staging-member-thebanana-co"
+    },
+    "targets": {}
 }
