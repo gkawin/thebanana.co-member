@@ -18,6 +18,8 @@ const db = admin.firestore()
 
 export const sendPaymentNotify = func.firestore.document('/booking/{bookingCode}').onWrite(async (change) => {
     const data = change.after.data()
+    // NOTE: Which means deleted all data.
+    if (!data) return null
 
     if (data.receipt || data.status !== 'PAID') return null
 
@@ -63,6 +65,9 @@ export const generateReceipt = func
     .firestore.document('/booking/{bookingCode}')
     .onWrite(async (change, context) => {
         const data = change.after.data()
+
+        // NOTE: Which means deleted all data.
+        if (!data) return null
 
         if (data.receipt || data.status !== 'PAID') return null
 
