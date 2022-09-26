@@ -7,7 +7,7 @@ import { PaymentEventBodyModel } from '@/models/payment/PaymentEventBody.model'
 
 import { UserAddressModel } from '@/models/UserAddressModel'
 
-import { badRequest } from '@hapi/boom'
+import { badRequest, badData } from '@hapi/boom'
 
 import { injectable } from 'tsyringe'
 
@@ -39,6 +39,13 @@ class HookPaymentBooking extends HandlerApi {
         )
 
         const payload = withModel(PaymentEventBodyModel).fromJson(body)
+
+        const bookingStatus = this.getBookingStatus(payload)
+
+        if (bookingStatus === BookingStatus.REJECTED) {
+            console.log('BookingStatus :: REJECTED ', `${payload.data.failureCode} and ${payload.data.failureMessage}`)
+            throw badData(payload.data.failureMessage)
+        }
 
         const { bookingCode, courseId, shippingAddressId, userId, startDate, endDate, price, studentInfo } =
             payload.data.metadata

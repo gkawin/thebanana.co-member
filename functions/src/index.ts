@@ -18,9 +18,7 @@ const db = admin.firestore()
 
 export const sendPaymentNotify = func.firestore.document('/booking/{bookingCode}').onWrite(async (change) => {
     const data = change.after.data()
-    const previousData = change.after.data()
 
-    if (data.status === previousData.status) return null
     if (data.receipt || data.status !== 'PAID') return null
 
     const { bookingCode, paymentMethod, studentInfo, user, course } = data
@@ -65,9 +63,7 @@ export const generateReceipt = func
     .firestore.document('/booking/{bookingCode}')
     .onWrite(async (change, context) => {
         const data = change.after.data()
-        const previousData = change.before.data()
 
-        if (data.status === previousData.status) return null
         if (data.receipt || data.status !== 'PAID') return null
 
         const bookingCode = context.params.bookingCode
