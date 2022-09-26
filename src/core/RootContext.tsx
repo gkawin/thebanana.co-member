@@ -14,7 +14,7 @@ import SignUpPage from '@/components/signup/SignupPage'
 import { getDoc, getDocs, getFirestore } from 'firebase/firestore'
 import { schoolCollection, userDoc } from '@/concerns/query'
 
-const isProduction = process.env.NEXT_RUNTIME__ENV === 'production'
+const isProduction = process.env.NEXT_RUNTIME__APP_STAGE === 'production'
 
 const liffId = isProduction ? '1653826193-QbmamAo0' : ''
 const firebaseConfig = isProduction

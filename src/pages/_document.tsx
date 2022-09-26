@@ -14,7 +14,7 @@ export default class AppDoc extends Document {
                         href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600&display=swap"
                         rel="stylesheet"
                     />
-                    {process.env.NEXT_RUNTIME__ENV === 'production' && (
+                    {process.env.NEXT_RUNTIME__APP_STAGE === 'production' && (
                         <Script
                             charSet="utf-8"
                             src="https://static.line-scdn.net/liff/edge/2/sdk.js"
@@ -22,7 +22,7 @@ export default class AppDoc extends Document {
                         ></Script>
                     )}
 
-                    {process.env.NEXT_RUNTIME__ENV === 'development' && (
+                    {process.env.NEXT_RUNTIME__APP_STAGE !== 'production' && (
                         <Script
                             id="hack"
                             strategy="afterInteractive"
