@@ -3,7 +3,11 @@
  */
 const config = {
     images: {
-        domains: ['firebasestorage.googleapis.com', 'fakeimg.pl'],
+        domains: ['firebasestorage.googleapis.com', 'fakeimg.pl', 'www.thebanana.co'],
+    },
+    env: {
+        NEXT_RUNTIME__APP_STAGE: process.env.APP_STAGE,
+        NEXT_RUNTIME__OMISE_PUBLIC_KEY: process.env.OMISE_PUBLIC_KEY,
     },
 }
 

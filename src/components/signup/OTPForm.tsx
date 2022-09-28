@@ -10,7 +10,7 @@ export const OTPForm: React.FC = () => {
         register,
         handleSubmit,
         setError,
-        formState: { errors },
+        formState: { errors, isSubmitting },
     } = useForm<{ otp: string }>()
     const { push } = useRouter()
 
@@ -20,30 +20,34 @@ export const OTPForm: React.FC = () => {
             push('/')
         } catch (error) {
             if (error instanceof OTPError && error.code === ErrorCode.INVALID_OTP) {
-                console.log('test')
                 setError('otp', { message: 'กรุณาระบุเลข OTP  ให้ถูกต้อง' }, { shouldFocus: true })
             }
         }
     }
 
+    if (!sentOtp) return null
+
     return (
-        sentOtp && (
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <label htmlFor="otp">กรุณากรอกรหัส 6 หลักที่ได้รับจาก SMS</label>
-                <input
-                    {...register('otp', { required: 'กรุณาระบุ', maxLength: 6 })}
-                    id="otp"
-                    type="text"
-                    className={`form-input ${!!errors.otp ? 'border border-red-500' : ''} rounded w-full`}
-                    pattern="[0-9]*"
-                    placeholder=""
-                    maxLength={6}
-                ></input>
-                <small className="text-red-500 ">{errors.otp?.message}</small>
-                <button type="submit" className="bg-yellow-500 p-2 rounded w-full mt-4">
-                    ยืนยัน
-                </button>
-            </form>
-        )
+        <form onSubmit={handleSubmit(onSubmit)}>
+            <label htmlFor="otp">กรุณากรอกรหัส 6 หลักที่ได้รับจาก SMS</label>
+            <input
+                {...register('otp', { required: 'กรุณาระบุ', maxLength: 6 })}
+                id="otp"
+                type="text"
+                className={`form-input ${!!errors.otp ? 'border border-red-500' : ''} rounded w-full`}
+                pattern="[0-9]*"
+                placeholder=""
+                maxLength={6}
+            ></input>
+            <small className="text-red-500 ">{errors.otp?.message}</small>
+            <button
+                type="submit"
+                className={`text-white ${
+                    isSubmitting ? 'bg-indigo-700 opacity-20' : 'bg-indigo-700'
+                }  p-2 rounded w-full mt-4`}
+            >
+                ยืนยัน
+            </button>
+        </form>
     )
 }

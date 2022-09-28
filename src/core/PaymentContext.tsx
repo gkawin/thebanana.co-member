@@ -46,7 +46,7 @@ export const PaymentProvider: React.FC<PropsWithChildren<PaymentProviderProps>> 
             if (!formData) throw new Error('payload error')
             if (!(window.Omise && window.OmiseCard)) throw new Error('need initialized OmiseJs first.')
 
-            const publicKey = 'pkey_test_5q52539zzmb9psl4k9p'
+            const publicKey = process.env.NEXT_RUNTIME__OMISE_PUBLIC_KEY
 
             switch (method) {
                 case PaymentMethod.CREDIT_CARD: {

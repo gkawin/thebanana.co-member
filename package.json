@@ -5,6 +5,7 @@
     "scripts": {
         "dev": "next dev",
         "build": "next build",
+        "build:staging": "APP_ENV=staging next build",
         "start": "next start",
         "lint": "next lint",
         "serve": "firebase emulators:start --only functions,hosting,firestore",

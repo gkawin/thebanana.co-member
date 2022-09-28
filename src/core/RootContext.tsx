@@ -14,16 +14,27 @@ import SignUpPage from '@/components/signup/SignupPage'
 import { getDoc, getDocs, getFirestore } from 'firebase/firestore'
 import { schoolCollection, userDoc } from '@/concerns/query'
 
-const liffId = '1653826193-QbmamAo0'
-const firebaseConfig = {
-    apiKey: 'AIzaSyABewxwss6AP3bH5YDPfSJ1ZiYNPGkJ8Rs',
-    authDomain: 'prod-member-thebanana-co.firebaseapp.com',
-    projectId: 'prod-member-thebanana-co',
-    storageBucket: 'prod-member-thebanana-co.appspot.com',
-    messagingSenderId: '560154323667',
-    appId: '1:560154323667:web:17b5cff2ede9bc4ffd0226',
-    measurementId: 'G-KPYSRNLGFX',
-}
+const isProduction = process.env.NEXT_RUNTIME__APP_STAGE === 'production'
+
+const liffId = isProduction ? '1653826193-QbmamAo0' : ''
+const firebaseConfig = isProduction
+    ? {
+          apiKey: 'AIzaSyABewxwss6AP3bH5YDPfSJ1ZiYNPGkJ8Rs',
+          authDomain: 'prod-member-thebanana-co.firebaseapp.com',
+          projectId: 'prod-member-thebanana-co',
+          storageBucket: 'prod-member-thebanana-co.appspot.com',
+          messagingSenderId: '560154323667',
+          appId: '1:560154323667:web:17b5cff2ede9bc4ffd0226',
+          measurementId: 'G-KPYSRNLGFX',
+      }
+    : {
+          apiKey: 'AIzaSyCFGj9Lx8dumvWDvxjbj_beb6VOnILdKOc',
+          authDomain: 'staging-member-thebanana-co.firebaseapp.com',
+          projectId: 'staging-member-thebanana-co',
+          storageBucket: 'staging-member-thebanana-co.appspot.com',
+          messagingSenderId: '656004791180',
+          appId: '1:656004791180:web:a56bd0959fc5e622f974a9',
+      }
 
 export type AppContext = {
     $axios?: AxiosInstance
@@ -88,7 +99,7 @@ export const useUserInfo = () => {
 }
 
 const createLiff = async () => {
-    if (window.liff) {
+    if (isProduction && window.liff) {
         await window.liff.init({ liffId })
         await window.liff.ready
         if (!window.liff.isLoggedIn()) {
@@ -142,6 +153,7 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
         if (!context.initilized) return () => {}
 
         const unsubcriber = getAuth().onAuthStateChanged(async (user) => {
+            console.log('CURRENT USER :: ', user)
             if (user) {
                 const lineProfile = await window.liff.getProfile()
                 const db = getFirestore()
