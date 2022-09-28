@@ -3,7 +3,7 @@
  */
 const config = {
     images: {
-        domains: ['firebasestorage.googleapis.com', 'fakeimg.pl'],
+        domains: ['firebasestorage.googleapis.com', 'fakeimg.pl', 'www.thebanana.co'],
     },
     env: {
         NEXT_RUNTIME__APP_STAGE: process.env.APP_STAGE,

@@ -31,7 +31,7 @@ export const MobilePhoneForm: React.VFC = () => {
             </div>
 
             <button
-                className={`${sentOtp ? 'bg-yellow-500 opacity-20' : 'bg-yellow-500'} rounded p-2 my-2`}
+                className={`${sentOtp ? 'bg-indigo-700 opacity-20' : 'bg-indigo-700 '} rounded p-2 my-2 text-white`}
                 type="submit"
                 disabled={sentOtp}
             >

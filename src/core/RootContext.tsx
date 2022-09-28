@@ -153,6 +153,7 @@ const RootContext: React.FC<PropsWithChildren> = ({ children }) => {
         if (!context.initilized) return () => {}
 
         const unsubcriber = getAuth().onAuthStateChanged(async (user) => {
+            console.log('CURRENT USER :: ', user)
             if (user) {
                 const lineProfile = await window.liff.getProfile()
                 const db = getFirestore()
