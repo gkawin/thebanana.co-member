@@ -21,8 +21,6 @@ const MyEditBooking: NextPage<MyEditBookingProps> = ({ bookingCode }) => {
     const bookingInfo = items[0]
     const [receiptUrl, setReceiptUrl] = useState<string>('')
 
-    console.log(bookingInfo, bookingCode)
-
     useEffect(() => {
         if (bookingInfo?.receipt) {
             const generateDownloadableReceiptLink = async (filePath: string) => {
@@ -66,66 +64,66 @@ const MyEditBooking: NextPage<MyEditBookingProps> = ({ bookingCode }) => {
     const isRejected = bookingInfo?.status === BookingStatus.REJECTED
     const isPending = bookingInfo?.status === BookingStatus.PENDING
 
+    if (!bookingInfo) return null
+
     return (
-        bookingInfo && (
-            <>
-                <div className="container py-4 space-y-4">
-                    <Link href="/my/booking">
-                        <a className="text-indigo-500 ">
-                            <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
-                            กลับไปหน้าการจอง
-                        </a>
-                    </Link>
-                    {isPending && (
-                        <div className="py-4 text-center border border-red-300 bg-red-50 rounded">
-                            <span className="text-lg font-semibold">
-                                <PaymentActivityInfo bookingCode={bookingCode} />
-                            </span>
-                        </div>
-                    )}
-                    {isRejected && (
-                        <div className="py-4 text-center border border-red-300 bg-red-50 rounded">
-                            <span className="text-lg font-semibold">
-                                ทำรายการไม่สำเร็จ หรือคุณได้ยกเลิกรายการชำระเงิน กรุณาลองใหม่อีกครั้ง
-                            </span>
-                        </div>
-                    )}
-                    <div className={`px-2 py-4 rounded shadow-gray-300 shadow border border-gray-50 space-y-1`}>
-                        <h2>รายละเอียด</h2>
-                        <div>
-                            <span className="text-sm text-gray-500 block">หมายเลขการจอง</span>
-                            <span className="font-semibold">{bookingInfo.bookingCode}</span>
-                        </div>
-                        <div>
-                            <span className="text-sm text-gray-500 block">เริ่มเรียน</span>
-                            <span className="font-semibold">
-                                {withThaiDateFormat(bookingInfo.startDate.toISOString(), 'dddd DD MMMM BBBB')}
-                            </span>
-                        </div>
-                        <div>
-                            <span className="text-sm text-gray-500 block">วันสุดท้าย</span>
-                            <span className="font-semibold">
-                                {withThaiDateFormat(bookingInfo.endDate.toISOString(), 'dddd DD MMMM BBBB')}
-                            </span>
-                        </div>
+        <>
+            <div className="container py-4 space-y-4">
+                <Link href="/my/booking">
+                    <a className="text-indigo-500 ">
+                        <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
+                        กลับไปหน้าการจอง
+                    </a>
+                </Link>
+                {isPending && (
+                    <div className="py-4 text-center border border-red-300 bg-red-50 rounded">
+                        <span className="text-lg font-semibold">
+                            <PaymentActivityInfo bookingCode={bookingCode} />
+                        </span>
                     </div>
-                    <StudentInfoPanel studentInfo={bookingInfo.studentInfo} />
-                    <ShippingAddressPanel shippingAddress={bookingInfo.shippingAddress} />
-                    <div className="px-2 py-4 rounded shadow-gray-300 shadow-md border border-gray-50 space-y-1">
-                        <h2>ข้อมูลการชำระเงิน</h2>
-
-                        <div>
-                            <div className="flex justify-between py-4">
-                                <span>ราคา</span>
-                                <span className="font-semibold">{bookingInfo.pricing}</span>
-                            </div>
-                        </div>
-
-                        {renderPaymentOperation()}
+                )}
+                {isRejected && (
+                    <div className="py-4 text-center border border-red-300 bg-red-50 rounded">
+                        <span className="text-lg font-semibold">
+                            ทำรายการไม่สำเร็จ หรือคุณได้ยกเลิกรายการชำระเงิน กรุณาลองใหม่อีกครั้ง
+                        </span>
+                    </div>
+                )}
+                <div className={`px-2 py-4 rounded shadow-gray-300 shadow border border-gray-50 space-y-1`}>
+                    <h2>รายละเอียด</h2>
+                    <div>
+                        <span className="text-sm text-gray-500 block">หมายเลขการจอง</span>
+                        <span className="font-semibold">{bookingInfo.bookingCode}</span>
+                    </div>
+                    <div>
+                        <span className="text-sm text-gray-500 block">เริ่มเรียน</span>
+                        <span className="font-semibold">
+                            {withThaiDateFormat(bookingInfo.startDate.toISOString(), 'dddd DD MMMM BBBB')}
+                        </span>
+                    </div>
+                    <div>
+                        <span className="text-sm text-gray-500 block">วันสุดท้าย</span>
+                        <span className="font-semibold">
+                            {withThaiDateFormat(bookingInfo.endDate.toISOString(), 'dddd DD MMMM BBBB')}
+                        </span>
                     </div>
                 </div>
-            </>
-        )
+                <StudentInfoPanel studentInfo={bookingInfo.studentInfo} />
+                <ShippingAddressPanel shippingAddress={bookingInfo.shippingAddress} />
+                <div className="px-2 py-4 rounded shadow-gray-300 shadow-md border border-gray-50 space-y-1">
+                    <h2>ข้อมูลการชำระเงิน</h2>
+
+                    <div>
+                        <div className="flex justify-between py-4">
+                            <span>ราคา</span>
+                            <span className="font-semibold">{bookingInfo.pricing}</span>
+                        </div>
+                    </div>
+
+                    {renderPaymentOperation()}
+                </div>
+            </div>
+        </>
     )
 }
 
